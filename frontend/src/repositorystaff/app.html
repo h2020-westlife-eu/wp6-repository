@@ -18,15 +18,17 @@ Project input
       <tr class="w3-hover-green" repeat.for="visitor of visitors"><td>${visitor}</td></tr>
     </table></p>
       <div class="w3-half w3-padding">
-      <h4>Upload files</h4>
+      <h4>Local files</h4>
       <form>
+      <table>
+        <tr>
+          <td>
       <table class="w3-table-all" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
-        <thead><tr><th>filename</th><th>date</th><th colspan="2">action</th></tr></thead>
+        <thead><tr><th>filename</th></tr></thead>
         <tbody>
         <tr>
           <td><input class="w3-button" type="file" multiple="multiple" name="files[]" webkitdirectory="true" change.delegate="appendDir($event)" value.bind="uploaddir"/>
           <input class="w3-button" type="file" multiple="multiple" title="Select Files to Download" change.delegate="appendFiles($event)" value.bind="uploadfiles"/>
-          <button disabled.bind="filestoupload.length == 0" class="w3-button w3-green" click.delegate="submitUpload()">Start Upload</button>
           </td>
           <td>Totally: ${filestoupload.length} files will be uploaded.</td>
         </tr>
@@ -36,10 +38,17 @@ Project input
         </tr>
         </tbody>
       </table>
+          </td>
+          <td class="w3-layout-top">
+            <button disabled.bind="filestoupload.length == 0" class="w3-button w3-green" click.delegate="submitUpload()">Upload to &raquo;</button>
+
+          </td>
+        </tr>
+      </table>
       </form>
       </div>
       <div class="w3-half w3-padding">
-      <h4>Existing files</h4>
+      <h4>Repository files</h4>
       <table class="w3-table-all" >
         <thead><tr><th>filename</th><th>date</th><th colspan="2">action</th></tr></thead>
       <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectItem(item)">
