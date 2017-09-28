@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-export WP6SRC=`pwd`;
+if [ -z ${WP6SRC+x} ]; then
+  export WP6SRC=/vagrant;
+fi
+
 # install davfs2
 yum -y install epel-release
 yum repolist
@@ -14,7 +17,7 @@ yum -y install davfs2
 
 cp -R $WP6SRC/conf-template/* /
 WP6SRCESC=$(echo $WP6SRC | sed 's_/_\\/_g')
-sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/www/${WP6SRCESC}\/www/g" /etc/httpd/conf.d/000-default.conf
+sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/www/${WP6SRCESC}\/repository/g" /etc/httpd/conf.d/000-default.conf
 
 
 systemctl enable httpd
