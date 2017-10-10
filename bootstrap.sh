@@ -4,6 +4,7 @@ if [ -z ${WP6REPSRC+x} ]; then
   export WP6REPSRC=/vagrant;
 fi
 
+
 # install davfs2
 yum -y install epel-release
 yum repolist
