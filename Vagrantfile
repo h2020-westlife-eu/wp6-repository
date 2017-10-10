@@ -5,7 +5,7 @@ Vagrant.configure(2) do |config|
   if Vagrant::VERSION =~ /^1.9.3/
     puts "vagrant version 1.9.3, fixing host_ip configuration "
     # forward standard web
-    config.vm.network "forwarded_port", host_ip: "127.0.0.1", guest: 80, host: 8081
+    config.vm.network "forwarded_port", host_ip: "127.0.0.1", guest: 80, host: 8080
   else
     if Vagrant::VERSION =~ /^1.9.4/
       puts "vagrant version 1.9.4 detected. Upgrade to version 1.9.5+ or downgrade to version 1.9.3 or bellow"
@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
       puts "vagrant version:"
       puts Vagrant::VERSION
       # forward standard web
-      config.vm.network "forwarded_port", guest: 80, host: 8081
+      config.vm.network "forwarded_port", guest: 80, host: 8080
     end
   end
   if Vagrant.has_plugin?("vagrant-proxyconf")

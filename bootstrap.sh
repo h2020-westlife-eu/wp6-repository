@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ -z ${WP6SRC+x} ]; then
-  export WP6SRC=/vagrant;
+if [ -z ${WP6REPSRC+x} ]; then
+  export WP6REPSRC=/vagrant;
 fi
 
 # install davfs2
@@ -15,8 +15,8 @@ yum -y install davfs2
 # prepare and restart apache, rewrite configuration
 # copy all system config to etc
 
-cp -R $WP6SRC/conf-template/* /
-WP6SRCESC=$(echo $WP6SRC | sed 's_/_\\/_g')
+cp -R $WP6REPSRC/conf-template/* /
+WP6SRCESC=$(echo $WP6REPSRC | sed 's_/_\\/_g')
 sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/www/${WP6SRCESC}\/repository/g" /etc/httpd/conf.d/000-default.conf
 
 
