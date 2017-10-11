@@ -24,6 +24,9 @@ sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/$
 chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
 
 systemctl enable httpd
+# stop httpd if it is running by some other related software
+systemctl stop httpd
+
 systemctl start httpd
 
 #create dirs
