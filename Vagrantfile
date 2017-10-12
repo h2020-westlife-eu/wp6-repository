@@ -2,8 +2,6 @@ Vagrant.configure(2) do |config|
 #  config.vm.box = "westlife-eu/wp6-cernvm"
   config.vm.box = "westlife-eu/scientific_7.3_x86_64_minimal_gui"
 
-#  config.ssh.username = "vagrant"
-#  config.ssh.password = "vagrant"
   if Vagrant::VERSION =~ /^1.9.3/
     puts "vagrant version 1.9.3, fixing host_ip configuration "
     # forward standard web
@@ -41,7 +39,6 @@ Vagrant.configure(2) do |config|
   end
   config.vm.synced_folder ".", "/vagrant", nfs: false
   config.vm.boot_timeout = 1200
-  config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provision "shell",  path: "bootstrap.sh"
   config.vm.provision "shell",  path: "bootstrapaai.sh"
 end

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # installs SAML2 and integrates with Westlife AAI
 
-yum -y install mod_auth_mellon
+yum -y install wget mod_auth_mellon 
 
-if [! -f /vagrant/sp_key.pem ]; then
+if [ ! -f /vagrant/sp_key.pem ]; then
 # generate the configuration, note that sp-metadata.xml needs to be sent to idp-metadata provider
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
