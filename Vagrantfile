@@ -41,6 +41,5 @@ Vagrant.configure(2) do |config|
   config.vm.boot_timeout = 1200
   config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provision "shell",  path: "bootstrap.sh"
-  #bug when installing virtuoso, workaround -- reboot
-  #config.vm.provision :reload
+  config.vm.provision "shell",  path: "bootstrapaai.sh"
 end
