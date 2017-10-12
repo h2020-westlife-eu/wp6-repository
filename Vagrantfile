@@ -1,5 +1,7 @@
 Vagrant.configure(2) do |config|
-  config.vm.box = "westlife-eu/wp6-cernvm"
+#  config.vm.box = "westlife-eu/wp6-cernvm"
+  config.vm.box = "westlife-eu/scientific_7.3_x86_64_minimal_gui"
+
 #  config.ssh.username = "vagrant"
 #  config.ssh.password = "vagrant"
   if Vagrant::VERSION =~ /^1.9.3/

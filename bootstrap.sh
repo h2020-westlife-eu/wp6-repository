@@ -23,6 +23,16 @@ sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/$
 #add +x permission on all html files which has include directive
 chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
 
+# SELinux in SL7.3 setting, allow proxy from apache to other services and security context to dir
+if hash setsebool 2>/dev/null; then
+  sed -i -e "s|\SELINUX=.*$|SELINUX=permissive|g" /etc/selinux/config
+  setenforce 0
+  setsebool -P httpd_can_network_connect 1
+  chcon -R --reference=/var/www $WP6SRC/www
+  firewall-cmd --zone=public --add-port=80/tcp --permanent
+  firewall-cmd --reload
+fi
+
 systemctl enable httpd
 # stop httpd if it is running by some other related software
 systemctl stop httpd
