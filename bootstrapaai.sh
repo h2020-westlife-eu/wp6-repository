@@ -22,5 +22,6 @@ fi
 echo "Copying mellon configuration from /vagrant";
 mkdir -p /etc/httpd/mellon
 cp /vagrant/sp_key.pem /vagrant/sp_cert.pem /vagrant/sp-metadata.xml /vagrant/idp-metadata.xml /etc/httpd/mellon
+chmod 600 /etc/httpd/mellon/sp_key.pem
 
 service httpd restart
