@@ -1,0 +1,15 @@
+<template>
+      <h3>Visiting Scientist</h3>
+      <p>Create New Proposal for a Visit
+        <a href="#newproposal" class="w3-button">New Proposal</a>
+      </p>
+      <p>Current proposals:</p>
+      <table>
+        <tr>
+          <th>pid</th><th>title</th><th>statusID</th><th>status</th>
+        </tr>
+        <tr repeat.for="proposal of proposals" >
+          <td>${proposal.pid}</td><td>${proposal.title}</td><td>${proposal.statusID}</td><td>${proposal.status}</td>
+        </tr>
+      </table>
+</template>

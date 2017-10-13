@@ -1,0 +1,32 @@
+<template>
+  <h3>New visit proposal</h3>
+  <form role = "form" submit.delegate = "submit()">
+<label>Title</label><input value.bind="title" placeholder="Title"/><br/>
+    <label>Owner</label><input value.bind="owner" placeholder="Owner"/><br/>
+    <label>PI</label><input value.bind="pi" placeholder="Principal Investigator"/><br/>
+    <label>Team</label><textarea value.bind="team"placeholder="team member name,email country, org, sso"></textarea><br/>
+
+    <label>Scientific background and significance</label>
+    <textarea value.bind = "background" placeholder = "scientific background"></textarea>
+    <br/>
+
+    <label >Research programme and methodology</label>
+    <textarea  value.bind = "methodology" placeholder = "research programme and methodology"></textarea><br/>
+
+    <label>Ethical concerns</label>
+    <input type = "checkbox" checked.bind = "isEthicalConcerns"><br/>
+    <textarea value.bind = "ethicalconcerns" if.bind="isEthicalConcerns" placeholder="ethical concerns details"></textarea><br/>
+
+    <label>Safety concerns</label>
+    <input type = "checkbox" checked.bind = "isSafetyConcerns"><br/>
+    <textarea value.bind = "safetyconcerns" if.bind="isSafetyConcerns" placeholder="safety concerns details"></textarea><br/>
+
+    <label >Background in your lab &amp; current results</label>
+    <textarea  value.bind = "backgroundlab" placeholder = "background in your lab"></textarea><br/>
+
+    <label >Relevant publication</label>
+    <input type="text" value.bind = "publication" placeholder = "comma delimited pubmed IDs"/><br/>
+<p>Other fields per http://aria.structuralbiology.eu/docs.html#xml-data</p>
+    <button type = "submit">Submit</button>
+  </form>
+</template>
