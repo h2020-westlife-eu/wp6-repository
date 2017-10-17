@@ -8,7 +8,7 @@ fi
 # install davfs2
 yum -y install epel-release
 yum repolist
-yum -y install davfs2
+yum -y install davfs2 httpd
 
 # install and start web server
 # httpd is present in cernvm
