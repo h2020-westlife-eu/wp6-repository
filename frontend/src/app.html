@@ -1,17 +1,11 @@
 <template>
     <require from="./w3.css"></require>
-    <require from="./navitem"></require>
-    <div class="w3-margin">
-      <navitem href="index.html">Rep Home</navitem>
-    </div>
+    <require from="components/navigation.html"></require>
+
       <div class="w3-card-2 w3-white w3-margin w3-padding">
-        <h3>Repository</h3>
-        <p>
-          You can access your data at the institutional repository.
-
-          <button class="w3-button" click.delegate="login()">Login</button>
-        </p>
-
+        <router-view>
+          <!-- Top level views are rendered here -->
+        </router-view>
       </div>
 
 </template>

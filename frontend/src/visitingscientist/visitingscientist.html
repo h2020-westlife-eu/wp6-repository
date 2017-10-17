@@ -1,0 +1,37 @@
+<template>
+      <h3>Visiting Scientist</h3>
+
+  <h4>Datasets:</h4>
+
+  <table class="w3-table">
+    <thead>
+    <tr>
+      <th>date</th><th>Summary</th><th>i</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectItem(item)">
+      <td>${item.date}</td>
+      <td>${item.summary}</td>
+      <td>${item.info}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h4>Current proposals:</h4>
+  <table>
+    <tr>
+      <th>pid</th><th>title</th><th>statusID</th><th>status</th>
+    </tr>
+    <tr repeat.for="proposal of proposals" >
+      <td>${proposal.pid}</td><td>${proposal.title}</td><td>${proposal.statusID}</td><td>${proposal.status}</td>
+    </tr>
+  </table>
+  <p>Instruct -
+    <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
+  </p>
+  <p>Instruct -
+    <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">New Proposal</a> for a visit.
+  </p>
+
+</template>
