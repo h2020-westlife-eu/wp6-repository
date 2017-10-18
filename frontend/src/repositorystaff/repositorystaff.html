@@ -1,23 +1,15 @@
 <template>
-  <require from="../w3.css"></require>
-  <require from="../navitem"></require>
-  <div class="w3-margin">
-    <navitem href="index.html">Rep Home</navitem>
-    <navitem href="login.html">Login</navitem>
-    <navitem href="repositorystaff.html">Repository Staff</navitem>
-  </div>
-
-    <div class="w3-white w3-margin w3-padding">
       <h3>Repository Staff</h3>
-      <p>
-Project input
-        <input class="w3-input"/>
 
-      </p>
-      <p>Select the user, who's data will be uploaded:
+  <label>Project input
+    <input class="w3-input">
+  </label>
+
+      <p>Select the user, who's data will be uploaded:</p>
       <table class="w3-table-all" draggable="true">
       <tr class="w3-hover-green" repeat.for="visitor of visitors"><td>${visitor}</td></tr>
-    </table></p>
+    </table>
+
       <div class="w3-half w3-padding">
       <h4>Local files</h4>
       <form>
@@ -25,7 +17,7 @@ Project input
         <tr>
           <td>
       <table class="w3-table-all" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
-        <thead><tr><th>filename</th></tr></thead>
+        <thead><tr><th>drag & drop files/directories here or browse</th></tr></thead>
         <tbody>
         <tr>
           <td><input class="w3-button" type="file" multiple="multiple" name="files[]" webkitdirectory="true" change.delegate="appendDir($event)" value.bind="uploaddir"/>
@@ -58,11 +50,9 @@ Project input
         <td><button class="w3-button" title="delete">x</button></td>
 
       </tr>
-      </tbody>
       </table>
       </div>
 
 
-    </div>
 
 </template>
