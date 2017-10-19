@@ -8,7 +8,7 @@ if [ ! -f /vagrant/sp_key.pem ]; then
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
   chmod +x mellon_create_metadata.sh
-  ./mellon_create_metadata.sh http://local.west-life.eu http://localhost:8080
+  ./mellon_create_metadata.sh http://local.west-life.eu http://localhost:8080/mellon
   # move to /vagrant file - so next boot, provision will be same
   mv http_local.west_life.eu.key /vagrant/sp_key.pem
   mv http_local.west_life.eu.cert /vagrant/sp_cert.pem
