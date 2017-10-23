@@ -23,6 +23,8 @@ echo "Copying mellon configuration from /vagrant";
 mkdir -p /etc/httpd/mellon
 cp /vagrant/sp_key.pem /vagrant/sp_cert.pem /vagrant/sp-metadata.xml /vagrant/idp-metadata.xml /etc/httpd/mellon
 chmod 600 /etc/httpd/mellon/sp_key.pem
+echo "Check http://localhost:8080/mellon/metadata"
+echo "If not yet registered, send the metadata file: sp-metadata.xml to West-life AAI provider westlife-aai@ics.muni.cz."
 
 #install simplesamlphp
 #yum -y install php
