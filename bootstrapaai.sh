@@ -25,12 +25,10 @@ cp /vagrant/sp_key.pem /vagrant/sp_cert.pem /vagrant/sp-metadata.xml /vagrant/id
 chmod 600 /etc/httpd/mellon/sp_key.pem
 
 #install simplesamlphp
-yum -y install php
-wget https://simplesamlphp.org/download?latest -O simplesamlphp.tar.gz
-tar xzf simplesamlphp.tar.gz
-SSP=`find . -maxdepth 1 -type d -name 'simplesamlphp*'`
-mv $SSP simplesamlphp
-
-
+#yum -y install php
+#wget https://simplesamlphp.org/download?latest -O simplesamlphp.tar.gz
+#tar xzf simplesamlphp.tar.gz
+#SSP=`find . -maxdepth 1 -type d -name 'simplesamlphp*'`
+#mv $SSP simplesamlphp
 
 service httpd restart
