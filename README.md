@@ -7,3 +7,5 @@ If you don't have vagrant and/or virtualbox, download and install [vagrant tool]
     git clone https://github.com/h2020-westlife-eu/wp6-repository.git
     cd wp6-repository
     vagrant up
+
+New sp-metadata.xml and other files are created. You need to register the sp-metadata.xml in order to enable authentication with West-Life AAI. You can find metadata of your SP also on http://localhost:8080/mellon/metadata. Check if the link is correct, and send the sp-metadata.xml to westlife-aai@ics.muni.cz. N.B. For the pilot environment we do not require any paper work. 
