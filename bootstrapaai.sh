@@ -4,7 +4,8 @@
 SP_IDENTIFICATION=http://local.west-life.eu
 SP_ENDPOINT=http://localhost:8080/mellon
 
-yum -y install wget mod_auth_mellon 
+# skip broken on cernvm4
+yum -y install wget mod_auth_mellon --skip-broken
 if [ ! -f /vagrant/sp_key.pem ]; then
 # generate the configuration, note that sp-metadata.xml needs to be sent to idp-metadata provider
   echo "Generating mellon configuration"
