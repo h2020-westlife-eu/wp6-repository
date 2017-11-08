@@ -46,3 +46,5 @@ keytool -importkeystore -srckeystore jetty.pkcs12 -srcstoretype PKCS12 -keystore
 mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
 
 
+create database using createDB.sql
+
