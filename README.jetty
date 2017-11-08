@@ -43,8 +43,33 @@ insert password: secret
 
 keytool -importkeystore -srckeystore jetty.pkcs12 -srcstoretype PKCS12 -keystore ./jetty.keystore -storepass secret -keypass secret
 
+
+
+install mysql and create ad db using dbname: springw6
+username: root
+passwd: and1217
+
+these paramater can be changed on appication.properties on resources directory
+
+create database using createDB.sql
+
+
+at the moment ssl configration are not used uncomment line on pom.xml to under jetty plugin
+
 mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
 
 
+
+install mysql and create ad db using dbname: springw6
+username: root
+passwd: and1217
+
+these paramater can be changed on appication.properties on resources directory
+
 create database using createDB.sql
+
+default login: user
+passwd: user
+
+
 
