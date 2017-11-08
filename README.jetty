@@ -43,4 +43,6 @@ insert password: secret
 
 keytool -importkeystore -srckeystore jetty.pkcs12 -srcstoretype PKCS12 -keystore ./jetty.keystore -storepass secret -keypass secret
 
-mvn jetty:run
+mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
+
+
