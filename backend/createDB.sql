@@ -1,4 +1,6 @@
 /*All User's gets stored in APP_USER table*/
+CREATE DATABASE springwp6;
+use springwp6;
 create table APP_USER (
    id BIGINT NOT NULL AUTO_INCREMENT,
    sso_id VARCHAR(30) NOT NULL,
@@ -46,7 +48,7 @@ VALUES ('user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', '
 
 /* Populate JOIN Table */
 INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
-  SELECT user.id, profile.id FROM app_user user, user_profile profile
+  SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
   where user.sso_id='user' and profile.type='ADMIN';
 
 /* Create persistent_logins Table used to store rememberme related stuff*/
