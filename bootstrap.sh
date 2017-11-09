@@ -19,7 +19,6 @@ yum -y install davfs2 httpd
 cp -R $WP6REPSRC/conf-template/* /
 WP6SRCESC=$(echo $WP6REPSRC | sed 's_/_\\/_g')
 sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/${WP6SRCESC}\/frontend/g" /etc/httpd/conf.d/wp6-repository.conf
-sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/visitproposalui/${WP6SRCESC}\/visitproposalui/g" /etc/httpd/conf.d/wp6-visitui.conf
 sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/${WP6SRCESC}\/frontend/g" /etc/httpd/conf.d/wp6-aai.conf
 #add +x permission on all html files which has include directive
 chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
@@ -47,4 +46,35 @@ mkdir /home/vagrant/work /home/vagrant/.westlife /home/vagrant/logs
 usermod -a -G davfs2 vagrant
 usermod -a -G davfs2 apache
 usermod -g davfs2 vagrant
+
+#checkout backend submodule
+if [ ! -d $WP6REPSRC/backend ]; then
+   yum install -y git
+   git clone https://github.com/andreagia/spring-wp6 backend
+fi
+
+#!/usr/bin/env bash
+# initial db setting
+#install backend submodule dependencies
+#mariadb is GNU/GPL fork of mysql
+yum install -y java mariadb-server maven
+service mariadb start
+
+#TODO generate random password, store it locally and distribute as a environment variable
+export DBCRED=and1217
+echo setting db
+mysql --user=root <<EOF
+use mysql
+update user set password=PASSWORD("${DBCRED}") where User="root";
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+EOF
+
+echo creating db
+# create db for backend
+echo populating data
+mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
 
