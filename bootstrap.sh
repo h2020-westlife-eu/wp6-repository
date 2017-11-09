@@ -50,7 +50,7 @@ usermod -g davfs2 vagrant
 #checkout backend submodule
 if [ ! -d $WP6REPSRC/backend ]; then
    yum install -y git
-   git clone https://github.com/andreagia/spring-wp6 backend
+   git clone https://github.com/andreagia/spring-wp6 $WP6REPSRC/backend
 fi
 
 #!/usr/bin/env bash
