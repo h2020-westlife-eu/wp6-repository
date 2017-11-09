@@ -1,0 +1,75 @@
+install letsencrypt
+http://www.html.it/articoli/certificati-https-gratuiti-con-lets-encrypt/
+
+git clone https://github.com/letsencrypt/letsencrypt
+
+./letsencrypt-auto certonly -d nmrdyn.cerm.unifi.it
+
+
+debian@nmrdyn:~/letsencrypt$ ./letsencrypt-auto certonly -d nmrdyn.cerm.unifi.it
+Requesting root privileges to run certbot...
+  /home/debian/.local/share/letsencrypt/bin/letsencrypt certonly -d nmrdyn.cerm.unifi.it
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Failed to find executable apache2ctl in PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+How would you like to authenticate with the ACME CA?
+-------------------------------------------------------------------------------
+1: Spin up a temporary webserver (standalone)
+2: Place files in webroot directory (webroot)
+-------------------------------------------------------------------------------
+Select the appropriate number [1-2] then [enter] (press 'c' to cancel): 1
+Obtaining a new certificate
+Performing the following challenges:
+tls-sni-01 challenge for nmrdyn.cerm.unifi.it
+Waiting for verification...
+Cleaning up challenges
+
+IMPORTANT NOTES:
+ - Congratulations! Your certificate and chain have been saved at
+   /etc/letsencrypt/live/nmrdyn.cerm.unifi.it/fullchain.pem. Your cert
+   will expire on 2017-08-06. To obtain a new or tweaked version of
+   this certificate in the future, simply run letsencrypt-auto again.
+   To non-interactively renew *all* of your certificates, run
+   "letsencrypt-auto renew"
+ - If you like Certbot, please consider supporting our work by:
+
+   Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+   Donating to EFF:                    https://eff.org/donate-le
+
+
+openssl pkcs12 -inkey privkey.pem -in cert.pem -export -out jetty.pkcs12
+
+insert password: secret
+
+keytool -importkeystore -srckeystore jetty.pkcs12 -srcstoretype PKCS12 -keystore ./jetty.keystore -storepass secret -keypass secret
+
+
+
+install mysql and create ad db using dbname: springw6
+username: root
+passwd: and1217
+
+these paramater can be changed on appication.properties on resources directory
+
+create database using createDB.sql
+
+
+at the moment ssl configration are not used uncomment line on pom.xml to under jetty plugin
+
+mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
+
+
+
+install mysql and create ad db using dbname: springw6
+username: root
+passwd: and1217
+
+these paramater can be changed on appication.properties on resources directory
+
+create database using createDB.sql
+
+default login: user
+passwd: user
+
+
+
