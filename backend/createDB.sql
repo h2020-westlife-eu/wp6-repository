@@ -1,5 +1,5 @@
 /*All User's gets stored in APP_USER table*/
-DROP DATABASE springw6;
+# DROP DATABASE springw6;
 CREATE DATABASE springw6;
 use springw6;
 create table APP_USER (

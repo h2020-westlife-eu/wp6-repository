@@ -77,4 +77,6 @@ echo creating db
 # create db for backend
 echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
+#link frontend directory to webapp
+ln -s $WP6REPSRC/frontend $WP6REPSRC/backend/src/main/webapp/frontend
 
