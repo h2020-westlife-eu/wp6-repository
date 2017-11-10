@@ -42,7 +42,11 @@ public class AppConfig extends WebMvcConfigurerAdapter{
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/static/**").addResourceLocations("/static/");
-		registry.addResourceHandler("/frontend/**").addResourceLocations("/frontend/");
+        if (System.getenv("REP_LOCATION")!=null) {
+			registry.addResourceHandler("/frontend/**").addResourceLocations("file:" + System.getenv("REP_LOCATION"));
+		} else {
+			registry.addResourceHandler("/frontend/**").addResourceLocations("/frontend/");
+		}
     }
     
     /**
