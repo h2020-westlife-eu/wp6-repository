@@ -1,26 +1,30 @@
 #!/usr/bin/env bash
+# Bootstrap script preparing environment for H2020 West-Life Repository Instance - D6.2
+# expecting that the system is clean, minimal, tested on Scientific Linux 7.x and CernVM 4.x
 
+# WP6REPSRC is directory where sources of D6.2 are available, if not set,
 if [ -z ${WP6REPSRC+x} ]; then
   export WP6REPSRC=/vagrant;
 fi
 
+########################################################################
+# Basic system preparation
+########################################################################
 
-# install davfs2
+# davfs2 - allows mounting remote WEBDAV storages into file system
+# httpd - apache server
 yum -y install epel-release
 yum repolist
 yum -y install davfs2 httpd
 
-# install and start web server
-# httpd is present in cernvm
-# yum -y install httpd
-# prepare and restart apache, rewrite configuration
-# copy all system config to etc
 
+# prepare all configuration
 cp -R $WP6REPSRC/conf-template/* /
+# replace path to frontend in configuration to current path
 WP6SRCESC=$(echo $WP6REPSRC | sed 's_/_\\/_g')
 sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/${WP6SRCESC}\/frontend/g" /etc/httpd/conf.d/wp6-repository.conf
-sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/${WP6SRCESC}\/frontend/g" /etc/httpd/conf.d/wp6-aai.conf
 #add +x permission on all html files which has include directive
+# some html pages includes header with menu, footer etc shared among pages
 chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
 
 # SELinux in SL7.3 setting, allow proxy from apache to other services and security context to dir
@@ -33,10 +37,10 @@ if hash setsebool 2>/dev/null; then
   firewall-cmd --reload
 fi
 
+# enabling Apache server
 systemctl enable httpd
 # stop httpd if it is running by some other related software
 systemctl stop httpd
-
 systemctl start httpd
 
 #create dirs
@@ -47,16 +51,60 @@ usermod -a -G davfs2 vagrant
 usermod -a -G davfs2 apache
 usermod -g davfs2 vagrant
 
-#checkout backend submodule
-if [ ! -d $WP6REPSRC/backend ]; then
+########################################################################
+# SSO preparation
+########################################################################
+
+# installs SAML2 and integrates with Westlife AAI
+# default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
+SP_IDENTIFICATION=http://local.west-life.eu
+SP_ENDPOINT=http://localhost:8080/mellon
+
+# skip broken on cernvm4
+yum -y install wget mod_auth_mellon --skip-broken
+if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
+# generate the configuration, note that sp-metadata.xml needs to be sent to idp-metadata provider
+  echo "Generating mellon configuration"
+  wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
+  chmod +x mellon_create_metadata.sh
+  ./mellon_create_metadata.sh $SP_IDENTIFICATION $SP_ENDPOINT
+  # move to /vagrant file - so next boot, provision will be same
+  mv http_local.west_life.eu.key ${WP6REPSRC}/sp_key.pem
+  mv http_local.west_life.eu.cert ${WP6REPSRC}/sp_cert.pem
+  mv http_local.west_life.eu.xml ${WP6REPSRC}/sp-metadata.xml
+  #get west-life idp metadata
+  wget https://auth.west-life.eu/proxy/saml2/idp/metadata.php
+  mv metadata.php /${WP6REPSRC}/idp-metadata.xml
+fi
+
+# copy the mellon configuration to /etc/httpd/mellon
+echo "Copying mellon configuration from /vagrant";
+mkdir -p /etc/httpd/mellon
+cp ${WP6REPSRC}/sp_key.pem ${WP6REPSRC}/sp_cert.pem ${WP6REPSRC}/sp-metadata.xml ${WP6REPSRC}/idp-metadata.xml /etc/httpd/mellon
+chmod 600 /etc/httpd/mellon/sp_key.pem
+echo "Check http://localhost:8080/mellon/metadata"
+echo "If not yet registered, send the metadata file: sp-metadata.xml to West-life AAI provider westlife-aai@ics.muni.cz."
+
+#install simplesamlphp
+#yum -y install php
+#wget https://simplesamlphp.org/download?latest -O simplesamlphp.tar.gz
+#tar xzf simplesamlphp.tar.gz
+#SSP=`find . -maxdepth 1 -type d -name 'simplesamlphp*'`
+#mv $SSP simplesamlphp
+
+service httpd restart
+
+########################################################################
+# Backend preparation
+########################################################################
+
+# checkout backend submodule if it is not yet downloaded,checked
+if [ ! -d ${WP6REPSRC}/backend ]; then
    yum install -y git
    git clone https://github.com/andreagia/spring-wp6 $WP6REPSRC/backend
 fi
 
-#!/usr/bin/env bash
-# initial db setting
-#install backend submodule dependencies
-#mariadb is GNU/GPL fork of mysql
+# Install and configure database - mariadb is GNU/GPL fork of mysql
 yum install -y java mariadb-server maven
 service mariadb start
 
@@ -77,9 +125,10 @@ echo creating db
 # create db for backend
 echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
-#link frontend directory to webapp, link doesn't work on shared folders
+#TODO link frontend directory to webapp doesn't work on shared folders, needs to be change in source code
 #ln -s $WP6REPSRC/frontend $WP6REPSRC/backend/src/main/webapp/frontend
 # change appropriate conf of repository service
 sed -i -e "s/^\(WorkingDirectory\s*=\s*\).*$/\1\${WP6SRCESC}/backend/g" /etc/systemd/system/westlife-repository.service
 sed -i -e "s/^\(Environment=REP_LOCATION\s*=\s*\).*$/\1\${WP6SRCESC}/g" /etc/systemd/system/westlife-repository.service
 service westlife-repository start
+
