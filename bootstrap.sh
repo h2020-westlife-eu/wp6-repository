@@ -36,6 +36,9 @@ if hash setsebool 2>/dev/null; then
   firewall-cmd --zone=public --add-port=80/tcp --permanent
   firewall-cmd --reload
 fi
+#set RX permision on WP6REPSRC and all parents, so apache can read and access WP6REPSRC
+f=${WP6REPSRC}
+while [[ $f != "/" ]]; do chmod g+rx $f; f=$(dirname $f); done;
 
 # enabling Apache server
 systemctl enable httpd

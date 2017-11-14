@@ -1,58 +1,85 @@
 <template>
-      <h3>Repository Staff</h3>
-
+  <h3>Support Staff</h3>
+  <p> This page shows </p>
   <label>Project input
     <input class="w3-input">
   </label>
 
-      <p>Select the user, who's data will be uploaded:</p>
-      <table class="w3-table-all" draggable="true">
-      <tr class="w3-hover-green" repeat.for="visitor of visitors"><td>${visitor}</td></tr>
-    </table>
-
-      <div class="w3-half w3-padding">
-      <h4>Local files</h4>
-      <form>
-      <table>
-        <tr>
-          <td>
-      <table class="w3-table-all" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
-        <thead><tr><th>drag & drop files/directories here or browse</th></tr></thead>
-        <tbody>
-        <tr>
-          <td><input class="w3-button" type="file" multiple="multiple" name="files[]" webkitdirectory="true" change.delegate="appendDir($event)" value.bind="uploaddir"/>
-          <input class="w3-button" type="file" multiple="multiple" title="Select Files to Download" change.delegate="appendFiles($event)" value.bind="uploadfiles"/>
-          </td>
-          <td>Totally: ${filestoupload.length} files will be uploaded.</td>
-        </tr>
-        <tr class="w3-hover-green" repeat.for="item of filestoupload" click.trigger="selectItemToUpload(item)">
-          <td>${item.name}</td>
-          <td><button class="w3-button" title="delete" click.delegate="removeItemToUpload(item)">x</button></td>
-        </tr>
-        </tbody>
-      </table>
-          </td>
-          <td class="w3-layout-top">
-            <button disabled.bind="filestoupload.length == 0" class="w3-button w3-green" click.delegate="submitUpload()">Upload to &raquo;</button>
-
-          </td>
-        </tr>
-      </table>
-      </form>
-      </div>
-      <div class="w3-half w3-padding">
-      <h4>Repository files</h4>
-      <table class="w3-table-all" >
-        <thead><tr><th>filename</th><th>date</th><th colspan="2">action</th></tr></thead>
-      <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectItem(item)">
-        <td>${item.name}</td>
-        <td>${item.date}</td>
-        <td><button class="w3-button" title="delete">x</button></td>
-
-      </tr>
-      </table>
+  <p>Select the user, who's data will be uploaded:</p>
+  <table class="w3-table-all" draggable="true">
+    <tr class="w3-hover-green" repeat.for="visitor of visitors">
+      <td>${visitor}</td>
+    </tr>
+  </table>
+<table>
+  <tr>
+    <td>
+      <div>
+        <h4>Local files</h4>
+        <form>
+          <table class="w3-table-all" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
+            <thead>
+            <tr>
+              <th>drag & drop files/directories here or browse</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td><input class="w3-button" type="file" multiple="multiple" name="files[]" webkitdirectory="true"
+                         change.delegate="appendDir($event)" value.bind="uploaddir"/>
+                <input class="w3-button" type="file" multiple="multiple" title="Select Files to Download"
+                       change.delegate="appendFiles($event)" value.bind="uploadfiles"/>
+              </td>
+              <td>Totally: ${filestoupload.length} files will be uploaded.</td>
+            </tr>
+            <tr class="w3-hover-green" repeat.for="item of filestoupload" click.trigger="selectItemToUpload(item)">
+              <td>${item.name}</td>
+              <td>
+                <button class="w3-button" title="delete" click.delegate="removeItemToUpload(item)">x</button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </form>
       </div>
 
+    </td>
+    <td>
+      <div>
+
+        <button disabled.bind="filestoupload.length == 0" class="w3-button w3-green"
+                click.delegate="submitUpload()">Upload to &raquo;
+        </button>
+
+
+      </div>
+
+    </td>
+    <td>
+      <div>
+        <h4>Repository files</h4>
+        <table class="w3-table-all">
+          <thead>
+          <tr>
+            <th>filename</th>
+            <th>date</th>
+            <th colspan="2">action</th>
+          </tr>
+          </thead>
+          <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectitem(item)">
+            <td>${item.name}</td>
+            <td>${item.date}</td>
+            <td>
+              <button class="w3-button" title="delete" click.trigger="deleteitem(item)">x</button>
+            </td>
+
+          </tr>
+        </table>
+      </div>
+
+    </td>
+  </tr>
+</table>
 
 
 </template>

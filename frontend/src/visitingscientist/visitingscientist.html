@@ -1,8 +1,9 @@
 <template>
-      <h3>Visiting Scientist</h3>
-
+      <h3>Visiting Scientist Dashboard</h3>
+<p>This screen shows sumarry of actions available for visiting scientist. He can view datasets acquired earlier,
+  he can view Proposals for Visits from Instruct and can submit a new one.</p>
+<div class="w3-half w3-card">
   <h4>Datasets:</h4>
-
   <table class="w3-table">
     <thead>
     <tr>
@@ -15,17 +16,20 @@
       <td>${item.summary}</td>
       <td>${item.info}</td>
     </tr>
+    <tr  class="w3-hover-green"><td colspan="3"><a href="#datasets">... see all datasets ...</a></td> </tr>
     </tbody>
   </table>
-
-  <h4>Current proposals:</h4>
-  <table>
+</div>
+  <div class="w3-half w3-card">
+  <h4>Proposals for Visits (Instruct):</h4>
+  <table class="w3-table">
     <tr>
       <th>pid</th><th>title</th><th>statusID</th><th>status</th>
     </tr>
-    <tr repeat.for="proposal of proposals" >
+    <tr repeat.for="proposal of proposals"  class="w3-hover-green">
       <td>${proposal.pid}</td><td>${proposal.title}</td><td>${proposal.statusID}</td><td>${proposal.status}</td>
     </tr>
+    <tr  class="w3-hover-green"><td colspan="3"><a href="#datasets">... see all proposals ...</a></td> </tr>
   </table>
   <p>Instruct -
     <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
@@ -33,5 +37,6 @@
   <p>Instruct -
     <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">New Proposal</a> for a visit.
   </p>
-
+  </div>
+  <p>&nbsp;</p>
 </template>

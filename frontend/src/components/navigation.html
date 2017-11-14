@@ -5,19 +5,16 @@
     <a class="w3-button  w3-small w3-padding-4 vf-right-border" href.bind="row.href">${row.title}</a>
   </span>
   -->
-  <nav style="float:left">
+  <nav style="float:left!important">
 
     <ul>
       <li style="padding:0!important">
         <!--<li class="w3-dropdown-hover">-->
-        <a href="index.html">menu</div>
-        </div>
-        </a>
+        <a href="#">&#8801;</a>
         <ul><!-- class="w3-dropdown-content w3-white w3-card-4">-->
-          <li repeat.for="row of router.navigation" class="${row.isActive ? 'active' : ''}">
+          <li repeat.for="row of router.navigation" class="${row.isActive ? 'nav-item active' : 'nav-item'}">
             <a href.bind="row.href">${row.title}</a>
           </li>
-          <li><button onclick="document.getElementById('id01').style.display='block'" class="w3-button">About</button></li>
         </ul>
       </li>
 
