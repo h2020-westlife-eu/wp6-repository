@@ -1,10 +1,10 @@
 import {HttpClient} from 'aurelia-http-client';
 
-export class Repositorystaff {
+export class Repositorytovf {
 
   constructor() {
-    console.log("Repositorystaff()");
-    this.visitors = ["Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
+    console.log("Repositorytovf()");
+
     this.items=[{date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb"},
       {date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb"},
       {date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb"},
@@ -12,9 +12,9 @@ export class Repositorystaff {
     this.filestoupload=[];
     this.uploadfiles=[];
     this.uploaddir="";
-    this.selectinguser=true;
-    this.selectedvisitor="";
+    this.selectingfiles=true;
   }
+
   attached() {
 
   }
@@ -23,19 +23,19 @@ export class Repositorystaff {
     console.log("Selected",item)
   }
 
-  selectvisitor(visitor) {
-    this.selectinguser=false;
-    this.selectedvisitor = visitor;
+  submitfiles() {
+    this.selectingfiles=false;
   }
-  deselectvisitor(){
-    this.selectinguser=true;
+
+  unsubmitfiles(){
+    this.selectingfiles=true;
   }
   deleteitem(item){
     let indexremoved = this.items.indexOf(item);
     if (indexremoved >=0 ) this.items.splice(indexremoved,1);
   }
-  
-    selectItemToUpload(item) {
+
+  selectItemToUpload(item) {
     console.log("selected item");
     console.log(item);
   }
@@ -43,7 +43,7 @@ export class Repositorystaff {
   removeItemToUpload(item){
     console.log("selected item");
     console.log(item);
-  let i = this.filestoupload.indexOf(item);
+    let i = this.filestoupload.indexOf(item);
     this.filestoupload.splice(i,1);
   }
 
