@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,9 +38,11 @@ public class RestCon {
     //OrdiniService ordiniService;
 
     @RequestMapping(value = { "/user" },method = RequestMethod.GET,produces = {"application/json"})
-    public ResponseEntity listOrder() {
+    public ResponseEntity listOrder(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname) {
         LOG.info("sono in user");
+        LOG.info("user from HTTP header (westlife-sso):"+xusername);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (xusername.length()>0) username=xusername;
         //return "Welcome, " + username;
         Gson gson = new Gson();
         //List<Offer> offers = offerService.findAllOffer();
