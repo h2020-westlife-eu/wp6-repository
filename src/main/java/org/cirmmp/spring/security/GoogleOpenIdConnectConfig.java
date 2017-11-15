@@ -2,18 +2,23 @@ package org.cirmmp.spring.security;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
+import org.springframework.web.context.request.RequestContextListener;
 
 @Configuration
 @EnableOAuth2Client
 public class GoogleOpenIdConnectConfig {
+
     @Value("${google.clientId}")
     private String clientId;
 
@@ -43,6 +48,7 @@ public class GoogleOpenIdConnectConfig {
     }
 
     @Bean
+    @Primary
     public OAuth2RestTemplate googleOpenIdTemplate(final OAuth2ClientContext clientContext) {
         final OAuth2RestTemplate template = new OAuth2RestTemplate(googleOpenId(), clientContext);
         return template;
