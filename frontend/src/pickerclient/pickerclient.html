@@ -1,0 +1,9 @@
+<template mode="file">
+  <div show.bind="filepicker">
+  <button class="w3-button" click.trigger="openfilewindow()">Select File from West-Life Virtual Folder</button>
+  </div>
+  <div show.bind="!filepicker">
+    <button class="w3-button" click.trigger="opendirwindow()">Select Dir from West-Life Virtual Folder</button>
+  </div>
+  <p>Selected Resource URL:<a href.bind="vfurl">${vfurl}</a></p>
+</template>

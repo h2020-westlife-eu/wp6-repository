@@ -4,20 +4,24 @@
   <label>Project input
     <input class="w3-input">
   </label>
-
-  <p>Select the user, who's data will be uploaded:</p>
+  <div show.bind="selectinguser">
+  <p><b>1.</b>Select a user, who's data will be uploaded:</p>
   <table class="w3-table-all" draggable="true">
-    <tr class="w3-hover-green" repeat.for="visitor of visitors">
+    <tr class="w3-hover-green" repeat.for="visitor of visitors" click.trigger="selectvisitor(visitor)">
       <td>${visitor}</td>
     </tr>
   </table>
+  </div>
+  <div show.bind="!selectinguser">
+    <p><b>1.</b>Selected user: ${selectedvisitor} <button class="w3-button w3-padding-tiny" click.trigger="deselectvisitor()">change</button></p>
+    <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>
 <table>
   <tr>
-    <td>
+    <td  class="w3-cell-top">
       <div>
         <h4>Local files</h4>
         <form>
-          <table class="w3-table-all" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
+          <table class="w3-table-all w3-padding-tiny" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
             <thead>
             <tr>
               <th>drag & drop files/directories here or browse</th>
@@ -33,9 +37,9 @@
               <td>Totally: ${filestoupload.length} files will be uploaded.</td>
             </tr>
             <tr class="w3-hover-green" repeat.for="item of filestoupload" click.trigger="selectItemToUpload(item)">
-              <td>${item.name}</td>
-              <td>
-                <button class="w3-button" title="delete" click.delegate="removeItemToUpload(item)">x</button>
+              <td class="w3-padding-tiny">${item.name}</td>
+              <td class="w3-padding-tiny">
+                <button class="w3-button  w3-padding-tiny" title="delete" click.delegate="removeItemToUpload(item)">x</button>
               </td>
             </tr>
             </tbody>
@@ -44,7 +48,7 @@
       </div>
 
     </td>
-    <td>
+    <td class="w3-cell-top">
       <div>
 
         <button disabled.bind="filestoupload.length == 0" class="w3-button w3-green"
@@ -55,7 +59,7 @@
       </div>
 
     </td>
-    <td>
+    <td  class="w3-cell-top">
       <div>
         <h4>Repository files</h4>
         <table class="w3-table-all">
@@ -67,10 +71,10 @@
           </tr>
           </thead>
           <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectitem(item)">
-            <td>${item.name}</td>
-            <td>${item.date}</td>
-            <td>
-              <button class="w3-button" title="delete" click.trigger="deleteitem(item)">x</button>
+            <td class="w3-padding-tiny">${item.name}</td>
+            <td class="w3-padding-tiny">${item.date}</td>
+            <td class="w3-padding-tiny">
+              <button class="w3-button w3-padding-tiny" title="delete" click.trigger="deleteitem(item)">x</button>
             </td>
 
           </tr>
@@ -80,6 +84,6 @@
     </td>
   </tr>
 </table>
-
+  </div>
 
 </template>

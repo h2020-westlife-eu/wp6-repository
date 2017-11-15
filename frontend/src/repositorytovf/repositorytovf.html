@@ -1,0 +1,35 @@
+<template>
+  <require from="../pickerclient/pickerclient"></require>
+  <h3>Repository to West-Life Virtual Folder</h3>
+  <p> This page shows dialog to select files or directories to be uploaded from local repository to user's Virtual Folder.</p>
+  <div show.bind="selectingfiles">
+    <p><b>1.</b>Select files or directories that will be uploaded:</p>
+    <h4>Repository files</h4>
+    <table class="w3-table-all">
+      <thead>
+      <tr>
+        <th>filename</th>
+        <th>date</th>
+        <th colspan="2">action</th>
+      </tr>
+      </thead>
+      <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectitem(item)">
+        <td class="w3-padding-tiny">${item.name}</td>
+        <td class="w3-padding-tiny">${item.date}</td>
+        <td class="w3-padding-tiny">
+          <button class="w3-button w3-padding-tiny" title="delete" click.trigger="deleteitem(item)">x</button>
+        </td>
+
+      </tr>
+    </table>
+    <button class="w3-button" title="submit" click.trigger="submitfiles()">Submit</button>
+  </div>
+
+  <div show.bind="!selectingfiles">
+    <p><b>1.</b>Selected files: ${selectedfiles} <button class="w3-button w3-padding-tiny" click.trigger="unsubmitfiles()">change</button></p>
+    <p><b>2.</b>Select Virtual Folder:</p>
+    <pickerclient mode="dir"></pickerclient>
+
+  </div>
+
+</template>
