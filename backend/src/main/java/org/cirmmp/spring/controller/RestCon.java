@@ -1,17 +1,18 @@
 package org.cirmmp.spring.controller;
 
-
 import com.google.gson.Gson;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.UserService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,8 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +32,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/restcon")
 public class RestCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
+    private static Gson gson = new Gson();
 
     @Autowired
     UserService userService;
@@ -49,23 +49,23 @@ public class RestCon {
     //@Autowired
     //OrdiniService ordiniService;
 
-    @RequestMapping(value = { "/user" },method = RequestMethod.GET,produces = {"application/json"})
-    public ResponseEntity listOrder(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname) {
+    @RequestMapping(value = { "/user" },method = RequestMethod.GET)
+    public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname){
         LOG.info("sono in user");
         LOG.info("user from HTTP header (westlife-sso):"+xusername);
         String username = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         //return "Welcome, " + username;
-        Gson gson = new Gson();
+
         //List<Offer> offers = offerService.findAllOffer();
         //String jsonOffers = gson.toJson(username);
         LOG.info("JSON OFFERS");
         LOG.info(username);
-        return new ResponseEntity(username, HttpStatus.OK);
+        return new ResponseEntity (gson.toJson(username), HttpStatus.OK);
     }
 
 
     @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
-    public ResponseEntity createProject(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname){
+    public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname){
         LOG.info("sono in createproject");
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
@@ -75,11 +75,11 @@ public class RestCon {
         project.setSummary("TEST TEST TEST");
         LOG.info("sono in createproject 2");
         projectService.save(project);
-        return new ResponseEntity(project, HttpStatus.OK);
+        return new ResponseEntity(gson.toJson(project), HttpStatus.OK);
     }
 
     @RequestMapping(value = {"/listProject", "/project"}, method=RequestMethod.GET)
-    public ResponseEntity listProject(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname){
+    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname){
         LOG.info("sono in createproject");
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
@@ -92,7 +92,7 @@ public class RestCon {
         LOG.debug("Single file upload!");
 
         if (uploadfile.isEmpty()) {
-            return new ResponseEntity("please select a file!", HttpStatus.OK);
+            return new ResponseEntity("please select a file!", HttpStatus.BAD_REQUEST);
         }
 
         try {

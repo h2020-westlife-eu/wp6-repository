@@ -1,5 +1,5 @@
 /*All User's gets stored in APP_USER table*/
-# DROP DATABASE springw6;
+DROP DATABASE springw6;
 CREATE DATABASE springw6;
 use springw6;
 DROP TABLE IF EXISTS APP_USER;
@@ -24,7 +24,7 @@ create table USER_PROFILE(
 );
 
 /* JOIN TABLE for MANY-TO-MANY relationship*/
-DROP TABLE IF EXISTS 'USER_PROFILE';
+/* DROP TABLE IF EXISTS 'USER_PROFILE';*/
 CREATE TABLE APP_USER_USER_PROFILE (
     user_id BIGINT NOT NULL,
     user_profile_id BIGINT NOT NULL,
@@ -82,7 +82,7 @@ create table FILELIST (
   project_id BIGINT ,
   file_name VARCHAR(100) ,
   file_info VARCHAR(2000) ,
-  PRIMARY KEY (filelist_id),
+  PRIMARY KEY (id),
   KEY FK_PROJECT (project_id),
   CONSTRAINT FK_PROJECT FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON DELETE CASCADE ON UPDATE CASCADE
 
