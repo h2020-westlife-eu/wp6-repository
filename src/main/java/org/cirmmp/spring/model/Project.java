@@ -29,10 +29,18 @@ public class Project {
     @Column(name="SUMMARY")
     private String summary;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date creation_date;
 
-    public void setProjetcId(Integer Id) {
-        this.Id = Id;
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
     }
+
+    public Date getCreation_date() {
+
+        return creation_date;
+    }
+
 
     public void setUserId(Integer userId) {
         this.userId = userId;
@@ -47,9 +55,12 @@ public class Project {
     }
 
 
+    public void setId(Integer id) {
+        Id = id;
+    }
 
+    public Integer getId() {
 
-    public Integer getProjetcId() {
         return Id;
     }
 

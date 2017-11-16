@@ -69,9 +69,9 @@ create table PROJECT (
   user_id BIGINT ,
   project_name VARCHAR(30) ,
   summary VARCHAR(2000) ,
-  PRIMARY KEY (id),
-  KEY FK_USER (id),
-  CONSTRAINT FK_USER FOREIGN KEY (id) REFERENCES APP_USER (id) ON DELETE CASCADE ON UPDATE CASCADE
+  creation_date TIMESTAMP,
+  PRIMARY KEY (id)
+
 );
 
 DROP TABLE IF EXISTS filelist;
@@ -80,8 +80,7 @@ create table FILELIST (
   project_id BIGINT ,
   file_name VARCHAR(100) ,
   file_info VARCHAR(2000) ,
-  PRIMARY KEY (filelist_id),
-  KEY FK_PROJECT (project_id),
-  CONSTRAINT FK_PROJECT FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY (filelist_id)
+
 
 );
