@@ -22,5 +22,7 @@ Tested on Vagrant (1.9.6) and VirtualBox (5.1.30)
 
 If new sp-metadata.xml was generated, send it to westlife-aai@ics.muni.cz in order to enable authentication via West-Life AAI. N.B. For the pilot environment we do not require any paper work. 
 
+# Development
+To merge backend with git repository
 
-    
+    git subtree pull --prefix=backend https://github.com/andreagia/spring-wp6
