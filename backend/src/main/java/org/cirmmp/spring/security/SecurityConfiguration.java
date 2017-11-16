@@ -3,6 +3,7 @@ package org.cirmmp.spring.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -16,15 +17,19 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.context.request.RequestContextListener;
 
 @Configuration
 @EnableWebSecurity
+@ComponentScan({ "org.cirmmp.spring" })
 @PropertySource(value = { "classpath:openID.properties" })
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -38,6 +43,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     // OAUTH
     @Autowired
     private OAuth2RestTemplate restTemplate;
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/resources/**");
@@ -54,11 +60,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
         auth.authenticationProvider(authenticationProvider());
+
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/", "/list")
+        http.addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+                .addFilterAfter(myFilter(), OAuth2ClientContextFilter.class)
+                .authorizeRequests().antMatchers("/", "/list")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
                 .access("hasRole('ADMIN')").antMatchers("/edit-user-*")
@@ -72,7 +81,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf()
                 .and()
-                .exceptionHandling().accessDeniedPage("/Access_Denied");
+                .exceptionHandling().accessDeniedPage("/Access_Denied")
+                .and()
+                .authorizeRequests()
+                .antMatchers("/google-login","/login","/static/**").permitAll();
         // OpenID configuration
                 /*.and()
                 .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
@@ -108,5 +120,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public AuthenticationTrustResolver getAuthenticationTrustResolver() {
         return new AuthenticationTrustResolverImpl();
     }
+
 
 }
