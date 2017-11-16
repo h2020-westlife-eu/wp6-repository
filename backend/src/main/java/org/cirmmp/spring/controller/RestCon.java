@@ -53,8 +53,7 @@ public class RestCon {
     public ResponseEntity listOrder(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname) {
         LOG.info("sono in user");
         LOG.info("user from HTTP header (westlife-sso):"+xusername);
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (xusername.length()>0) username=xusername;
+        String username = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         //return "Welcome, " + username;
         Gson gson = new Gson();
         //List<Offer> offers = offerService.findAllOffer();
@@ -64,10 +63,11 @@ public class RestCon {
         return new ResponseEntity(username, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/createProject")
-    public ResponseEntity createProject(){
+
+    @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
+    public ResponseEntity createProject(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname){
         LOG.info("sono in createproject");
-        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         Project project = new Project();
         project.setUserId(user.getId());
@@ -75,15 +75,13 @@ public class RestCon {
         project.setSummary("TEST TEST TEST");
         LOG.info("sono in createproject 2");
         projectService.save(project);
-
         return new ResponseEntity(project, HttpStatus.OK);
-
     }
 
-    @RequestMapping(value = "/listProject")
-    public ResponseEntity listProject(){
+    @RequestMapping(value = {"/listProject", "/project"}, method=RequestMethod.GET)
+    public ResponseEntity listProject(@RequestHeader("X-USERNAME") String xusername,@RequestHeader("X-NAME") String xname){
         LOG.info("sono in createproject");
-        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
@@ -91,7 +89,6 @@ public class RestCon {
 
     @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {
-
         LOG.debug("Single file upload!");
 
         if (uploadfile.isEmpty()) {
@@ -99,7 +96,6 @@ public class RestCon {
         }
 
         try {
-
             saveUploadedFiles(Arrays.asList(uploadfile));
 
         } catch (IOException e) {
