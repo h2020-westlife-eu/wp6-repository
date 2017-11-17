@@ -40,21 +40,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     PersistentTokenRepository tokenRepository;
 
-    // OAUTH
-    @Autowired
-    private OAuth2RestTemplate restTemplate;
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/resources/**");
-    }
-
-    @Bean
-    public OpenIdConnectFilter myFilter() {
-        final OpenIdConnectFilter filter = new OpenIdConnectFilter("/google-login");
-        filter.setRestTemplate(restTemplate);
-        return filter;
-    }
 
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
@@ -65,9 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                .addFilterAfter(myFilter(), OAuth2ClientContextFilter.class)
-                .authorizeRequests().antMatchers("/", "/list")
+        http.authorizeRequests().antMatchers("/", "/list")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
                 .access("hasRole('ADMIN')").antMatchers("/edit-user-*")
@@ -85,15 +68,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/google-login","/login","/static/**").permitAll();
-        // OpenID configuration
-                /*.and()
-                .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                .addFilterAfter(myFilter(), OAuth2ClientContextFilter.class)
-                .httpBasic().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/google-login"))
-                .and()
-                .authorizeRequests()
-                .antMatchers("/google-login","/login","/static/**").permitAll()
-                .anyRequest().authenticated();*/
+
     }
 
     @Bean
