@@ -6,6 +6,7 @@ import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.model.UserProfile;
 import org.cirmmp.spring.service.ProjectService;
+import org.cirmmp.spring.service.UserProfileService;
 import org.cirmmp.spring.service.UserService;
 
 import org.slf4j.Logger;
@@ -26,8 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,6 +41,9 @@ public class RestCon {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    UserProfileService userProfileService;
 
     //@Autowired
     //LinkService linkService;
@@ -116,9 +119,15 @@ public class RestCon {
         //TODO: disable password - or generate random
         user.setPassword(randomString(30));
 
+
         //TODO where to put user groups? issue #10
         //if (xgroups contains 'West-Life' or 'ARIA') user.setUserProfiles('USER')
         //if (xusername == 'admin eppn' user.setUserProfile('ADMIN')...
+        //now everybody logged via West-Life SSO is USER
+        HashSet<UserProfile> ups = new HashSet<>();
+        ups.add(userProfileService.findByType("USER"));
+        user.setUserProfiles(ups);
+
         LOG.info("creating user:"+user.toString());
         userService.saveUser(user);
         user = userService.findBySSO(ssoId);
@@ -129,7 +138,7 @@ public class RestCon {
     //returns all names except last one delimited by space;
     private String getFirstNames(String[] names){
         StringBuffer s = new StringBuffer();
-        for (int i=0;i<names.length-2;i++)
+        for (int i=0;i<names.length-1;i++)
         {
             if (i>0) s.append(" ");
             s.append(names[i]);
