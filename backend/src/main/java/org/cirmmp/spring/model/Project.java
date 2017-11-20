@@ -30,7 +30,7 @@ public class Project {
     private String summary;
 
 
-    public void setProjetcId(Integer Id) {
+    public void setProjectId(Integer Id) {
         this.Id = Id;
     }
 
@@ -49,7 +49,7 @@ public class Project {
 
 
 
-    public Integer getProjetcId() {
+    public Integer getProjectId() {
         return Id;
     }
 

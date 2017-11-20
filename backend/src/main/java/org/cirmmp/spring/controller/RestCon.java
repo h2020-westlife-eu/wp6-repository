@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class RestCon {
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         //fix issue #9
-        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId);
+        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
         Project project = new Project();
         project.setUserId(user.getId());
         project.setProjectName("Test");
@@ -91,10 +91,43 @@ public class RestCon {
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         //fix issue #9
-        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId);
+        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId,xgroups);
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
     }
+
+    private class PostData {
+        public String access_token;
+        public String aria_response_format;
+    }
+    
+    //updates project from ARIA API
+    @RequestMapping(value = {"/updateProject"}, method=RequestMethod.POST)
+    public ResponseEntity updateProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        LOG.info("sono in createproject");
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findBySSO(ssoId);
+        //fix issue #9
+        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+        /*Project project = new Project();
+        project.setUserId(user.getId());
+        project.setProjectName("Test");
+        project.setSummary("TEST TEST TEST");
+        LOG.info("sono in createproject 2");
+
+        projectService.save(project);*/
+
+        Project [] projects;
+        String uri= "https://www.structuralbiology.eu/ws/oauth/proposallist";
+        RestTemplate rt = new RestTemplate();
+        PostData data = new PostData();data.access_token="";data.aria_response_format="json";
+
+        String result = rt.postForObject(uri,data,String.class);
+        LOG.info("updated list of projects:"+result);
+
+        return new ResponseEntity(gson.toJson(result), HttpStatus.OK);
+    }
+
 
 
     static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -108,7 +141,7 @@ public class RestCon {
     }
 
 
-    private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId) {
+    private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId, @RequestHeader(name = "X-GROUPS", defaultValue = "")String xgroups) {
         User user;//user doesn't exist in local system yet, create it from SSO West-Life information
         user = new User();
         user.setSsoId(xusername);
@@ -129,6 +162,7 @@ public class RestCon {
         user.setUserProfiles(ups);
 
         LOG.info("creating user:"+user.toString());
+        LOG.info("groups:"+xgroups);
         userService.saveUser(user);
         user = userService.findBySSO(ssoId);
         //should have the user.getId() set now

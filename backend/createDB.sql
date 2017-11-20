@@ -33,28 +33,6 @@ CREATE TABLE APP_USER_USER_PROFILE (
     CONSTRAINT FK_USER_PROFILE FOREIGN KEY (user_profile_id) REFERENCES USER_PROFILE (id)
 );
 
-/* Populate USER_PROFILE Table */
-INSERT INTO USER_PROFILE(type)
-VALUES ('USER');
-
-INSERT INTO USER_PROFILE(type)
-VALUES ('ADMIN');
-
-INSERT INTO USER_PROFILE(type)
-VALUES ('DBA');
-
-
-/* Populate one Admin User which will further create other users for the application using GUI */
-/* password: user   */
-INSERT INTO APP_USER(sso_id, password, first_name, last_name, email)
-VALUES ('user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'User','User','user@xyz.com');
-
-
-/* Populate JOIN Table */
-INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
-  SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
-  where user.sso_id='user' and profile.type='ADMIN';
-
 /* Create persistent_logins Table used to store rememberme related stuff*/
 DROP TABLE IF EXISTS persistent_logins;
 CREATE TABLE PERSISTENT_LOGINS (
@@ -69,7 +47,7 @@ DROP TABLE IF EXISTS project;
 create table PROJECT (
   id BIGINT NOT NULL AUTO_INCREMENT,
   user_id BIGINT ,
-  project_name VARCHAR(30) ,
+  project_name VARCHAR(255) ,
   summary VARCHAR(2000) ,
   PRIMARY KEY (id),
   KEY FK_USER (id),
@@ -87,3 +65,28 @@ create table FILELIST (
   CONSTRAINT FK_PROJECT FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON DELETE CASCADE ON UPDATE CASCADE
 
 );
+
+/* Populate USER_PROFILE Table */
+INSERT INTO USER_PROFILE(type)
+VALUES ('USER');
+
+INSERT INTO USER_PROFILE(type)
+VALUES ('ADMIN');
+
+INSERT INTO USER_PROFILE(type)
+VALUES ('DBA');
+
+/* Populate one Admin User which will further create other users for the application using GUI */
+/* password: user   */
+INSERT INTO APP_USER(id,sso_id, password, first_name, last_name, email)
+VALUES (1,'user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'User','User','user@xyz.com'),
+(2,'30d14bd81ab385bdccb3286406131f39021ba308@west-life.eu','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'Tomas','Kulhanek','tomas.kulhanek@stfc.ac.uk');
+
+/* Populate JOIN Table */
+INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
+  SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
+  where user.sso_id='user' and profile.type='ADMIN';
+
+/* create demo project */
+INSERT INTO PROJECT(user_id,project_name,summary)
+    VALUES (2,"Strychnin NMR analysis","This project analyses strychnine and binding sites of glycine receptors");
