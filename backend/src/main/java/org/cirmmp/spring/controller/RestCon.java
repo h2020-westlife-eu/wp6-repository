@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
+import org.cirmmp.spring.model.UserProfile;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.UserService;
 
@@ -65,10 +66,12 @@ public class RestCon {
 
 
     @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
-    public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname){
+    public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         LOG.info("sono in createproject");
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
+        //fix issue #9
+        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId);
         Project project = new Project();
         project.setUserId(user.getId());
         project.setProjectName("Test");
@@ -79,12 +82,44 @@ public class RestCon {
     }
 
     @RequestMapping(value = {"/listProject", "/project"}, method=RequestMethod.GET)
-    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname){
+    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         LOG.info("sono in createproject");
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
+        //fix issue #9
+        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId);
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
+    }
+
+    private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId) {
+        User user;//user doesn't exist in local system yet, create it from SSO West-Life information
+        user = new User();
+        user.setSsoId(xusername);
+        String[] names = xname.split(" ");
+        user.setFirstName(getFirstNames(names)); //first name in names, or first two names "Jose" or "Jose Maria"?
+        user.setLastName(names[names.length-1]); //last name or last names "Maria Carazo" or "Carazo"
+        user.setEmail(xemail);
+
+        //TODO where to put user groups? issue #10
+        //if (xgroups contains 'West-Life' or 'ARIA') user.setUserProfiles('USER')
+        //if (xusername == 'admin eppn' user.setUserProfile('ADMIN')...
+        LOG.info("creating user:"+user.toString());
+        userService.saveUser(user);
+        user = userService.findBySSO(ssoId);
+        //should have the user.getId() set now
+        return user;
+    }
+
+    //returns all names except last one delimited by space;
+    private String getFirstNames(String[] names){
+        StringBuffer s = new StringBuffer();
+        for (int i=0;i<names.length-2;i++)
+        {
+            if (i>0) s.append(" ");
+            s.append(names[i]);
+        }
+        return s.toString();
     }
 
     @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
