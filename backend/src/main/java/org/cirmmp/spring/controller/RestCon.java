@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,6 +93,18 @@ public class RestCon {
         return new ResponseEntity(projects, HttpStatus.OK);
     }
 
+
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static SecureRandom rnd = new SecureRandom();
+
+    private String randomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
+
     private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId) {
         User user;//user doesn't exist in local system yet, create it from SSO West-Life information
         user = new User();
@@ -100,6 +113,8 @@ public class RestCon {
         user.setFirstName(getFirstNames(names)); //first name in names, or first two names "Jose" or "Jose Maria"?
         user.setLastName(names[names.length-1]); //last name or last names "Maria Carazo" or "Carazo"
         user.setEmail(xemail);
+        //TODO: disable password - or generate random
+        user.setPassword(randomString(30));
 
         //TODO where to put user groups? issue #10
         //if (xgroups contains 'West-Life' or 'ARIA') user.setUserProfiles('USER')
