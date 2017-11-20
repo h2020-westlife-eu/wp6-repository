@@ -5,11 +5,11 @@ use springw6;
 DROP TABLE IF EXISTS APP_USER;
 create table APP_USER (
    id BIGINT NOT NULL AUTO_INCREMENT,
-   sso_id VARCHAR(30) NOT NULL,
-   password VARCHAR(100) NOT NULL,
-   first_name VARCHAR(30) NOT NULL,
-   last_name  VARCHAR(30) NOT NULL,
-   email VARCHAR(30) NOT NULL,
+   sso_id VARCHAR(255) NOT NULL,
+   password VARCHAR(255) NOT NULL,
+   first_name VARCHAR(255) NOT NULL,
+   last_name  VARCHAR(255) NOT NULL,
+   email VARCHAR(255) NOT NULL,
    PRIMARY KEY (id),
    UNIQUE (sso_id)
 );
