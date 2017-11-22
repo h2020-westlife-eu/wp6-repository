@@ -40,14 +40,20 @@ export class Visitingscientist {
           this.proposals = this.proposalsall.slice(0,3);
           this.proposalslength= this.proposalsall.length;
           this.showallbutton = this.proposalsall.length > 3;
+          this.showmorebutton = true;
         }
       })
       .catch(error => {
         console.log(error);
       });
   }
-  seeAllProposals() {
-    this.proposals = this.proposalsall;
-    this.showallbutton=false;
+  switchMoreLessProposals() {
+    if (this.showmorebutton) {
+      this.proposals = this.proposalsall;
+      this.showmorebutton = false;
+    } else {
+      this.proposals = this.proposalsall.slice(0,3);
+      this.showmorebutton = true;
+    }
   }
 }
