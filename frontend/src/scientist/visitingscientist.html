@@ -29,7 +29,7 @@
     <tr repeat.for="proposal of proposals"  class="w3-hover-green">
       <td>${proposal.projectId}</td><td>${proposal.summary}</td>
     </tr>
-    <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="seeAllProposals()"><td colspan="2">.. see all proposals (${proposalslength})</td> </tr>
+    <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
   </table>
   <p>Instruct -
     <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
