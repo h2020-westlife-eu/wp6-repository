@@ -100,7 +100,7 @@ public class RestCon {
         public String access_token;
         public String aria_response_format;
     }
-    
+
     //updates project from ARIA API
     @RequestMapping(value = {"/updateProject"}, method=RequestMethod.POST)
     public ResponseEntity updateProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){

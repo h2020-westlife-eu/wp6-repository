@@ -24,12 +24,12 @@
   <h4>Proposals for Visits (Instruct):</h4>
   <table class="w3-table">
     <tr>
-      <th>pid</th><th>title</th><th>statusID</th><th>status</th>
+      <th>pid</th><th>title</th>
     </tr>
     <tr repeat.for="proposal of proposals"  class="w3-hover-green">
-      <td>${proposal.pid}</td><td>${proposal.title}</td><td>${proposal.statusID}</td><td>${proposal.status}</td>
+      <td>${proposal.projectId}</td><td>${proposal.summary}</td>
     </tr>
-    <tr  class="w3-hover-green"><td colspan="3"><a href="#datasets">... see all proposals ...</a></td> </tr>
+    <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="seeAllProposals()"><td colspan="2">.. see all proposals (${proposalslength})</td> </tr>
   </table>
   <p>Instruct -
     <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
