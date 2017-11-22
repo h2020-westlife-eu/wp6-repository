@@ -50,8 +50,8 @@ create table PROJECT (
   project_name VARCHAR(255) ,
   summary VARCHAR(2000) ,
   PRIMARY KEY (id),
-  KEY FK_USER (id),
-  CONSTRAINT FK_USER FOREIGN KEY (id) REFERENCES APP_USER (id) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY FK_USER (user_id),
+  CONSTRAINT FK_USER FOREIGN KEY (user_id) REFERENCES APP_USER (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 DROP TABLE IF EXISTS filelist;
@@ -89,4 +89,8 @@ INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
 
 /* create demo project */
 INSERT INTO PROJECT(user_id,project_name,summary)
-    VALUES (2,"Strychnin NMR analysis","This project analyses strychnine and binding sites of glycine receptors");
+    VALUES (2,"Strychnin NMR analysis GLY","This project analyses strychnine and binding sites of glycine receptors"),
+    (2,"Strychnin NMR analysis TAS","This project analyses strychnine and binding sites of taste receptors TAS2R10"),
+    (2,"Strychnin NMR analysis ACE","This project analyses strychnine and binding sites of acetylcholine receptors"),
+    (2,"Strychnin NMR analysis Nic","This project analyses strychnine and binding sites of nicotinic acetylcholine receptors"),
+    (2,"Strychnin NMR analysis Mus","This project analyses strychnine and binding sites of muscarinic acetylcholine receptors");
