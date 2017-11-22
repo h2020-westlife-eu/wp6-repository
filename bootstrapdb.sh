@@ -6,5 +6,3 @@ echo creating db
 echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/populatetestDB.sql
-
-
