@@ -1,8 +1,13 @@
 <template>
-    <require from="./w3.css"></require>
-    <require from="components/navigation.html"></require>
+  <require from="./w3.css"></require>
+  <require from="components/heads.css"></require>
+  <require from="components/sharedheader.html"></require>
+  <require from="components/sharedfooter.html"></require>
+  <require from="components/navigation.html"></require>
+  <sharedheader></sharedheader>
 
       <div class="w3-card-2 w3-white w3-margin w3-padding">
+
         <navigation router.bind="router"></navigation>
         <!--nav>
         <ul repeat.for="nav of router.navigation">
@@ -12,6 +17,8 @@
         <router-view>
           <!-- Top level views are rendered here -->
         </router-view>
-      </div>
 
+        <sharedfooter></sharedfooter>
+
+      </div>
 </template>
