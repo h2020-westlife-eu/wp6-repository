@@ -40,6 +40,7 @@ let serve = gulp.series(
             ext: '.html'
           }),
           springserviceproxy('/restcon',{target: 'http://localhost:8080/', changeOrigin: true,logLevel:'debug'}),
+          springserviceproxy('/login',{target: 'http://localhost:8080/', changeOrigin: true,logLevel:'debug'})
         ]
       }
     }, function(err, bs) {

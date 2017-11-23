@@ -75,7 +75,12 @@ public class RestCon {
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         //fix issue #9
-        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+        if (user==null) {
+            if (xusername.length()>0)
+            user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+            else //return http 401
+            new ResponseEntity("authorization required",HttpStatus.UNAUTHORIZED);
+        }
         Project project = new Project();
         project.setUserId(user.getId());
         project.setProjectName("Test");
@@ -91,7 +96,12 @@ public class RestCon {
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findBySSO(ssoId);
         //fix issue #9
-        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId,xgroups);
+        if (user==null) {
+            if (xusername.length()>0)
+                user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+            else //return http 401
+                new ResponseEntity("authorization required",HttpStatus.UNAUTHORIZED);
+        }
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
     }
