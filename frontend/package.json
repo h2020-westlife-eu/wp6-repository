@@ -52,6 +52,7 @@
     "karma-jasmine": "^1.0.2",
     "karma-babel-preprocessor": "^6.0.1",
     "aurelia-http-client": "^1.0.0",
-    "aurelia-fetch-client": "^1.0.0"
+    "aurelia-fetch-client": "^1.0.0",
+    "http-proxy-middleware": "^0.17.3"
   }
 }

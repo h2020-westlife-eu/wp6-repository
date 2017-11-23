@@ -19,6 +19,7 @@ function reload(done) {
 }
 //tomas added ssi and proxy declaration
 var ssi = require('browsersync-ssi');
+var springserviceproxy = require('http-proxy-middleware');
 
 let serve = gulp.series(
   build,
@@ -37,7 +38,8 @@ let serve = gulp.series(
           ssi({
             baseDir: './',
             ext: '.html'
-          })
+          }),
+          springserviceproxy('/restcon',{target: 'http://localhost:8080/', changeOrigin: true,logLevel:'debug'}),
         ]
       }
     }, function(err, bs) {
