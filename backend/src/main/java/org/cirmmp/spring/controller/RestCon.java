@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -56,9 +59,10 @@ public class RestCon {
 
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname){
+        String username = checkAuthentication(xusername);
         LOG.info("sono in user");
         LOG.info("user from HTTP header (westlife-sso):"+xusername);
-        String username = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+
         //return "Welcome, " + username;
 
         //List<Offer> offers = offerService.findAllOffer();
@@ -71,16 +75,8 @@ public class RestCon {
 
     @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
     public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("sono in createproject");
-        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
-        //fix issue #9
-        if (user==null) {
-            if (xusername.length()>0)
-            user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
-            else //return http 401
-            new ResponseEntity("authorization required",HttpStatus.UNAUTHORIZED);
-        }
         Project project = new Project();
         project.setUserId(user.getId());
         project.setProjectName("Test");
@@ -92,16 +88,8 @@ public class RestCon {
 
     @RequestMapping(value = {"/listProject", "/project"}, method=RequestMethod.GET)
     public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("sono in createproject");
-        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
-        //fix issue #9
-        if (user==null) {
-            if (xusername.length()>0)
-                user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
-            else //return http 401
-                new ResponseEntity("authorization required",HttpStatus.UNAUTHORIZED);
-        }
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
     }
@@ -114,11 +102,7 @@ public class RestCon {
     //updates project from ARIA API
     @RequestMapping(value = {"/updateProject"}, method=RequestMethod.POST)
     public ResponseEntity updateProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
-        LOG.info("sono in createproject");
-        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
-        //fix issue #9
-        if (user==null) user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
         /*Project project = new Project();
         project.setUserId(user.getId());
         project.setProjectName("Test");
@@ -188,6 +172,42 @@ public class RestCon {
             s.append(names[i]);
         }
         return s.toString();
+    }
+    public String checkAuthentication(String xusername) {
+        LOG.info("checkAuthentication()");
+        //String xusername="";
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+        if (ssoId=="") {
+            LOG.info("checkAuthentication: not authenticated");
+            throw new UnauthorizedUserException("authorization required");
+            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
+        } else {
+            return ssoId;
+        }
+    }
+    public User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
+        LOG.info("checkAuthentication()");
+        //String xusername="";
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+        if (ssoId=="") {
+            LOG.info("checkAuthentication: not authenticated");
+            throw new AuthenticationCredentialsNotFoundException("authorization required");
+
+            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
+        } else {
+            User user= userService.findBySSO(ssoId);
+            //fix issue #9
+            if (user==null) {
+                if (xusername.length()>0)
+                    user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+                else {//return http 401
+                    LOG.info("checkAuthentication: not authenticated");
+                    throw new AuthenticationCredentialsNotFoundException("authorization required");
+                }
+            }
+            LOG.info("checkAuthentication: OK");
+            return user;
+        }
     }
 
     @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
