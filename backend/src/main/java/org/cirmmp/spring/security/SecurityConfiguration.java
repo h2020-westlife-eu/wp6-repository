@@ -44,6 +44,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private OAuth2RestTemplate restTemplate;
 
+    private AlwaysSendUnauthorized401AuthenticationEntryPoint  alwaysSendUnauthorized401AuthenticationEntryPoint = new AlwaysSendUnauthorized401AuthenticationEntryPoint();
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/resources/**");
@@ -84,7 +86,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/google-login","/login","/static/**").permitAll();
+                .antMatchers("/google-login","/login","/static/**").permitAll()
+                //suggested to throw HTTP 401, but doesn't work
+                .and().exceptionHandling().authenticationEntryPoint(alwaysSendUnauthorized401AuthenticationEntryPoint);
+
         // OpenID configuration
                 /*.and()
                 .addFilterAfter(new OAuth2ClientContextFilter(), AbstractPreAuthenticatedProcessingFilter.class)
