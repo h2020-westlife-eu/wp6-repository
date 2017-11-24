@@ -4,6 +4,8 @@ import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.model.UserProfile;
 import org.cirmmp.spring.service.UserProfileService;
 import org.cirmmp.spring.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -29,6 +31,7 @@ import java.util.Locale;
 @RequestMapping("/")
 @SessionAttributes("roles")
 public class AppController {
+	private static final Logger LOG = LoggerFactory.getLogger(AppController.class);
 
 	@Autowired
 	UserService userService;
@@ -177,8 +180,8 @@ public class AppController {
 	 * If users is already logged-in and tries to goto login page again, will be redirected to list page.
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String loginPage(@RequestParam(name="redirect",defaultValue="") String redirecturl) {
-
+	public String loginPage(@RequestParam(name="next",defaultValue="") String redirecturl) {
+		LOG.info("loginPage(), redirect next "+redirecturl);
 		if (isCurrentAuthenticationAnonymous()) {
 			return "login";
 	    } else {
