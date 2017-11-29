@@ -1,8 +1,40 @@
 <template>
-      <h3>Dataset Dashboard</h3>
-<p>This screen shows summary of actions available for visiting scientist. He can view datasets acquired earlier,
-  he can view Proposals for Visits from Instruct and can submit a new one.</p>
-<div class="w3-half w3-card">
+  <require
+    from="./visitingscientist.css"></require>
+      <h3>Repository Dashboard</h3>
+<p>You are logged as visiting scientist.
+  You can view your visits or proposals.
+  Clicking on visit or proposal you can narrow datasets related to the visit.
+</p>
+<div class="w3-card au-animate">
+    <h4>Proposals for Visits (Instruct):<button show.bind="!showProposals" class="w3-button au-animate" click.trigger="showAllProposals()">Show all</button></h4>
+    <div show.bind="showProposals" class="au-animate">
+    <table class="w3-table">
+      <tr>
+        <th>pid</th><th>title</th>
+      </tr>
+      <tr repeat.for="proposal of proposals"  class="w3-hover-green" click.trigger="selectProposal(proposal)">
+        <td>${proposal.projectId}</td><td>${proposal.summary}(${proposal.datasets})</td>
+      </tr>
+      <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
+    </table>
+    <p>Instruct -
+      <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
+    </p>
+    <p>Instruct -
+      <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">New Proposal</a> for a visit.
+    </p>
+      </div>
+    <div show.bind="! showProposals" class="au-animate">
+      <p class="w3-green">${selectedProposal.projectId} ${selectedProposal.summary}</p>
+    </div>
+  </div>
+
+  <p>
+  You can view datasets.
+  Every dataset consists of files.
+  Clicking on a dataset will switch to file view of the dataset.</p>
+  <div class="w3-card">
   <h4>Datasets:</h4>
   <table class="w3-table">
     <thead>
@@ -11,7 +43,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectItem(item)">
+    <tr class="w3-hover-green" repeat.for="item of items" click.trigger="selectDataset(item)">
       <td>${item.date}</td>
       <td>${item.summary}</td>
       <td>${item.info}</td>
@@ -20,23 +52,5 @@
     </tbody>
   </table>
 </div>
-  <div class="w3-half w3-card">
-  <h4>Proposals for Visits (Instruct):</h4>
-  <table class="w3-table">
-    <tr>
-      <th>pid</th><th>title</th>
-    </tr>
-    <tr repeat.for="proposal of proposals"  class="w3-hover-green">
-      <td>${proposal.projectId}</td><td>${proposal.summary}</td>
-    </tr>
-    <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
-  </table>
-  <p>Instruct -
-    <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
-  </p>
-  <p>Instruct -
-    <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">New Proposal</a> for a visit.
-  </p>
-  </div>
   <p>&nbsp;</p>
 </template>
