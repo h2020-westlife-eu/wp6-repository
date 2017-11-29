@@ -29,6 +29,7 @@ export class Visitingscientist {
     ]*/
     this.projectserviceurl="/restcon/project"
     this.nexturl = window.location;
+    this.showProposals=true;
 
   }
   attached() {
@@ -67,5 +68,13 @@ export class Visitingscientist {
       this.proposals = this.proposalsall.slice(0,3);
       this.showmorebutton = true;
     }
+  }
+  selectProposal(item) {
+    console.log(item);
+    this.selectedProposal=item;
+    this.showProposals=false;
+  }
+  showAllProposals(){
+    this.showProposals=true;
   }
 }

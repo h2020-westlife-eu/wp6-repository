@@ -87,3 +87,61 @@ nav {
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
   }
+
+.aurelia-hide-remove {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeIn 2s;
+}
+
+.aurelia-hide-add {
+  -webkit-animation: fadeOut 2s;
+  animation: fadeOut 2s;
+}
+
+.aurelia-hide-enter {
+  animation: fadeOut 2s;
+}
+.aurelia-hide-leave {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeIn 2s;
+}
+
+.au-leave-active {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeOut 2s;
+}
+.animation-enter-active {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeIn 2s;
+}
+
+.aurelia-enter-active {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeIn 2s;
+}
+
+.au-enter-active {
+  -webkit-animation: fadeIn 2s;
+  animation: fadeIn 2s;
+}
+
+/* CSS3-Animations */
+@-webkit-keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes fadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
