@@ -11,7 +11,7 @@ export class App {
   }
 
   login() {
-    window.location="login.html?next"+window.location.pathname;
+    //window.location="login.html?next"+window.location.pathname;
   }
 
 }
