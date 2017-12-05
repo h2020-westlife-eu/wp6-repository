@@ -13,6 +13,10 @@ PIDFile=/var/run/westlife-repository.pid
 User=vagrant
 ExecStart=/bin/mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
 WorkingDirectory=/cvmfs/west-life.egi.eu/software/repository/latest/backend
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=westlife-repository
+
 
 [Install]
 WantedBy=multi-user.target

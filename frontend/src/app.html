@@ -1,24 +1,37 @@
 <template>
-  <require from="./w3.css"></require>
-  <require from="components/heads.css"></require>
-  <require from="components/sharedheader.html"></require>
-  <require from="components/sharedfooter.html"></require>
-  <require from="components/navigation.html"></require>
+  <require from="../w3.css"></require>
+  <require from="../components/heads.css"></require>
+  <require from="../components/sharedheader.html"></require>
+  <require from="../components/sharedfooter.html"></require>
   <sharedheader></sharedheader>
+  <p>
+    West-life Repository is standalone web application for experimental facilities that are newly embarking on data management.
+  </p>
+  <p>
+    This is reference implementation of a repository that supplies
+  </p>
+    <ul>
+  <li> suitable metadata to the portal (D6.2) matching the metadata standards to be devised in WP7.</li>
+  <li> registering a new project, </li>
+  <li> adding files to a project. </li>
+</ul>
 
-      <div class="w3-card-2 w3-white w3-margin w3-padding">
+  <p>
+    Features in development, not yet implemented:
+  </p>
+  <ul>
+  <li>The implementation use the CERIF standard.</li>
+  <li>It will be compatible with existing CRIS repositories,</li>
+  <li>and also be capable of assigning an URI to a project if it is not yet recorded in a CRIS repository.</li>
+</ul>
+  <p>
+  To continue:
+  </p>
+  <ul>
+    <li><a href="repository/index.html">Visiting scientist - requires login via West-Life SSO</a></li>
+    <li><a href="http://localhost:8080/index.html">Staff access - available only from local workstation</a></li>
+  </ul>
 
-        <navigation router.bind="router"></navigation>
-        <!--nav>
-        <ul repeat.for="nav of router.navigation">
-          <li class="${nav.isActive ? 'nav-item active' : 'nav-item'}"><a href.bind="nav.href">${nav.title}</a></li>
-        </ul>
-        </nav-->
-        <router-view>
-          <!-- Top level views are rendered here -->
-        </router-view>
 
-        <sharedfooter></sharedfooter>
-
-      </div>
+  <sharedfooter></sharedfooter>
 </template>
