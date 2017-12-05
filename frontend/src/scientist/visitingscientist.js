@@ -48,15 +48,9 @@ export class Visitingscientist {
       })
       .catch(error => {
         //console.log(error);
-        if (error.statusCode=401) {
-          //this.nexturl = window.location.pathname;
-
-          window.location = "/login?next=" + this.nexturl;
-        }
-        else {
           console.log(error);
           alert("Sorry, error:"+error.statusCode+" "+error.message);
-        }
+
 
       });
   }

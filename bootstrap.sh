@@ -25,7 +25,10 @@ export WP6SRCESC=$(echo $WP6REPSRC | sed 's_/_\\/_g')
 sed -i -e "s/\/cvmfs\/west-life.egi.eu\/software\/repository\/latest\/frontend/${WP6SRCESC}\/frontend/g" /etc/httpd/conf.d/wp6-repository.conf
 #add +x permission on all html files which has include directive
 # some html pages includes header with menu, footer etc shared among pages
-chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
+#no html include needed anymore
+#chmod ugo+x `grep -rl $WP6REPSRC/frontend/ -e "<\!--\#include"`
+# syslog of westlife services logs are at /var/log/westlife/
+service rsyslog restart
 
 # SELinux in SL7.3 setting, allow proxy from apache to other services and security context to dir
 if hash setsebool 2>/dev/null; then
@@ -47,7 +50,7 @@ systemctl stop httpd
 systemctl start httpd
 
 #create dirs
-mkdir /home/vagrant/work /home/vagrant/.westlife /home/vagrant/logs
+mkdir /home/vagrant/work /home/vagrant/.westlife
 
 # add users to davfs2 group
 usermod -a -G davfs2 vagrant
