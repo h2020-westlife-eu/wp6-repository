@@ -8,7 +8,6 @@
 -->
 <Configure id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
     <Set name="secureScheme">https</Set>
-    <Set name="contextPath">/admin</Set>
     <Set name="securePort">
         <Property name="jetty.secure.port" default="443"/>
     </Set>
