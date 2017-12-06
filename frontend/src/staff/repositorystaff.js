@@ -1,10 +1,10 @@
 import {HttpClient} from 'aurelia-http-client';
 
 export class Repositorystaff {
-
-  constructor() {
+  static inject = [HttpClient];
+  constructor(httpclient) {
     console.log("Repositorystaff()");
-    this.visitors = ["Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
+    this.visitors = [];//"Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
     this.items=[{date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb"},
       {date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb"},
       {date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb"},
@@ -14,9 +14,23 @@ export class Repositorystaff {
     this.uploaddir="";
     this.selectinguser=true;
     this.selectedvisitor="";
+    this.client =httpclient;
+    this.serviceurl="/restcon/user"
   }
-  attached() {
 
+  attached() {
+    this.httpclient.get(this.serviceurl)
+      .then(data => {
+        console.log(data);
+        if (data.response) {
+          this.visitors = JSON.parse(data.response);
+        }
+      })
+      .catch(error => {
+        //console.log(error);
+        console.log(error);
+        alert("Sorry, error:"+error.statusCode+" "+error.message);
+      });
   }
 
   selectitem(item) {

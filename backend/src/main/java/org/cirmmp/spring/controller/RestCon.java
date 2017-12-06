@@ -72,6 +72,24 @@ public class RestCon {
         return new ResponseEntity (gson.toJson(username), HttpStatus.OK);
     }
 
+    @RequestMapping(value = { "/users" },method = RequestMethod.GET)
+    public ResponseEntity listUsers(){
+        //String username = checkAuthentication(xusername);
+        //LOG.info("sono in user");
+        //LOG.info("user from HTTP header (westlife-sso):"+xusername);
+
+        //return "Welcome, " + username;
+
+        //List<Offer> offers = offerService.findAllOffer();
+        //String jsonOffers = gson.toJson(username);
+        //LOG.info("JSON OFFERS");
+        //LOG.info(username);
+        List<User> users = userService.findAllUsers();
+
+
+        return new ResponseEntity (gson.toJson(users), HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
     public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
