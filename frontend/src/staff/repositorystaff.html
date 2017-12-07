@@ -8,7 +8,7 @@
   <p><b>1.</b>Select a user, who's data will be uploaded:</p>
   <table class="w3-table-all" draggable="true">
     <tr class="w3-hover-green" repeat.for="visitor of visitors" click.trigger="selectvisitor(visitor)">
-      <td>${visitor}</td>
+      <td>${visitor.Id}</td><td>${visitor.FirstName} ${visitor.LastName}</td>
     </tr>
   </table>
   </div>
