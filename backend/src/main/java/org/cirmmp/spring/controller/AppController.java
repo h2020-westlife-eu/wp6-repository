@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -180,11 +181,14 @@ public class AppController {
 	 * If users is already logged-in and tries to goto login page again, will be redirected to list page.
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String loginPage(@RequestParam(name="next",defaultValue="") String redirecturl) {
+	public String loginPage(HttpServletRequest request, Model model, @RequestParam(name="next",defaultValue="") String redirecturl) {
 		LOG.info("loginPage(), redirect next "+redirecturl);
 		if (isCurrentAuthenticationAnonymous()) {
+			if (redirecturl.length()>0 )
+				//sets redirection attribute if not logged
+				request.getSession().setAttribute("url_prior_login", redirecturl);
 			return "login";
-	    } else {
+	    } else {//redirect if already logged
 			if (redirecturl.length()>0 )
 				return "redirect:"+redirecturl;
 			else

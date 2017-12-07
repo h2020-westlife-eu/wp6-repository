@@ -17,15 +17,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.web.context.request.RequestContextListener;
 
 @Configuration
 @EnableWebSecurity
@@ -76,6 +73,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("hasRole('ADMIN') or hasRole('DBA')")
                 .and()
                 .formLogin().loginPage("/login")
+                .successHandler(successHandler())
                 .loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
                 .and()
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
@@ -106,6 +104,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        return new RedirectHandler("/");
+    }
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
