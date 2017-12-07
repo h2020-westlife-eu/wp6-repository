@@ -28,6 +28,7 @@ export class Visitingscientist {
       {date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb"},
     ]*/
     this.projectserviceurl="/restcon/project"
+    this.dataserviceurl="/restcon/data"
     this.nexturl = window.location;
     this.showProposals=true;
 
@@ -50,6 +51,24 @@ export class Visitingscientist {
         //console.log(error);
           console.log(error);
           alert("Sorry, error:"+error.statusCode+" "+error.message);
+
+
+      });
+    this.httpclient.get(this.projectserviceurl)
+      .then(data => {
+        console.log(data);
+        if (data.response) {
+          this.proposalsall = JSON.parse(data.response);
+          this.proposals = this.proposalsall.slice(0,3);
+          this.proposalslength= this.proposalsall.length;
+          this.showallbutton = this.proposalsall.length > 3;
+          this.showmorebutton = true;
+        }
+      })
+      .catch(error => {
+        //console.log(error);
+        console.log(error);
+        alert("Sorry, error:"+error.statusCode+" "+error.message);
 
 
       });
