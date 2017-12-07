@@ -80,6 +80,7 @@ public class RestCon {
       String SsoId;
     }
 
+    /* return list of users registered inside repository DB*/
     @RequestMapping(value = { "/users" },method = RequestMethod.GET)
     public ResponseEntity listUsers(){
         //String username = checkAuthentication(xusername);
