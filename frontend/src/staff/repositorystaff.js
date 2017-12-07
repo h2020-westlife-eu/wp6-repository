@@ -15,13 +15,13 @@ export class Repositorystaff {
     this.selectinguser=true;
     this.selectedvisitor="";
     this.client =httpclient;
-    this.serviceurl="/restcon/user"
+    this.serviceurl="/restcon/users"
   }
 
   attached() {
     this.httpclient.get(this.serviceurl)
       .then(data => {
-        console.log(data);
+        //console.log(data);
         if (data.response) {
           this.visitors = JSON.parse(data.response);
         }

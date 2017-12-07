@@ -72,6 +72,14 @@ public class RestCon {
         return new ResponseEntity (gson.toJson(username), HttpStatus.OK);
     }
 
+    public class UserDTO {
+      String FirstName;
+      String LastName;
+      String Email;
+      String Id;
+      String SsoId;
+    }
+
     @RequestMapping(value = { "/users" },method = RequestMethod.GET)
     public ResponseEntity listUsers(){
         //String username = checkAuthentication(xusername);
@@ -85,9 +93,19 @@ public class RestCon {
         //LOG.info("JSON OFFERS");
         //LOG.info(username);
         List<User> users = userService.findAllUsers();
+        List<UserDTO> userdtos = new ArrayList<UserDTO>();
+        for (Iterator<User> it=users.iterator(); it.hasNext(); ){
+          User user = it.next();
+          UserDTO udto= new UserDTO();
+          udto.FirstName = user.getFirstName();
+          udto.LastName = user.getLastName();
+          udto.Email = user.getEmail();
+          udto.Id = user.getId().toString();
+          udto.SsoId = user.getSsoId();
+          userdtos.add(udto);
+        }
 
-
-        return new ResponseEntity (gson.toJson(users), HttpStatus.OK);
+        return new ResponseEntity (gson.toJson(userdtos), HttpStatus.OK);
     }
 
 
