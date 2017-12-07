@@ -9,13 +9,4 @@ export class App {
 
   }
 
-  bind() {
-    if (/(^|;)\s*JSESSIONID=/.test(document.cookie)) {
-      //alert("Hello again!");
-      console.log("User probably logged in")
-    } else {
-      window.location="/login.html?next"+window.location.pathname;
-    }
-  }
-
 }
