@@ -415,6 +415,7 @@ define('scientist/visitingscientist',["exports", "aurelia-http-client"], functio
       this.proposals = [];
       this.items = [];
       this.projectserviceurl = "/restcon/project";
+      this.dataserviceurl = "/restcon/data";
       this.nexturl = window.location;
       this.showProposals = true;
     }
@@ -424,6 +425,19 @@ define('scientist/visitingscientist',["exports", "aurelia-http-client"], functio
 
       console.log("VisitingScientist atached()");
       console.log(this.nexturl);
+      this.httpclient.get(this.projectserviceurl).then(function (data) {
+        console.log(data);
+        if (data.response) {
+          _this.proposalsall = JSON.parse(data.response);
+          _this.proposals = _this.proposalsall.slice(0, 3);
+          _this.proposalslength = _this.proposalsall.length;
+          _this.showallbutton = _this.proposalsall.length > 3;
+          _this.showmorebutton = true;
+        }
+      }).catch(function (error) {
+        console.log(error);
+        alert("Sorry, error:" + error.statusCode + " " + error.message);
+      });
       this.httpclient.get(this.projectserviceurl).then(function (data) {
         console.log(data);
         if (data.response) {
