@@ -8395,7 +8395,7 @@ define('aurelia-binding',['exports', 'aurelia-logging', 'aurelia-pal', 'aurelia-
 
     Scanner.prototype.scanOperator = function scanOperator(start, text) {
       assert(this.peek === text.charCodeAt(0));
-      assert(OPERATORS.indexOf(text) !== -1);
+      assert(OPERATORS[text] === 1);
       this.advance();
       return new Token(start, text).withOp(text);
     };
@@ -8416,7 +8416,7 @@ define('aurelia-binding',['exports', 'aurelia-logging', 'aurelia-pal', 'aurelia-
         text += two;
       }
 
-      assert(OPERATORS.indexOf(text) !== -1);
+      assert(OPERATORS[text] === 1);
 
       return new Token(start, text).withOp(text);
     };
@@ -8434,7 +8434,7 @@ define('aurelia-binding',['exports', 'aurelia-logging', 'aurelia-pal', 'aurelia-
       var text = this.input.substring(start, this.index);
       var result = new Token(start, text);
 
-      if (OPERATORS.indexOf(text) !== -1) {
+      if (OPERATORS[text] === 1) {
         result.withOp(text);
       } else {
         result.withGetterSetter(text);
@@ -8557,7 +8557,33 @@ define('aurelia-binding',['exports', 'aurelia-logging', 'aurelia-pal', 'aurelia-
     return Scanner;
   }();
 
-  var OPERATORS = ['undefined', 'null', 'true', 'false', '+', '-', '*', '/', '%', '^', '=', '==', '===', '!=', '!==', '<', '>', '<=', '>=', '&&', '||', '&', '|', '!', '?'];
+  var OPERATORS = {
+    'undefined': 1,
+    'null': 1,
+    'true': 1,
+    'false': 1,
+    '+': 1,
+    '-': 1,
+    '*': 1,
+    '/': 1,
+    '%': 1,
+    '^': 1,
+    '=': 1,
+    '==': 1,
+    '===': 1,
+    '!=': 1,
+    '!==': 1,
+    '<': 1,
+    '>': 1,
+    '<=': 1,
+    '>=': 1,
+    '&&': 1,
+    '||': 1,
+    '&': 1,
+    '|': 1,
+    '!': 1,
+    '?': 1
+  };
 
   var $EOF = 0;
   var $TAB = 9;
@@ -10898,7 +10924,9 @@ define('aurelia-binding',['exports', 'aurelia-logging', 'aurelia-pal', 'aurelia-
         this.updateTarget(value);
       }
 
-      if (mode === bindingMode.toView) {
+      if (mode === bindingMode.oneTime) {
+        return;
+      } else if (mode === bindingMode.toView) {
         enqueueBindingConnect(this);
       } else if (mode === bindingMode.twoWay) {
         this.sourceExpression.connect(this, source);
@@ -28778,4 +28806,4 @@ define('aurelia-testing/wait',["require", "exports"], function (require, exports
     exports.waitForDocumentElements = waitForDocumentElements;
 });
 
-function _aureliaConfigureModuleLoader(){requirejs.config({"baseUrl":"src/","paths":{"aurelia-bootstrapper":"../node_modules/aurelia-bootstrapper/dist/amd/aurelia-bootstrapper","aurelia-dependency-injection":"../node_modules/aurelia-dependency-injection/dist/amd/aurelia-dependency-injection","aurelia-event-aggregator":"../node_modules/aurelia-event-aggregator/dist/amd/aurelia-event-aggregator","aurelia-binding":"../node_modules/aurelia-binding/dist/amd/aurelia-binding","aurelia-framework":"../node_modules/aurelia-framework/dist/amd/aurelia-framework","aurelia-history":"../node_modules/aurelia-history/dist/amd/aurelia-history","aurelia-history-browser":"../node_modules/aurelia-history-browser/dist/amd/aurelia-history-browser","aurelia-loader":"../node_modules/aurelia-loader/dist/amd/aurelia-loader","aurelia-loader-default":"../node_modules/aurelia-loader-default/dist/amd/aurelia-loader-default","aurelia-logging":"../node_modules/aurelia-logging/dist/amd/aurelia-logging","aurelia-logging-console":"../node_modules/aurelia-logging-console/dist/amd/aurelia-logging-console","aurelia-metadata":"../node_modules/aurelia-metadata/dist/amd/aurelia-metadata","aurelia-pal":"../node_modules/aurelia-pal/dist/amd/aurelia-pal","aurelia-pal-browser":"../node_modules/aurelia-pal-browser/dist/amd/aurelia-pal-browser","aurelia-path":"../node_modules/aurelia-path/dist/amd/aurelia-path","aurelia-polyfills":"../node_modules/aurelia-polyfills/dist/amd/aurelia-polyfills","aurelia-route-recognizer":"../node_modules/aurelia-route-recognizer/dist/amd/aurelia-route-recognizer","aurelia-router":"../node_modules/aurelia-router/dist/amd/aurelia-router","aurelia-task-queue":"../node_modules/aurelia-task-queue/dist/amd/aurelia-task-queue","aurelia-templating":"../node_modules/aurelia-templating/dist/amd/aurelia-templating","aurelia-templating-binding":"../node_modules/aurelia-templating-binding/dist/amd/aurelia-templating-binding","aurelia-http-client":"../node_modules/aurelia-http-client/dist/amd/aurelia-http-client","aurelia-fetch-client":"../node_modules/aurelia-fetch-client/dist/amd/aurelia-fetch-client","text":"../node_modules/text/text","app-bundle":"../scripts/app-bundle"},"packages":[{"name":"aurelia-templating-resources","location":"../node_modules/aurelia-templating-resources/dist/amd","main":"aurelia-templating-resources"},{"name":"aurelia-templating-router","location":"../node_modules/aurelia-templating-router/dist/amd","main":"aurelia-templating-router"},{"name":"aurelia-testing","location":"../node_modules/aurelia-testing/dist/amd","main":"aurelia-testing"}],"stubModules":["text"],"shim":{},"bundles":{"app-bundle":["app","environment","main","home/home","login/login","pickerclient/pickerclient","repository/app","repository/main","resources/index","scientist/repositorytovf","scientist/visitingscientist","staff/app","staff/main","staff/repositorystaff","icons","w3","components/navigation","components/heads","components/sharedfooter","components/sharedheader"]}})}
+function _aureliaConfigureModuleLoader(){requirejs.config({"baseUrl":"src/","paths":{"aurelia-dependency-injection":"../node_modules/aurelia-dependency-injection/dist/amd/aurelia-dependency-injection","aurelia-binding":"../node_modules/aurelia-binding/dist/amd/aurelia-binding","aurelia-event-aggregator":"../node_modules/aurelia-event-aggregator/dist/amd/aurelia-event-aggregator","aurelia-framework":"../node_modules/aurelia-framework/dist/amd/aurelia-framework","aurelia-history-browser":"../node_modules/aurelia-history-browser/dist/amd/aurelia-history-browser","aurelia-loader":"../node_modules/aurelia-loader/dist/amd/aurelia-loader","aurelia-bootstrapper":"../node_modules/aurelia-bootstrapper/dist/amd/aurelia-bootstrapper","aurelia-metadata":"../node_modules/aurelia-metadata/dist/amd/aurelia-metadata","aurelia-loader-default":"../node_modules/aurelia-loader-default/dist/amd/aurelia-loader-default","aurelia-pal":"../node_modules/aurelia-pal/dist/amd/aurelia-pal","aurelia-pal-browser":"../node_modules/aurelia-pal-browser/dist/amd/aurelia-pal-browser","aurelia-logging":"../node_modules/aurelia-logging/dist/amd/aurelia-logging","aurelia-polyfills":"../node_modules/aurelia-polyfills/dist/amd/aurelia-polyfills","aurelia-path":"../node_modules/aurelia-path/dist/amd/aurelia-path","aurelia-logging-console":"../node_modules/aurelia-logging-console/dist/amd/aurelia-logging-console","aurelia-route-recognizer":"../node_modules/aurelia-route-recognizer/dist/amd/aurelia-route-recognizer","aurelia-router":"../node_modules/aurelia-router/dist/amd/aurelia-router","aurelia-task-queue":"../node_modules/aurelia-task-queue/dist/amd/aurelia-task-queue","aurelia-http-client":"../node_modules/aurelia-http-client/dist/amd/aurelia-http-client","text":"../node_modules/text/text","aurelia-templating-binding":"../node_modules/aurelia-templating-binding/dist/amd/aurelia-templating-binding","aurelia-fetch-client":"../node_modules/aurelia-fetch-client/dist/amd/aurelia-fetch-client","aurelia-templating":"../node_modules/aurelia-templating/dist/amd/aurelia-templating","aurelia-history":"../node_modules/aurelia-history/dist/amd/aurelia-history","app-bundle":"../scripts/app-bundle"},"packages":[{"name":"aurelia-templating-resources","location":"../node_modules/aurelia-templating-resources/dist/amd","main":"aurelia-templating-resources"},{"name":"aurelia-templating-router","location":"../node_modules/aurelia-templating-router/dist/amd","main":"aurelia-templating-router"},{"name":"aurelia-testing","location":"../node_modules/aurelia-testing/dist/amd","main":"aurelia-testing"}],"stubModules":["text"],"shim":{},"bundles":{"app-bundle":["app","environment","main","home/home","login/login","pickerclient/pickerclient","repository/app","repository/main","resources/index","scientist/repositorytovf","scientist/visitingscientist","staff/app","staff/main","staff/repositorystaff","components/navigation","components/sharedfooter","components/sharedheader","icons","w3","components/heads"]}})}
