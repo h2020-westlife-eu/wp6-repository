@@ -36,6 +36,7 @@
   Clicking on a dataset will switch to file view of the dataset.</p>
   <div class="w3-card">
   <h4>Datasets:</h4>
+  <div show.bind="showDatasets" class="au-animate">
   <table class="w3-table">
     <thead>
     <tr>
@@ -47,10 +48,15 @@
       <td>${item.date}</td>
       <td>${item.summary}</td>
       <td>${item.info}</td>
+      <td>${item.projectId}</td>
     </tr>
     <tr  class="w3-hover-green"><td colspan="3"><a href="#datasets">... see all datasets ...</a></td> </tr>
     </tbody>
   </table>
+  </div>
+    <div show.bind="! showDatasets" class="au-animate">
+      <p>${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
+    </div>
 </div>
   <p>&nbsp;</p>
 </template>
