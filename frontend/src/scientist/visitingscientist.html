@@ -7,7 +7,7 @@
   Clicking on visit or proposal you can narrow datasets related to the visit.
 </p>
 <div class="w3-card au-animate">
-    <h4>Proposals for Visits (Instruct):<button show.bind="!showProposals" class="w3-button au-animate" click.trigger="showAllProposals()">Show all</button></h4>
+    <h4>Select visits/proposals to narrow datasets:<button show.bind="!showProposals" class="w3-button au-animate" click.trigger="showAllProposals()">Show all</button></h4>
     <div show.bind="showProposals" class="au-animate">
     <table class="w3-table">
       <tr>
@@ -28,14 +28,8 @@
     <div show.bind="! showProposals" class="au-animate">
       <p class="w3-green">${selectedProposal.projectId} ${selectedProposal.summary}</p>
     </div>
-  </div>
 
-  <p>
-  You can view datasets.
-  Every dataset consists of files.
-  Clicking on a dataset will switch to file view of the dataset.</p>
-  <div class="w3-card">
-  <h4>Datasets:</h4>
+  <h4>Select dataset to narrow files:</h4>
   <div show.bind="showDatasets" class="au-animate">
   <table class="w3-table">
     <thead>
@@ -57,6 +51,16 @@
     <div show.bind="! showDatasets" class="au-animate">
       <p>${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
     </div>
+  <h4>Files:</h4>
+  <div class="w3-card">
+    <table class="w3-table">
+      <tr class="w3-hover-green" repeat.for="file of files" click.trigger="selectFile(item)">
+        <td>${file.name}</td>
+        <td>${file.size}</td>
+        <td>${file.date}</td>
+      </tr>
+    </table>
+  </div>
 </div>
   <p>&nbsp;</p>
 </template>
