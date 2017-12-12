@@ -38,8 +38,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     PersistentTokenRepository tokenRepository;
 
     // OAUTH
-    @Autowired
-    private OAuth2RestTemplate restTemplate;
+    /*@Autowired
+    private OAuth2RestTemplate restTemplate;*/
 
     private AlwaysSendUnauthorized401AuthenticationEntryPoint  alwaysSendUnauthorized401AuthenticationEntryPoint = new AlwaysSendUnauthorized401AuthenticationEntryPoint();
 
@@ -48,12 +48,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/resources/**");
     }
 
-    @Bean
+    /*@Bean
     public OpenIdConnectFilter myFilter() {
         final OpenIdConnectFilter filter = new OpenIdConnectFilter("/google-login");
         filter.setRestTemplate(restTemplate);
         return filter;
-    }
+    }*/
 
     @Autowired
     public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
@@ -95,7 +95,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/google-login","/login","/static/**").permitAll()
                 .anyRequest().authenticated();*/
-                .antMatchers("/google-login","/login","/static/**").permitAll();
+
 
     }
 

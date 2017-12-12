@@ -100,14 +100,13 @@ export class Visitingscientist {
   }
   selectProposal(item) {
     console.log("SelectedProposal()")
-    console.log(item.projectId);
 
     this.selectedProposal=item;
     this.showProposals=false;
     //now remember all datasets
     //this.allitems = this.items.splice();
     //filter per the selected project
-    this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.projectId)
+    this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.id)
   }
   showAllProposals(){
     this.showProposals=true;

@@ -123,8 +123,7 @@ public class RestCon {
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("sono in createproject");
 
-        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
+        //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         Date now = new Date();
         Project project = new Project();
         project.setCreation_date(now);
