@@ -4,19 +4,15 @@
   <require from="../components/sharedheader.html"></require>
   <require from="../components/sharedfooter.html"></require>
   <require from="../components/navigation.html"></require>
+  <require from="../components/userinfo"></require>
   <sharedheader></sharedheader>
 
       <div class="w3-card-2 w3-white w3-margin w3-padding">
 
         <navigation router.bind="router"></navigation>
-        <!--nav>
-        <ul repeat.for="nav of router.navigation">
-          <li class="${nav.isActive ? 'nav-item active' : 'nav-item'}"><a href.bind="nav.href">${nav.title}</a></li>
-        </ul>
-        </nav-->
-        <router-view>
-          <!-- Top level views are rendered here -->
-        </router-view>
+        <userinfo></userinfo>
+
+        <router-view></router-view>
 
         <sharedfooter></sharedfooter>
 
