@@ -17,25 +17,8 @@ export class Visitingscientist {
         })
     });
 
-      console.log("VisitingScientist()");
-    this.proposals = [];/*[
-      {
-        "pid": "1582",
-        "title": "API Test with Crystallisation and MX beamtime for strychnine",
-        "statusID": "5",
-        "status": "Approved",
-        "submitted": "1454583055",
-        "display": "PID: 1582 - API Test with Crystallisation and MX beamtime for strychnine"
-      },
-      {
-        "pid": "1586",
-        "title": "API Test with Crystallisation and MX beamtime for acetylcholine",
-        "statusID": "3",
-        "status": "Pending",
-        "submitted": "1454583056",
-        "display": "PID: 1586 - API Test with Crystallisation and MX beamtime for acetylcholine"
-      }
-    ];*/
+
+    this.proposals = [];
     //demo data until backend is implemented
     this.itemsall=[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb"},
       {projectId:"1",date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb"},
@@ -53,12 +36,9 @@ export class Visitingscientist {
   }
 
   attached() {
-    console.log("VisitingScientist atached()")
     this.httpclient.fetch("project")
       .then(response => response.json())
       .then(data => {
-        console.log(data);
-
           this.proposalsall = data;
           this.proposals = this.proposalsall.slice(0,3);
           this.proposalslength= this.proposalsall.length;
@@ -67,11 +47,7 @@ export class Visitingscientist {
 
       })
       .catch(error => {
-        //console.log(error);
           console.log(error);
-//          alert("Sorry, error:"+error.statusCode+" "+error.message);
-
-
       });
     //not yet implemented on backend
     this.httpclient.fetch("data")
@@ -83,8 +59,6 @@ export class Visitingscientist {
       .catch(error => {
         //console.log(error);
         console.log(error);
-
-        //alert("Sorry, error:"+error.statusCode+" "+error.message);
       });
 
   }
@@ -99,13 +73,9 @@ export class Visitingscientist {
     }
   }
   selectProposal(item) {
-    console.log("SelectedProposal()")
 
     this.selectedProposal=item;
     this.showProposals=false;
-    //now remember all datasets
-    //this.allitems = this.items.splice();
-    //filter per the selected project
     this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.id)
   }
   showAllProposals(){
@@ -115,10 +85,28 @@ export class Visitingscientist {
   }
 
   selectDataset(item) {
-    console.log("SelectedDataset()")
-    console.log(item);
     this.showDatasets=false;
     this.selectedDataset=item;
+    //TODO replace URL by the one obtained from API
+    this.httpclient.fetch('http://localhost:8080/files/XufWqKau/',{
+      method:'PROPFIND',
+
+    }).then(response => response.text())
+      .then(str => (new window.DOMParser()).parseFromString(str,"text/xml"))
+      .then(data =>{
+      console.log("selectDataset() files:")
+      console.log(data);
+      //parse structure https://stackoverflow.com/questions/17604071/parse-xml-using-javascript
+      //this.files = data.getElementsByTagName("D:response");
+
+    }).catch(error => {
+      console.log("selectDataset() error");
+      console.log(error);
+    });
+  }
+
+  deselectDataset() {
+    this.showDatasets=true;
   }
 
   selectFile(file){

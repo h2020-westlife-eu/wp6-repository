@@ -11,14 +11,8 @@
 
         <navigation router.bind="router"></navigation>
         <userinfo></userinfo>
-        <!--nav>
-        <ul repeat.for="nav of router.navigation">
-          <li class="${nav.isActive ? 'nav-item active' : 'nav-item'}"><a href.bind="nav.href">${nav.title}</a></li>
-        </ul>
-        </nav-->
-        <router-view>
-          <!-- Top level views are rendered here -->
-        </router-view>
+
+        <router-view></router-view>
 
         <sharedfooter></sharedfooter>
 
