@@ -4,12 +4,16 @@
       <h3>Repository Dashboard</h3>
 <p>You are logged as visiting scientist.
   You can view your visits or proposals.
-  Clicking on visit or proposal you can narrow datasets related to the visit.
 </p>
+  <p> Review Instruct <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
+  </p>
+  <p>Submit new proposapl at
+    <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">Instruct Site</a>.
+  </p>
 <div class="w3-card au-animate">
-    <h4>Select visits/proposals to narrow datasets:<button show.bind="!showProposals" class="w3-button au-animate" click.trigger="showAllProposals()">Show all</button></h4>
+    <h4>Select visits/proposals to narrow datasets:</h4>
     <div show.bind="showProposals" class="au-animate">
-    <table class="w3-table">
+    <table class="w3-table-all">
       <tr>
         <th>pid</th><th>title</th>
       </tr>
@@ -18,20 +22,14 @@
       </tr>
       <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
     </table>
-    <p>Instruct -
-      <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
-    </p>
-    <p>Instruct -
-      <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">New Proposal</a> for a visit.
-    </p>
       </div>
     <div show.bind="! showProposals" class="au-animate">
-      <p class="w3-green">${selectedProposal.projectId} ${selectedProposal.summary}</p>
+      <p class="w3-green" click.trigger="showAllProposals()" title="click to show all proposal">${selectedProposal.projectId} ${selectedProposal.summary}</p>
     </div>
 
   <h4>Select dataset to narrow files:</h4>
   <div show.bind="showDatasets" class="au-animate">
-  <table class="w3-table">
+  <table class="w3-table-all">
     <thead>
     <tr>
       <th>date</th><th>Summary</th><th>i</th>
@@ -49,11 +47,11 @@
   </table>
   </div>
     <div show.bind="! showDatasets" class="au-animate">
-      <p>${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
+      <p class="w3-green" click.trigger="showAllDatasets()" title="click to show all datasets">${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
     </div>
   <h4>Files:</h4>
   <div class="w3-card">
-    <table class="w3-table">
+    <table class="w3-table-all">
       <tr class="w3-hover-green" repeat.for="file of files" click.trigger="selectFile(item)">
         <td>${file.name}</td>
         <td>${file.size}</td>
