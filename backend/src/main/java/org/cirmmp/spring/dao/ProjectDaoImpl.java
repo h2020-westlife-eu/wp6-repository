@@ -18,6 +18,7 @@ import java.util.List;
 public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements ProjectDao{
 
     static final Logger logger = LoggerFactory.getLogger(ProjectDaoImpl.class);
+
     public Project findById(int id) {
         Project project = getByKey(id);
 
@@ -38,7 +39,7 @@ public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements Pro
 
     public void deleteById(String id){
         Criteria crit = createEntityCriteria();
-        crit.add(Restrictions.eq("userId", id));
+        crit.add(Restrictions.eq("Id", id));
          Project project = (Project)crit.uniqueResult();
         delete(project);
     }

@@ -1,27 +1,21 @@
-package org.cirmmp.spring.model;
+package org.cirmmp.spring.model.json;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.*;
+public class JFileList {
 
-public class FileList {
-
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name="PROJECT_ID")
     private String projectId;
 
-    @Column(name="FILE_NAME")
     private String filetName;
 
-    @Column(name="FILE_INFO")
     private String fileInfo;
 
+    private MultipartFile[] files;
 
-    public Integer getId() {
-        return id;
+
+    public MultipartFile[] getFiles() {
+
+        return files;
     }
 
     public String getProjectId() {
@@ -36,9 +30,8 @@ public class FileList {
         return fileInfo;
     }
 
-
-    public void setId(Integer id) {
-        this.id = id;
+    public void setFiles(MultipartFile[] files) {
+        this.files = files;
     }
 
     public void setProjectId(String projectId) {
@@ -52,6 +45,4 @@ public class FileList {
     public void setFileInfo(String fileInfo) {
         this.fileInfo = fileInfo;
     }
-
-
 }

@@ -1,9 +1,14 @@
 package org.cirmmp.spring.controller;
 
+
 import com.google.gson.Gson;
+import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
+import org.cirmmp.spring.model.json.JFileList;
+import org.cirmmp.spring.model.json.JProject;
+import org.cirmmp.spring.service.FileListService;
 import org.cirmmp.spring.model.UserProfile;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.UserProfileService;
@@ -44,6 +49,9 @@ public class RestCon {
 
     @Autowired
     ProjectService projectService;
+
+    @Autowired
+    FileListService fileListService;
 
     @Autowired
     UserProfileService userProfileService;
@@ -114,7 +122,12 @@ public class RestCon {
     public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("sono in createproject");
+
+        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findBySSO(ssoId);
+        Date now = new Date();
         Project project = new Project();
+        project.setCreation_date(now);
         project.setUserId(user.getId());
         project.setProjectName("Test");
         project.setSummary("TEST TEST TEST");
@@ -123,11 +136,29 @@ public class RestCon {
         return new ResponseEntity(gson.toJson(project), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/createProject", method = RequestMethod.POST,consumes = {"application/json"},produces = {"application/json"})
+    public ResponseEntity createProject(@RequestBody JProject jProject){
+        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findBySSO(ssoId);
+        Date now = new Date();
+        Project project = new Project();
+        project.setCreation_date(now);
+        project.setUserId(user.getId());
+        project.setProjectName(jProject.getProjectName());
+        project.setSummary(jProject.getSummary());
+        projectService.save(project);
+        return new ResponseEntity(project, HttpStatus.OK);
+    }
+
     @RequestMapping(value = {"/listProject", "/project"}, method=RequestMethod.GET)
     public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("sono in createproject");
+        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+
         List<Project> projects =projectService.findByUserId(user.getId());
+
+
         return new ResponseEntity(projects, HttpStatus.OK);
     }
 
@@ -249,13 +280,15 @@ public class RestCon {
 
     @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {
+
         LOG.debug("Single file upload!");
 
         if (uploadfile.isEmpty()) {
-            return new ResponseEntity("please select a file!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("please select a file!", HttpStatus.OK);
         }
 
         try {
+
             saveUploadedFiles(Arrays.asList(uploadfile));
 
         } catch (IOException e) {
@@ -298,7 +331,7 @@ public class RestCon {
 
     // 3.1.3 maps html form to a Model
     @RequestMapping(value = {"/upload/multi/model"}, method = RequestMethod.POST)
-    public ResponseEntity<?> multiUploadFileModel(@ModelAttribute UploadModel model) {
+    public ResponseEntity<?> multiUploadFileModel(@ModelAttribute JFileList model) {
 
         LOG.debug("Multiple file upload! With UploadModel");
 
@@ -309,6 +342,12 @@ public class RestCon {
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        FileList fileList = new FileList();
+        fileList.setFileInfo(model.getFileInfo());
+        fileList.setProjectId(model.getProjectId());
+        fileList.setFiletName(model.getFiletName());
+        fileListService.save(fileList);
 
         return new ResponseEntity("Successfully uploaded!", HttpStatus.OK);
 
