@@ -68,16 +68,9 @@ public class RestCon {
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname){
         String username = checkAuthentication(xusername);
-        LOG.info("sono in user");
-        LOG.info("user from HTTP header (westlife-sso):"+xusername);
+        User user = userService.findBySSO(username);
 
-        //return "Welcome, " + username;
-
-        //List<Offer> offers = offerService.findAllOffer();
-        //String jsonOffers = gson.toJson(username);
-        LOG.info("JSON OFFERS");
-        LOG.info(username);
-        return new ResponseEntity (gson.toJson(username), HttpStatus.OK);
+        return new ResponseEntity (gson.toJson(getUserDTO(user)), HttpStatus.OK);
     }
 
     public class UserDTO {
@@ -105,16 +98,20 @@ public class RestCon {
         List<UserDTO> userdtos = new ArrayList<UserDTO>();
         for (Iterator<User> it=users.iterator(); it.hasNext(); ){
           User user = it.next();
-          UserDTO udto= new UserDTO();
-          udto.FirstName = user.getFirstName();
-          udto.LastName = user.getLastName();
-          udto.Email = user.getEmail();
-          udto.Id = user.getId().toString();
-          udto.SsoId = user.getSsoId();
-          userdtos.add(udto);
+          userdtos.add(getUserDTO(user));
         }
 
         return new ResponseEntity (gson.toJson(userdtos), HttpStatus.OK);
+    }
+
+    private UserDTO getUserDTO(User user) {
+        UserDTO udto= new UserDTO();
+        udto.FirstName = user.getFirstName();
+        udto.LastName = user.getLastName();
+        udto.Email = user.getEmail();
+        udto.Id = user.getId().toString();
+        udto.SsoId = user.getSsoId();
+        return udto;
     }
 
 
