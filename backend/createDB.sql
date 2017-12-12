@@ -33,6 +33,28 @@ CREATE TABLE APP_USER_USER_PROFILE (
     CONSTRAINT FK_USER_PROFILE FOREIGN KEY (user_profile_id) REFERENCES USER_PROFILE (id)
 );
 
+/* Populate USER_PROFILE Table */
+INSERT INTO USER_PROFILE(type)
+VALUES ('USER');
+
+INSERT INTO USER_PROFILE(type)
+VALUES ('ADMIN');
+
+INSERT INTO USER_PROFILE(type)
+VALUES ('DBA');
+
+
+/* Populate one Admin User which will further create other users for the application using GUI */
+/* password: user   */
+INSERT INTO APP_USER(sso_id, password, first_name, last_name, email)
+VALUES ('user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'User','User','user@xyz.com');
+
+
+/* Populate JOIN Table */
+INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
+  SELECT user.id, profile.id FROM app_user user, user_profile profile
+  where user.sso_id='user' and profile.type='ADMIN';
+
 /* Create persistent_logins Table used to store rememberme related stuff*/
 DROP TABLE IF EXISTS persistent_logins;
 CREATE TABLE PERSISTENT_LOGINS (
@@ -49,9 +71,9 @@ create table PROJECT (
   user_id BIGINT ,
   project_name VARCHAR(255) ,
   summary VARCHAR(2000) ,
-  PRIMARY KEY (id),
-  KEY FK_USER (user_id),
-  CONSTRAINT FK_USER FOREIGN KEY (user_id) REFERENCES APP_USER (id) ON DELETE CASCADE ON UPDATE CASCADE
+  creation_date TIMESTAMP,
+  PRIMARY KEY (id)
+
 );
 
 DROP TABLE IF EXISTS filelist;
@@ -60,19 +82,7 @@ create table FILELIST (
   project_id BIGINT ,
   file_name VARCHAR(100) ,
   file_info VARCHAR(2000) ,
-  PRIMARY KEY (id),
-  KEY FK_PROJECT (project_id),
-  CONSTRAINT FK_PROJECT FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY (filelist_id)
+
 
 );
-
-/* Populate USER_PROFILE Table */
-INSERT INTO USER_PROFILE(type)
-VALUES ('USER');
-
-INSERT INTO USER_PROFILE(type)
-VALUES ('ADMIN');
-
-INSERT INTO USER_PROFILE(type)
-VALUES ('DBA');
-
