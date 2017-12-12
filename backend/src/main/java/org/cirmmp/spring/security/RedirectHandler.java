@@ -21,11 +21,10 @@ public class RedirectHandler extends SavedRequestAwareAuthenticationSuccessHandl
         if (session != null) {
             String redirectUrl = (String) session.getAttribute("url_prior_login");
             //fix ../staff/index.html is redirected to /admin../staff/index.html
-            if (redirectUrl.startsWith("..")) redirectUrl="/"+redirectUrl;
             if (redirectUrl != null) {
                 // clean this attribute from session
                 session.removeAttribute("url_prior_login");
-
+                if (redirectUrl.startsWith("..")) redirectUrl="/"+redirectUrl;
                 getRedirectStrategy().sendRedirect(request, response, redirectUrl);
             } else {
                 super.onAuthenticationSuccess(request, response, authentication);
