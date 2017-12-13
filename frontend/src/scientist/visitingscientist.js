@@ -1,8 +1,10 @@
 import {HttpClient} from 'aurelia-fetch-client';
 
+
 export class Visitingscientist {
   static inject = [HttpClient];
   constructor(httpclient) {
+
     this.httpclient=httpclient;
     this.httpclient.configure(config => {
       config
@@ -88,21 +90,14 @@ export class Visitingscientist {
     this.showDatasets=false;
     this.selectedDataset=item;
     //TODO replace URL by the one obtained from API
-    this.httpclient.fetch('http://localhost:8080/files/XufWqKau/',{
-      method:'PROPFIND',
 
-    }).then(response => response.text())
-      .then(str => (new window.DOMParser()).parseFromString(str,"text/xml"))
-      .then(data =>{
-      console.log("selectDataset() files:")
-      console.log(data);
-      //parse structure https://stackoverflow.com/questions/17604071/parse-xml-using-javascript
-      //this.files = data.getElementsByTagName("D:response");
+  }
 
-    }).catch(error => {
-      console.log("selectDataset() error");
-      console.log(error);
-    });
+  getFirstElementByTagName(fileitem,tag) {
+    //console.log(tag);
+    let elements =fileitem.getElementsByTagName(tag);
+    //console.log(elements);
+    return elements.length>0?elements[0].textContent:'';
   }
 
   deselectDataset() {

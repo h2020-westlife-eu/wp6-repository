@@ -1,6 +1,6 @@
 <template>
-  <require
-    from="./visitingscientist.css"></require>
+  <require from="./visitingscientist.css"></require>
+  <require from="../components/webdavfilepanel"></require>
       <h3>Repository Dashboard</h3>
 <p>You are logged as visiting scientist.
   You can view your visits or proposals.
@@ -50,14 +50,8 @@
       <p class="w3-green" click.trigger="deselectDataset()" title="click to show all datasets">${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
     </div>
   <h4>Files:</h4>
-  <div class="w3-card" show.bind="! showDatasets">
-    <table class="w3-table-all">
-      <tr class="w3-hover-green" repeat.for="file of files" click.trigger="selectFile(file)">
-        <td>${file.name}</td>
-        <td>${file.size}</td>
-        <td>${file.date}</td>
-      </tr>
-    </table>
+  <div show.bind="! showDatasets">
+<webdavfilepanel></webdavfilepanel>
   </div>
 </div>
   <p>&nbsp;</p>
