@@ -1,5 +1,6 @@
 import {HttpClient} from 'aurelia-fetch-client';
 import {EventAggregator} from 'aurelia-event-aggregator';
+import {Webdavresource} from './messages';
 
 export class Webdavfilepanel {
   static inject = [EventAggregator,HttpClient];
@@ -20,11 +21,12 @@ export class Webdavfilepanel {
         })
     });
     //this.webdavbase = ;
-    this.ea.subscribe(Webdavresource,msg =>this.setwebdav())
+    this.ea.subscribe(Webdavresource,msg =>this.setwebdav(msg.webdavurl))
     this.webdavpath = '/files/XufWqKau/';
   }
 
-  attached() {
+  setwebdav(webdavurl) {
+    this.webdavpath = webdavurl;
     this.httpclient.fetch(this.webdavpath, {
       method: 'PROPFIND',
       headers: {'Depth': '1'}
