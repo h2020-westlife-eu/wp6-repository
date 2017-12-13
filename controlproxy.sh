@@ -23,7 +23,6 @@ APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
 echo "Alias '/files/${PROXY}' '$1/'
 <Directory '$1'>
   DAV On
-  DavDepthInfinity on
   Require all granted
   Options +Indexes
 </Directory>" > $APACHEFILE
