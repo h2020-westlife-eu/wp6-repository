@@ -1,16 +1,17 @@
 import {HttpClient} from 'aurelia-fetch-client';
 import {Webdavresource} from "../components/messages";
+import {EventAggregator} from 'aurelia-event-aggregator';
 
 
 export class Visitingscientist {
-  static inject = [HttpClient];
-  constructor(httpclient) {
-
+  static inject = [EventAggregator,HttpClient];
+  constructor(ea,httpclient) {
+    this.ea = ea;
     this.httpclient=httpclient;
     this.httpclient.configure(config => {
       config
         .rejectErrorResponses()
-        .withBaseUrl('/restcon/')
+        .withBaseUrl('')
         .withDefaults({
           credentials: 'same-origin',
           headers: {
@@ -23,23 +24,23 @@ export class Visitingscientist {
 
     this.proposals = [];
     //demo data until backend is implemented
-    this.itemsall=[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb"},
-      {projectId:"1",date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb"},
-      {projectId:"2",date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb"},
+    this.itemsall=[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb",webdavurl:"/files/XufWqKa1/"},
+      {projectId:"1",date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb",webdavurl:"/files/XufWqKa2/"},
+      {projectId:"2",date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb",webdavurl:"/files/XufWqKa3/"},
     ]
     this.files=[{name:"sucrose.t1",size:133511,date:"18/06/2001"},
       {name:"hetcor.2d",size:525832,date:"18/06/2001"},
       {name:"menth.c13",size:132108,date:"18/06/2001"},
       {name:"noesy.fid",size:1640436,date:"18/06/2001"},
       {name:"hsqc.fid",size:2098448,date:"18/06/2001"},
-      {name:"hmbc.fid",size:2098448,date:"18/06/2001"}]
+      {name:"hmbc.fid",size:2098448,date:"18/06/2001"}];
     this.items = this.itemsall.slice()
     this.showProposals=true;
     this.showDatasets=true;
+    this.webdavurl="";
   }
-
   attached() {
-    this.httpclient.fetch("project")
+    this.httpclient.fetch("/restcon/project")
       .then(response => response.json())
       .then(data => {
           this.proposalsall = data;
@@ -53,7 +54,7 @@ export class Visitingscientist {
           console.log(error);
       });
     //not yet implemented on backend
-    this.httpclient.fetch("data")
+    this.httpclient.fetch("/restcon/data")
       .then(response => response.json())
       .then(data => {
         console.log(data);
@@ -91,15 +92,9 @@ export class Visitingscientist {
     this.showDatasets=false;
     this.selectedDataset=item;
     //TODO replace URL by the one obtained from API
-    this.ea.publish(new Webdavresource,msg =>this.setwebdav(msg.webdavurl))
+    this.webdavurl=item.webdavurl;
+    this.ea.publish(new Webdavresource(item.webdavurl))
 
-  }
-
-  getFirstElementByTagName(fileitem,tag) {
-    //console.log(tag);
-    let elements =fileitem.getElementsByTagName(tag);
-    //console.log(elements);
-    return elements.length>0?elements[0].textContent:'';
   }
 
   deselectDataset() {
