@@ -29,7 +29,11 @@
     <p><b>1.</b>Selected files: ${selectedfiles} <button class="w3-button w3-padding-tiny" click.trigger="unsubmitfiles()">change</button></p>
     <p><b>2.</b>Select Virtual Folder:</p>
     <pickerclient mode="dir"></pickerclient>
+  </div>
 
+  <div show.bind="selectedUploadDir">
+    <p><b>3.</b> Press the button to start <button class="w3-button w3-pale-green" click.trigger="copy()">upload all files.</button></p>
+    <p show.bind="copyinprogress">... upload in progress ...</p>
   </div>
 
 </template>

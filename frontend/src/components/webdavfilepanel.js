@@ -1,6 +1,6 @@
 import {HttpClient} from 'aurelia-fetch-client';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Webdavresource} from './messages';
+import {Editfile,Webdavresource} from './messages';
 
 export class Webdavfilepanel {
   static inject = [EventAggregator,HttpClient];
@@ -62,4 +62,17 @@ export class Webdavfilepanel {
       console.log(error);
     });
   }
+
+  getFirstElementByTagName(fileitem,tag) {
+    //console.log(tag);
+    let elements =fileitem.getElementsByTagName(tag);
+    //console.log(elements);
+    return elements.length>0?elements[0].textContent:'';
+  }
+
+  selectFile(file){
+    file.webdavurl = this.webdavpath+file.name;
+    this.ea.publish(new Editfile(file));
+  }
+
 }

@@ -1,18 +1,24 @@
 import {bindable} from 'aurelia-framework';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {Uploaddir} from '../components/messages';
 
 export class Pickerclient {
-
+  static inject = [EventAggregator];
   @bindable mode;
 
-  constructor() {
+  constructor(ea) {
+    this.ea=ea;
     this.href="https://portal.west-life.eu/virtualfolder/filepickercomponent.html";
     this.href2="https://portal.west-life.eu/virtualfolder/uploaddirpickercomponent.html";
     this.vfurl="";
     //receives message from popup window, fills target element with the data received
+    let th2= this
     this.receiveMessage = e => {
       console.log("received event");
       console.log(e);
-      this.vfurl=e.data;
+      th2.vfurl=e.data;
+      console.log("publishing event");
+      th2.ea.publish(new Uploaddir(th2.vfurl))
     }
     console.log("Pickerclient()");
     console.log(this.mode)

@@ -8,7 +8,7 @@ export class Userinfo {
     this.httpclient.configure(config => {
       config
         .rejectErrorResponses()
-        .withBaseUrl('/restcon/')
+        .withBaseUrl('')
         .withDefaults({
           credentials: 'same-origin',
           headers: {
@@ -22,7 +22,7 @@ export class Userinfo {
 
   attached(){
     console.log("Userinfo atached()")
-    this.httpclient.fetch("user")
+    this.httpclient.fetch("/restcon/user")
       .then(response => response.json())
       .then(data => {
         console.log(data);
