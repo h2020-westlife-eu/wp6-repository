@@ -1,4 +1,5 @@
 import {HttpClient} from 'aurelia-fetch-client';
+import {Webdavresource} from "../components/messages";
 
 
 export class Visitingscientist {
@@ -90,6 +91,7 @@ export class Visitingscientist {
     this.showDatasets=false;
     this.selectedDataset=item;
     //TODO replace URL by the one obtained from API
+    this.ea.publish(new Webdavresource,msg =>this.setwebdav(msg.webdavurl))
 
   }
 
