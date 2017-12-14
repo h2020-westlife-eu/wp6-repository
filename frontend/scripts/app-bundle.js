@@ -233,7 +233,7 @@ define('components/messages',["exports"], function (exports) {
   var Editfile = exports.Editfile = function Editfile(file) {
     _classCallCheck(this, Editfile);
 
-    this.webdavurl = file;
+    this.file = file;
   };
 
   var Uploaddir = exports.Uploaddir = function Uploaddir(webdavurl) {

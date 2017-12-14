@@ -10,7 +10,7 @@ export class Webdavresource {
 
 export class Editfile {
   constructor(file){
-    this.webdavurl = file;
+    this.file = file;
   }
 }
 
