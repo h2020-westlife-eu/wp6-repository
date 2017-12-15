@@ -1,15 +1,15 @@
 <template>
-  <require from="./visitingscientist.css"></require>
+  <require from="./dashboard.css"></require>
   <require from="../components/webdavfilepanel"></require>
   <require from="../components/fileeditor"></require>
       <h3>Repository Dashboard</h3>
 <p>You are logged as visiting scientist.
   You can view your visits or proposals.
 </p>
-  <p> Review Instruct <a href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
+  <p> Review Instruct <a target="_blank" href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
   </p>
-  <p>Submit new proposapl at
-    <a href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">Instruct Site</a>.
+  <p>Submit new proposal at
+    <a target="_blank" href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">Instruct Site</a>.
   </p>
 <div class="w3-card au-animate">
     <h4>Select<span show.bind="! showProposals">ed</span> visit/proposal to narrow datasets:</h4>
@@ -18,8 +18,10 @@
       <tr>
         <th>id</th><th>name</th><th>summary</th>
       </tr>
-      <tr repeat.for="proposal of proposals"  class="w3-hover-green" click.trigger="selectProposal(proposal)">
-        <td>${proposal.id}</td><td>${proposal.projectName}</td><td>${proposal.summary} (${proposal.datasets})</td>
+      <tr repeat.for="proposal of proposals"  class="w3-hover-green">
+
+        <td>${proposal.id}</td><td><a route-href="route: projectdetail; params.bind: {projectid:proposal.id}" click.delegate="selectProposal(proposal)" >${proposal.projectName}</a></td><td>${proposal.summary} (${proposal.datasets})</td>
+
       </tr>
       <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
     </table>

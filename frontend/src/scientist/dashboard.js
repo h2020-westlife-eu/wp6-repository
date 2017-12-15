@@ -3,7 +3,7 @@ import {Webdavresource} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 
 
-export class Visitingscientist {
+export class Dashboard {
   static inject = [EventAggregator,HttpClient];
   constructor(ea,httpclient) {
     this.ea = ea;
@@ -39,6 +39,14 @@ export class Visitingscientist {
     this.showDatasets=true;
     this.webdavurl="";
   }
+
+  activate(params, routeConfig, navigationInstruction){
+    console.log("Visitingscientist activate()")
+    console.log(params);
+    console.log(params.type);
+    console.log(params.id);
+  }
+
   attached() {
     this.httpclient.fetch("/restcon/project")
       .then(response => response.json())
@@ -76,12 +84,15 @@ export class Visitingscientist {
       this.showmorebutton = true;
     }
   }
-  selectProposal(item) {
 
+  selectProposal(item) {
     this.selectedProposal=item;
     this.showProposals=false;
-    this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.id)
+    this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.id);
+    return true;
+    //return false;
   }
+
   showAllProposals(){
     this.showProposals=true;
     this.showDatasets=true;
