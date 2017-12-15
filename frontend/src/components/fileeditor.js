@@ -46,7 +46,7 @@ export class Fileeditor {
 
       this.imageurl = file.webdavurl;
       //visualizeimg is set & image extension is detected
-      console.log("fileeditor.selectfile() visualizeimg: isimage:")
+      //console.log("fileeditor.selectfile() visualizeimg: isimage:")
       //console.log(localStorage.getItem("visualizeimg"));
       //vfstorage returns string - should convert to boolean
       this.isimage =
@@ -68,8 +68,8 @@ export class Fileeditor {
           .then(response => response.text())
           .then(data =>{
 
-              console.log("fileeditor.selectfile() loading:" + file.webdavurl);
-              console.log(data);
+              //console.log("fileeditor.selectfile() loading:" + file.webdavurl);
+              //console.log(data);
               that.codemirror.setValue(data);
               that.codemirror.refresh();
               that.filename=file.webdavurl;
