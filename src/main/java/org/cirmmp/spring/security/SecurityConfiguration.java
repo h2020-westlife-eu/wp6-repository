@@ -50,7 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/", "/list")
+        http.authorizeRequests().antMatchers( "/list")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
                 .access("hasRole('ADMIN')").antMatchers("/edit-user-*")
@@ -62,12 +62,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
                 .tokenValiditySeconds(86400)
                 .and()
-                .csrf()
-                .and()
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/google-login","/login","/static/**").permitAll();
+                .antMatchers("/**","/uploadMultipleFile","/uploadFile","/google-login","/login","/static/**").permitAll().and().csrf();//.disable();
 
     }
 
