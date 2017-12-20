@@ -32,5 +32,14 @@ public class ProjectServiceImpl implements ProjectService {
     public List<Project> findAllProject(){
         return dao.findAllProject();
     }
+
+    public void updateProject(Project project) {
+        Project entity = dao.findById(project.getId());
+        if(entity!=null){
+            entity.setProjectName(project.getProjectName());
+            entity.setSummary(project.getSummary());
+            entity.setUserId(project.getUserId());
+        }
+    }
 }
 

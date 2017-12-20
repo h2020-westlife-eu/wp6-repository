@@ -2,11 +2,8 @@ package org.cirmmp.spring.controller;
 
 
 import com.google.gson.Gson;
-import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
-import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
-import org.cirmmp.spring.model.json.JFileList;
 import org.cirmmp.spring.model.json.JProject;
 import org.cirmmp.spring.service.FileListService;
 import org.cirmmp.spring.service.ProjectService;
@@ -14,23 +11,16 @@ import org.cirmmp.spring.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/restcon")
@@ -54,6 +44,8 @@ public class RestCon {
 
     //@Autowired
     //OrdiniService ordiniService;
+
+
 
     @RequestMapping(value = { "/user" },method = RequestMethod.GET,produces = {"application/json"})
     public ResponseEntity listOrder() {
@@ -108,4 +100,5 @@ public class RestCon {
         List<Project> projects =projectService.findByUserId(user.getId());
         return new ResponseEntity(projects, HttpStatus.OK);
     }
+
 }

@@ -1,26 +1,33 @@
 package org.cirmmp.spring.controller;
 
-import org.cirmmp.spring.model.User;
-import org.cirmmp.spring.model.UserProfile;
+import org.cirmmp.spring.model.*;
+import org.cirmmp.spring.service.FileListService;
+import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.UserProfileService;
 import org.cirmmp.spring.service.UserService;
+import org.cirmmp.spring.util.FileValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -44,8 +51,33 @@ public class AppController {
 	
 	@Autowired
 	AuthenticationTrustResolver authenticationTrustResolver;
-	
-	
+
+	@Autowired
+	ProjectService projectService;
+
+	@Autowired
+	FileListService fileListService;
+
+	//@Autowired
+	//LinkService linkService;
+
+	//@Autowired
+	//OfferService offerService;
+
+	//@Autowired
+	//OrdiniService ordiniService;
+
+	@Autowired
+	FileValidator fileValidator;
+
+	@InitBinder("fileBucket")
+	protected void initBinder(WebDataBinder binder) {
+		binder.setValidator(fileValidator);
+	}
+
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(AppController.class);
 	/**
 	 * This method will list all existing users.
 	 */
@@ -223,5 +255,170 @@ public class AppController {
 	    return authenticationTrustResolver.isAnonymous(authentication);
 	}
 
+
+	@RequestMapping(value = { "/listPro" }, method = RequestMethod.GET)
+	public String listPro(ModelMap model) {
+
+		List<Project> projects = projectService.findAllProject();
+		model.addAttribute("projects", projects);
+		return "projectList";
+	}
+
+	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.GET)
+	public String addFiless(@PathVariable int projectId, ModelMap model) {
+
+        logger.info("Sono in add-file GET");
+		Project project = projectService.findById(projectId);
+		model.addAttribute("project", project);
+
+		FileBucket fileModel = new FileBucket();
+		model.addAttribute("fileBucket", fileModel);
+
+		List<FileList> files = fileListService.findByProjectId(projectId);
+		model.addAttribute("files", files);
+
+		return "managefiles";
+	}
+
+	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.POST)
+	public String uploadFile(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable int projectId) throws IOException {
+
+        logger.info("Sono in add-file POST");
+
+		if (result.hasErrors()) {
+			System.out.println("validation errors");
+			Project project = projectService.findById(projectId);
+			model.addAttribute("project", project);
+
+			List<FileList> files = fileListService.findByProjectId(projectId);
+			model.addAttribute("files", files);
+
+			return "managefiles";
+		} else {
+
+			System.out.println("Fetching file");
+
+			Project project = projectService.findById(projectId);
+			model.addAttribute("project", project);
+
+			saveFile(fileBucket, project);
+
+			return "redirect:/add-file-" + projectId;
+		}
+	}
+
+
+	@RequestMapping(value = { "/newproject" }, method = RequestMethod.GET)
+	public String newProject(ModelMap model) {
+		Project project = new Project();
+		model.addAttribute("project", project);
+		model.addAttribute("edit", false);
+		return "newproject";
+	}
+
+	/**
+	 * This method will be called on form submission, handling POST request for
+	 * saving user in database. It also validates the user input
+	 */
+	@RequestMapping(value = { "/newproject" }, method = RequestMethod.POST)
+	public String saveProject(@Valid Project project, BindingResult result,
+						   ModelMap model) {
+
+		if (result.hasErrors()) {
+			return "newproject";
+		}
+
+		/*
+		 * Preferred way to achieve uniqueness of field [sso] should be implementing custom @Unique annotation
+		 * and applying it on field [sso] of Model class [User].
+		 *
+		 * Below mentioned peace of code [if block] is to demonstrate that you can fill custom errors outside the validation
+		 * framework as well while still using internationalized messages.
+		 *
+		 */
+		//if(!userService.isUserSSOUnique(user.getId(), user.getSsoId())){
+		//	FieldError ssoError =new FieldError("user","ssoId",messageSource.getMessage("non.unique.ssoId", new String[]{user.getSsoId()}, Locale.getDefault()));
+		//	result.addError(ssoError);
+		//	return "registration";
+		//}
+
+		projectService.save(project);
+
+		model.addAttribute("project", project);
+		model.addAttribute("success", "Pooject " + project.getProjectName() + " registered successfully");
+		//return "success";
+		return "registrationsuccessproject";
+	}
+
+    @RequestMapping(value = { "/download-file-{prId}-{fileId}" }, method = RequestMethod.GET)
+    public String downloadFile(@PathVariable int prId, @PathVariable int fileId, HttpServletResponse response) throws IOException {
+        FileList document = fileListService.findById(fileId);
+        response.setContentType(document.getType());
+        response.setContentLength(document.getContent().length);
+        response.setHeader("Content-Disposition","attachment; filename=\"" + document.getFileName() +"\"");
+
+        FileCopyUtils.copy(document.getContent(), response.getOutputStream());
+
+        return "redirect:/add-file-"+prId;
+    }
+
+    @RequestMapping(value = { "/delete-file-{prId}-{fileId}" }, method = RequestMethod.GET)
+    public String deleteFile(@PathVariable int prId, @PathVariable int fileId) {
+        fileListService.deleteById(fileId);
+        return "redirect:/add-file-"+prId;
+    }
+
+
+
+    @RequestMapping(value = { "/edit-project-{Id}" }, method = RequestMethod.GET)
+    public String editProject(@PathVariable int Id, ModelMap model) {
+        Project project = projectService.findById(Id);
+        model.addAttribute("project", project);
+        model.addAttribute("edit", true);
+        return "registration";
+    }
+
+    /**
+     * This method will be called on form submission, handling POST request for
+     * updating user in database. It also validates the user input
+     */
+    @RequestMapping(value = { "/edit-project-{Id}" }, method = RequestMethod.POST)
+    public String updateUser(@Valid Project project, BindingResult result,
+                             ModelMap model, @PathVariable int Id) {
+
+        if (result.hasErrors()) {
+            return "registration";
+        }
+
+        projectService.u(project);
+
+        model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
+        return "registrationsuccess";
+    }
+
+
+    /**
+     * This method will delete an user by it's SSOID value.
+     */
+    @RequestMapping(value = { "/delete-user-{ssoId}" }, method = RequestMethod.GET)
+    public String deleteUser(@PathVariable String ssoId) {
+        userService.deleteUserBySSO(ssoId);
+        return "redirect:/list";
+    }
+
+
+	private void saveFile(FileBucket fileBucket, Project project) throws IOException {
+
+		FileList document = new FileList();
+
+		MultipartFile multipartFile = fileBucket.getFile();
+
+		document.setFileName(multipartFile.getOriginalFilename());
+		document.setFileInfo(fileBucket.getDescription());
+		document.setType(multipartFile.getContentType());
+		document.setContent(multipartFile.getBytes());
+		document.setProjectId(project.getId());
+		fileListService.save(document);
+	}
 
 }

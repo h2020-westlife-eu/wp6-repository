@@ -19,7 +19,7 @@ public class FileListServiceImpl implements FileListService {
     }
 
     @Override
-    public List<FileList> findByProjectId(String project_id) {
+    public List<FileList> findByProjectId(int project_id) {
         return dao.findByProjectId(project_id);
     }
 
@@ -30,7 +30,7 @@ public class FileListServiceImpl implements FileListService {
     }
 
     @Override
-    public void deleteById(String fillist_id) {
+    public void deleteById(int fillist_id) {
         dao.deleteById(fillist_id);
 
     }
