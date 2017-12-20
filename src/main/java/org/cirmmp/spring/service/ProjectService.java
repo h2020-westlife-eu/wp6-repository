@@ -12,7 +12,7 @@ public interface ProjectService {
 
     void save(Project project);
 
-    void deleteById(String id);
+    void deleteById(int id);
 
     List<Project> findAllProject();
     void updateProject(Project project);

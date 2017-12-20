@@ -2,8 +2,10 @@ package org.cirmmp.spring.controller;
 
 
 import com.google.gson.Gson;
+import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
+import org.cirmmp.spring.model.json.JFileList;
 import org.cirmmp.spring.model.json.JProject;
 import org.cirmmp.spring.service.FileListService;
 import org.cirmmp.spring.service.ProjectService;
@@ -14,11 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -101,4 +101,35 @@ public class RestCon {
         return new ResponseEntity(projects, HttpStatus.OK);
     }
 
+    @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
+    public ResponseEntity listFilesId(@PathVariable int projectId) {
+
+        List<FileList> files = fileListService.findByProjectId(projectId);
+        ArrayList<JFileList> nfiles = new ArrayList<>();
+        for(FileList ifile :files){
+            JFileList infiles = new JFileList();
+            infiles.setFiletName(ifile.getFileName());
+            infiles.setFileInfo(ifile.getFileInfo());
+            infiles.setProjectId(ifile.getProjectId());
+            nfiles.add(infiles);
+        }
+
+        return new ResponseEntity(nfiles, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
+    public ResponseEntity listFiles() {
+
+        List<FileList> files = fileListService.findAllFiles();
+        ArrayList<JFileList> nfiles = new ArrayList<>();
+        for(FileList ifile :files){
+            JFileList infiles = new JFileList();
+            infiles.setFiletName(ifile.getFileName());
+            infiles.setFileInfo(ifile.getFileInfo());
+            infiles.setProjectId(ifile.getProjectId());
+            nfiles.add(infiles);
+        }
+
+        return new ResponseEntity(nfiles, HttpStatus.OK);
+    }
 }

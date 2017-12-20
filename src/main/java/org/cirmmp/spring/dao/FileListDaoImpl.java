@@ -49,7 +49,7 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
 
     @Override
     public List<FileList> findAllFiles() {
-        Criteria criteria = createEntityCriteria().addOrder(Order.asc("filetName"));
+        Criteria criteria = createEntityCriteria().addOrder(Order.asc("fileName"));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
         List<FileList> fileLists = (List<FileList>) criteria.list();
         return fileLists;

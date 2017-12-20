@@ -400,10 +400,10 @@ public class AppController {
     /**
      * This method will delete an user by it's SSOID value.
      */
-    @RequestMapping(value = { "/delete-user-{ssoId}" }, method = RequestMethod.GET)
-    public String deletePRoject(@PathVariable String ssoId) {
-        userService.deleteUserBySSO(ssoId);
-        return "redirect:/list";
+    @RequestMapping(value = { "/delete-project-{Id}" }, method = RequestMethod.GET)
+    public String deleteProject(@PathVariable int Id) {
+        projectService.deleteById(Id);
+        return "redirect:/listPro";
     }
 
 

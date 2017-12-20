@@ -25,7 +25,7 @@ public class ProjectServiceImpl implements ProjectService {
         dao.save(project);
     }
 
-    public void deleteById(String id){
+    public void deleteById(int id){
         dao.deleteById(id);
     }
 

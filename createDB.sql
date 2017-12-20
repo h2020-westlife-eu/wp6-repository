@@ -85,3 +85,6 @@ create table FILELIST (
   PRIMARY KEY (id),
   CONSTRAINT filelist_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+/* Set max size for upload files on mysql database*/
+SET GLOBAL max_allowed_packet = 33554432 ;
