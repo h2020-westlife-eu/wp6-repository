@@ -392,7 +392,7 @@ public class AppController {
 
         projectService.u(project);
 
-        model.addAttribute("success", "User " + user.getFirstName() + " "+ user.getLastName() + " updated successfully");
+        model.addAttribute("success", "User " + project.getProjectName() + " updated successfully");
         return "registrationsuccess";
     }
 
