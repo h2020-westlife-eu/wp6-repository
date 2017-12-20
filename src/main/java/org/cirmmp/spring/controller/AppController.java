@@ -390,7 +390,7 @@ public class AppController {
             return "registration";
         }
 
-        projectService.u(project);
+        projectService.updateProject(project);
 
         model.addAttribute("success", "User " + project.getProjectName() + " updated successfully");
         return "registrationsuccess";
@@ -401,7 +401,7 @@ public class AppController {
      * This method will delete an user by it's SSOID value.
      */
     @RequestMapping(value = { "/delete-user-{ssoId}" }, method = RequestMethod.GET)
-    public String deleteUser(@PathVariable String ssoId) {
+    public String deletePRoject(@PathVariable String ssoId) {
         userService.deleteUserBySSO(ssoId);
         return "redirect:/list";
     }
