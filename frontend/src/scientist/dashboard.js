@@ -1,26 +1,14 @@
-import {HttpClient} from 'aurelia-fetch-client';
 import {Webdavresource} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
+import {ProjectApi} from '../components/projectapi';
 
-
+//@inject
 export class Dashboard {
-  static inject = [EventAggregator,HttpClient];
-  constructor(ea,httpclient) {
-    this.ea = ea;
-    this.httpclient=httpclient;
-    this.httpclient.configure(config => {
-      config
-        .rejectErrorResponses()
-        .withBaseUrl('')
-        .withDefaults({
-          credentials: 'same-origin',
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'Fetch'
-          }
-        })
-    });
+  static inject = [EventAggregator,ProjectApi];
 
+  constructor(ea,pa) {
+    this.ea = ea;
+    this.pa=pa;
 
     this.proposals = [];
     //demo data until backend is implemented
@@ -37,42 +25,45 @@ export class Dashboard {
     this.items = this.itemsall.slice()
     this.showProposals=true;
     this.showDatasets=true;
-    this.webdavurl="";
+    this.dataseturl="";
+    this.selectedProjectId=0;
   }
 
   activate(params, routeConfig, navigationInstruction){
     console.log("Visitingscientist activate()")
     console.log(params);
-    console.log(params.type);
-    console.log(params.id);
+    if (params && params.projectid) {
+      console.log(params.projectid);
+      this.selectedProjectId = params.projectid;
+    }
   }
 
   attached() {
-    this.httpclient.fetch("/restcon/project")
-      .then(response => response.json())
-      .then(data => {
+    //console.log("Dashboard.attached(): pa:")
+    //console.log(this.pa);
+    this.pa.getProjects().then(data => {
+          console.log("attached(), getProjects():")
+          //console.log(data);
           this.proposalsall = data;
           this.proposals = this.proposalsall.slice(0,3);
           this.proposalslength= this.proposalsall.length;
           this.showallbutton = this.proposalsall.length > 3;
           this.showmorebutton = true;
+          console.log(this.proposals);
+          console.log(this.proposalsall)
 
-      })
-      .catch(error => {
-          console.log(error);
       });
     //not yet implemented on backend
-    this.httpclient.fetch("/restcon/data")
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-          this.itemsall = data
-        })
-      .catch(error => {
-        //console.log(error);
-        console.log(error);
-      });
+    this.pa.getDatasets().then(data => {
+          //console.log("attahced(), getDatasets():")
+          //console.log(data);
+          this.itemsall = data;
+          if (this.selectedProjectId>0) {
+            this.showProposals=false;
+            this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == params.projectid);
+          }
 
+    });
   }
 
   switchMoreLessProposals() {
@@ -87,8 +78,6 @@ export class Dashboard {
 
   selectProposal(item) {
     this.selectedProposal=item;
-    this.showProposals=false;
-    this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == item.id);
     return true;
     //return false;
   }
@@ -103,7 +92,7 @@ export class Dashboard {
     this.showDatasets=false;
     this.selectedDataset=item;
     //TODO replace URL by the one obtained from API
-    this.webdavurl=item.webdavurl;
+    this.dataseturl=item.webdavurl;
     this.ea.publish(new Webdavresource(item.webdavurl))
 
   }

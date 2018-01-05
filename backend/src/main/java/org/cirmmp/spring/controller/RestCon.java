@@ -84,16 +84,6 @@ public class RestCon {
     /* return list of users registered inside repository DB*/
     @RequestMapping(value = { "/users" },method = RequestMethod.GET)
     public ResponseEntity listUsers(){
-        //String username = checkAuthentication(xusername);
-        //LOG.info("sono in user");
-        //LOG.info("user from HTTP header (westlife-sso):"+xusername);
-
-        //return "Welcome, " + username;
-
-        //List<Offer> offers = offerService.findAllOffer();
-        //String jsonOffers = gson.toJson(username);
-        //LOG.info("JSON OFFERS");
-        //LOG.info(username);
         List<User> users = userService.findAllUsers();
         List<UserDTO> userdtos = new ArrayList<UserDTO>();
         for (Iterator<User> it=users.iterator(); it.hasNext(); ){

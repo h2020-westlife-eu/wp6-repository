@@ -1,38 +1,20 @@
-import {HttpClient} from 'aurelia-fetch-client';
+import {ProjectApi} from './projectapi';
 
 export class Userinfo {
-  static inject = [HttpClient];
+  static inject = [ProjectApi];
 
-  constructor(httpclient) {
-    this.httpclient = httpclient;
-    this.httpclient.configure(config => {
-      config
-        .rejectErrorResponses()
-        .withBaseUrl('')
-        .withDefaults({
-          credentials: 'same-origin',
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'Fetch'
-          }
-        })
-    })
+  constructor(projectapi) {
+    this.pa = projectapi;
     this.showuserinfo=false;
   }
 
   attached(){
-    console.log("Userinfo atached()")
-    this.httpclient.fetch("/restcon/user")
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
+    //console.log("Userinfo atached()")
+    //console.log(this.pa);
+    this.pa.getUserInfo().then(data => {
+        //console.log(data);
         this.userinfo=data;
         this.showuserinfo=true;
       })
-      .catch(error => {
-        //console.log(error);
-        console.log(error);
-//          alert("Sorry, error:"+error.statusCode+" "+error.message);
-      });
   }
 }
