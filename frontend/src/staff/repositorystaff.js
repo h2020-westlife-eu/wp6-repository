@@ -1,8 +1,8 @@
-import {HttpClient} from 'aurelia-http-client';
+import {ProjectApi} from '../components/projectapi';
 
 export class Repositorystaff {
-  static inject = [HttpClient];
-  constructor(httpclient) {
+  static inject = [ProjectApi];
+  constructor(pa) {
     console.log("Repositorystaff()");
     this.visitors = [];//"Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
     this.items=[];
@@ -11,23 +11,12 @@ export class Repositorystaff {
     this.uploaddir="";
     this.selectinguser=true;
     this.selectedvisitor="";
-    this.client =httpclient;
-    this.serviceurl="/admin/restcon/users"
+    this.pa = pa;
   }
 
   attached() {
-    this.client.get(this.serviceurl)
-      .then(data => {
-        //console.log(data);
-        if (data.response) {
-          this.visitors = JSON.parse(data.response);
-        }
-      })
-      .catch(error => {
-        //console.log(error);
-        console.log(error);
-        //alert("Sorry, error:"+error.statusCode+" "+error.message);
-      });
+    this.pa.getUsers()
+      .then(data => { this.visitors = data });
   }
 
   selectitem(item) {
