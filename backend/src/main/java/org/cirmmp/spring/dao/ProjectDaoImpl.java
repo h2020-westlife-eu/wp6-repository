@@ -1,9 +1,7 @@
 package org.cirmmp.spring.dao;
 
 import org.cirmmp.spring.model.Project;
-import org.cirmmp.spring.model.User;
 import org.hibernate.Criteria;
-import org.hibernate.Hibernate;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -37,9 +35,9 @@ public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements Pro
         persist(project);
     }
 
-    public void deleteById(String id){
+    public void deleteById(int id){
         Criteria crit = createEntityCriteria();
-        crit.add(Restrictions.eq("Id", id));
+        crit.add(Restrictions.eq("id", id));
          Project project = (Project)crit.uniqueResult();
         delete(project);
     }

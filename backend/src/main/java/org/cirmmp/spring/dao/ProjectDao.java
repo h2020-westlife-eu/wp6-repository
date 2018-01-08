@@ -13,7 +13,7 @@ public interface ProjectDao {
 
     void save(Project project);
 
-    void deleteById(String id);
+    void deleteById(int id);
 
     List<Project> findAllProject();
 }

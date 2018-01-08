@@ -25,12 +25,21 @@ public class ProjectServiceImpl implements ProjectService {
         dao.save(project);
     }
 
-    public void deleteById(String id){
+    public void deleteById(int id){
         dao.deleteById(id);
     }
 
     public List<Project> findAllProject(){
         return dao.findAllProject();
+    }
+
+    public void updateProject(Project project) {
+        Project entity = dao.findById(project.getId());
+        if(entity!=null){
+            entity.setProjectName(project.getProjectName());
+            entity.setSummary(project.getSummary());
+            entity.setUserId(project.getUserId());
+        }
     }
 }
 

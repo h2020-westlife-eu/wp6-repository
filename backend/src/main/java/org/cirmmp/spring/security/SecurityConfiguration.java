@@ -11,18 +11,14 @@ import org.springframework.security.authentication.AuthenticationTrustResolverIm
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.web.context.request.RequestContextListener;
 
 @Configuration
 @EnableWebSecurity
@@ -64,7 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/", "/list")
+        http.authorizeRequests().antMatchers( "/list")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
                 .access("hasRole('ADMIN')").antMatchers("/edit-user-*")
@@ -77,14 +73,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
                 .tokenValiditySeconds(86400)
                 .and()
-                .csrf()
-                .and()
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/google-login","/login","/static/**").permitAll()
+                .antMatchers("/login","/static/**").permitAll().expressionHandler()
+                .and().exceptionHandling().authenticationEntryPoint(alwaysSendUnauthorized401AuthenticationEntryPoint)
+                .and().csrf();//.disable();
+
                 //suggested to throw HTTP 401, but doesn't work
-                .and().exceptionHandling().authenticationEntryPoint(alwaysSendUnauthorized401AuthenticationEntryPoint);
+
 
         // OpenID configuration
                 /*.and()

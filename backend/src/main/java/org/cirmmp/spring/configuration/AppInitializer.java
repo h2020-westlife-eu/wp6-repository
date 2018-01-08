@@ -3,6 +3,9 @@ package org.cirmmp.spring.configuration;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletRegistration;
+
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
 	@Override
@@ -20,4 +23,23 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 		return new String[] { "/" };
 	}
 
+	@Override
+	protected void customizeRegistration(ServletRegistration.Dynamic registration) {
+		registration.setMultipartConfig(getMultipartConfigElement());
+	}
+
+	private MultipartConfigElement getMultipartConfigElement(){
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(LOCATION, MAX_FILE_SIZE, MAX_REQUEST_SIZE, FILE_SIZE_THRESHOLD);
+		return multipartConfigElement;
+	}
+
+	/*Set these variables for your project needs*/
+
+	private static final String LOCATION = "";
+
+	private static final long MAX_FILE_SIZE = 1024 * 1024 * 100;//100MB
+
+	private static final long MAX_REQUEST_SIZE = 1024 * 1024 * 200;//200MB
+
+	private static final int FILE_SIZE_THRESHOLD = 0;
 }
