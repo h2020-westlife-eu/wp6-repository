@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/restcon")
@@ -264,8 +262,9 @@ public class RestCon {
         }
     }
 
-    @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {
+/*    @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {*/
+
     @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
     public ResponseEntity listFilesId(@PathVariable int projectId) {
 
@@ -315,7 +314,7 @@ public class RestCon {
         FileList fileList = new FileList();
         fileList.setFileInfo(model.getFileInfo());
         fileList.setProjectId(model.getProjectId());
-        fileList.setFiletName(model.getFiletName());
+        fileList.setFileName(model.getFileName());
         fileListService.save(fileList);
 
         return new ResponseEntity("Successfully uploaded!", HttpStatus.OK);
