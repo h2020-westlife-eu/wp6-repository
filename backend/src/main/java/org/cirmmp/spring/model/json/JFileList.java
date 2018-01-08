@@ -22,7 +22,7 @@ public class JFileList {
         return projectId;
     }
 
-    public String getFiletName() {
+    public String getFileName() {
         return fileName;
     }
 

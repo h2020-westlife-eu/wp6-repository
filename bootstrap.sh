@@ -5,6 +5,9 @@
 # WP6REPSRC is directory where sources of D6.2 are available, if not set,
 if [ -z ${WP6REPSRC+x} ]; then
   export WP6REPSRC=/vagrant;
+else
+  cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
+  cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
 fi
 
 ########################################################################
@@ -68,8 +71,10 @@ SP_ENDPOINT=http://localhost:8080/mellon
 
 # skip broken on cernvm4
 yum -y install wget mod_auth_mellon --skip-broken
+# copy existing configuration
+
+# generate the configuration if not exists, note that sp-metadata.xml needs to be sent to idp-metadata provider
 if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
-# generate the configuration, note that sp-metadata.xml needs to be sent to idp-metadata provider
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
   chmod +x mellon_create_metadata.sh
@@ -82,6 +87,7 @@ if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
   wget https://auth.west-life.eu/proxy/saml2/idp/metadata.php
   mv metadata.php /${WP6REPSRC}/idp-metadata.xml
 fi
+# else the configuration exists (e.g. in /vagrant), it is reused
 
 # copy the mellon configuration to /etc/httpd/mellon
 echo "Copying mellon configuration from /vagrant";
