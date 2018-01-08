@@ -5,7 +5,7 @@ export class Repositorystaff {
   constructor(pa) {
     console.log("Repositorystaff()");
     this.visitors = [];//"Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
-    this.items=[];
+    this.datasets=[];
     this.filestoupload=[];
     this.uploadfiles=[];
     this.uploaddir="";
@@ -31,8 +31,8 @@ export class Repositorystaff {
     this.selectinguser=true;
   }
   deleteitem(item){
-    let indexremoved = this.items.indexOf(item);
-    if (indexremoved >=0 ) this.items.splice(indexremoved,1);
+    let indexremoved = this.datasets.indexOf(item);
+    if (indexremoved >=0 ) this.datasets.splice(indexremoved,1);
   }
   
     selectItemToUpload(item) {
@@ -76,7 +76,7 @@ export class Repositorystaff {
 
   submitUpload(){
     //TODO fake implementation
-    this.items.unshift(...this.filestoupload);
+    this.datasets.unshift(...this.filestoupload);
     this.filestoupload=[];
   }
 

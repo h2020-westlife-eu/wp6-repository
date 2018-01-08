@@ -76,19 +76,14 @@ create table PROJECT (
 
 );
 
-DROP TABLE IF EXISTS filelist;
-create table FILELIST (
+create table DATASET (
   id BIGINT NOT NULL AUTO_INCREMENT,
   project_id BIGINT ,
   type VARCHAR(100),
-  file_name VARCHAR(100) ,
-  file_info VARCHAR(2000) ,
-  PRIMARY KEY (id)
-
-
-  content LONGBLOB,
+  name VARCHAR(100) ,
+  info VARCHAR(2000) ,
   PRIMARY KEY (id),
-  CONSTRAINT filelist_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
+  CONSTRAINT dataset_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 /* Set max size for upload files on mysql database*/

@@ -9,7 +9,7 @@ export class Repositorytovf {
     console.log("Repositorytovf()");
 
 
-    this.items=[{name:"sucrose.t1",size:133511,date:"18/06/2001"},
+    this.datasets=[{name:"sucrose.t1",size:133511,date:"18/06/2001"},
       {name:"hetcor.2d",size:525832,date:"18/06/2001"},
       {name:"menth.c13",size:132108,date:"18/06/2001"},
       {name:"noesy.fid",size:1640436,date:"18/06/2001"},
@@ -46,8 +46,8 @@ export class Repositorytovf {
     this.selectingfiles=true;
   }
   deleteitem(item){
-    let indexremoved = this.items.indexOf(item);
-    if (indexremoved >=0 ) this.items.splice(indexremoved,1);
+    let indexremoved = this.datasets.indexOf(item);
+    if (indexremoved >=0 ) this.datasets.splice(indexremoved,1);
   }
 
   selectItemToUpload(item) {
@@ -91,7 +91,7 @@ export class Repositorytovf {
 
   submitUpload(){
     //TODO fake implementation
-    this.items.unshift(...this.filestoupload);
+    this.datasets.unshift(...this.filestoupload);
     this.filestoupload=[];
   }
   copy(){

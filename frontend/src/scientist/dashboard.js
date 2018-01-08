@@ -11,18 +11,15 @@ export class Dashboard {
     this.pa=pa;
 
     this.proposals = [];
-    //demo data until backend is implemented
-    this.itemsall=[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb",webdavurl:"/files/XufWqKa1/"},
+
+    this.alldatasets=[];
+    //demo data
+    /*[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb",webdavurl:"/files/XufWqKa1/"},
       {projectId:"1",date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb",webdavurl:"/files/XufWqKa2/"},
       {projectId:"2",date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb",webdavurl:"/files/XufWqKa3/"},
-    ]
-    this.files=[{name:"sucrose.t1",size:133511,date:"18/06/2001"},
-      {name:"hetcor.2d",size:525832,date:"18/06/2001"},
-      {name:"menth.c13",size:132108,date:"18/06/2001"},
-      {name:"noesy.fid",size:1640436,date:"18/06/2001"},
-      {name:"hsqc.fid",size:2098448,date:"18/06/2001"},
-      {name:"hmbc.fid",size:2098448,date:"18/06/2001"}];
-    this.items = this.itemsall.slice()
+    ];*/
+    this.files=[];
+    this.datasets = this.alldatasets.slice();
     this.showProposals=true;
     this.showDatasets=true;
     this.dataseturl="";
@@ -57,10 +54,10 @@ export class Dashboard {
     this.pa.getDatasets().then(data => {
           //console.log("attahced(), getDatasets():")
           //console.log(data);
-          this.itemsall = data;
+          this.alldatasets = data;
           if (this.selectedProjectId>0) {
             this.showProposals=false;
-            this.items = this.itemsall.filter(filtereditem => filtereditem.projectId == params.projectid);
+            this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == params.projectid);
           }
 
     });
@@ -85,7 +82,7 @@ export class Dashboard {
   showAllProposals(){
     this.showProposals=true;
     this.showDatasets=true;
-    this.items = this.itemsall.slice()
+    this.datasets = this.alldatasets.slice()
   }
 
   selectDataset(item) {
