@@ -4,7 +4,6 @@ package org.cirmmp.spring.controller;
 import com.google.gson.Gson;
 import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
-import org.cirmmp.spring.model.UploadModel;
 import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.model.json.JFileList;
 import org.cirmmp.spring.model.json.JProject;
@@ -17,7 +16,6 @@ import org.cirmmp.spring.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -25,11 +23,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -266,53 +266,36 @@ public class RestCon {
 
     @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {
+    @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
+    public ResponseEntity listFilesId(@PathVariable int projectId) {
 
-        LOG.debug("Single file upload!");
-
-        if (uploadfile.isEmpty()) {
-            return new ResponseEntity("please select a file!", HttpStatus.OK);
+        List<FileList> files = fileListService.findByProjectId(projectId);
+        ArrayList<JFileList> nfiles = new ArrayList<>();
+        for(FileList ifile :files){
+            JFileList infiles = new JFileList();
+            infiles.setFiletName(ifile.getFileName());
+            infiles.setFileInfo(ifile.getFileInfo());
+            infiles.setProjectId(ifile.getProjectId());
+            nfiles.add(infiles);
         }
 
-        try {
-
-            saveUploadedFiles(Arrays.asList(uploadfile));
-
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity("Successfully uploaded - " +
-                uploadfile.getOriginalFilename(), new HttpHeaders(), HttpStatus.OK);
-
+        return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
-    // 3.1.2 Multiple file upload
-    @RequestMapping(value = {"/upload/multi"}, method = RequestMethod.POST)
-    public ResponseEntity<?> uploadFileMulti(
-            @RequestParam("extraField") String extraField,
-            @RequestParam("files") MultipartFile[] uploadfiles) {
+    @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
+    public ResponseEntity listFiles() {
 
-        LOG.debug("Multiple file upload!");
-
-        // Get file name
-        String uploadedFileName = Arrays.stream(uploadfiles).map(x -> x.getOriginalFilename())
-                .filter(x -> !StringUtils.isEmpty(x)).collect(Collectors.joining(" , "));
-
-        if (StringUtils.isEmpty(uploadedFileName)) {
-            return new ResponseEntity("please select a file!", HttpStatus.OK);
+        List<FileList> files = fileListService.findAllFiles();
+        ArrayList<JFileList> nfiles = new ArrayList<>();
+        for(FileList ifile :files){
+            JFileList infiles = new JFileList();
+            infiles.setFiletName(ifile.getFileName());
+            infiles.setFileInfo(ifile.getFileInfo());
+            infiles.setProjectId(ifile.getProjectId());
+            nfiles.add(infiles);
         }
 
-        try {
-
-            saveUploadedFiles(Arrays.asList(uploadfiles));
-
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        return new ResponseEntity("Successfully uploaded - "
-                + uploadedFileName, HttpStatus.OK);
-
+        return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
     // 3.1.3 maps html form to a Model

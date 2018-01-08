@@ -80,9 +80,16 @@ DROP TABLE IF EXISTS filelist;
 create table FILELIST (
   id BIGINT NOT NULL AUTO_INCREMENT,
   project_id BIGINT ,
+  type VARCHAR(100),
   file_name VARCHAR(100) ,
   file_info VARCHAR(2000) ,
   PRIMARY KEY (id)
 
 
+  content LONGBLOB,
+  PRIMARY KEY (id),
+  CONSTRAINT filelist_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+/* Set max size for upload files on mysql database*/
+SET GLOBAL max_allowed_packet = 33554432 ;

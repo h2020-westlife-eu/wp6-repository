@@ -1,9 +1,9 @@
 package org.cirmmp.spring.model;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import javax.persistence.*;
 
+@Entity
+@Table(name="FILELIST")
 public class FileList {
 
     @Id
@@ -11,25 +11,53 @@ public class FileList {
     private Integer id;
 
     @Column(name="PROJECT_ID")
-    private String projectId;
+    private int projectId;
 
     @Column(name="FILE_NAME")
-    private String filetName;
+    private String fileName;
 
     @Column(name="FILE_INFO")
     private String fileInfo;
+
+    @Column(name="type", length=100)
+    private String type;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name="content", nullable=true)
+    private byte[] content;
+
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+
+        this.type = type;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+
+
+    public byte[] getContent() {
+        return content;
+    }
 
 
     public Integer getId() {
         return id;
     }
 
-    public String getProjectId() {
+    public int getProjectId() {
         return projectId;
     }
 
-    public String getFiletName() {
-        return filetName;
+    public String getFileName() {
+        return fileName;
     }
 
     public String getFileInfo() {
@@ -41,12 +69,12 @@ public class FileList {
         this.id = id;
     }
 
-    public void setProjectId(String projectId) {
+    public void setProjectId(int projectId) {
         this.projectId = projectId;
     }
 
-    public void setFiletName(String filetName) {
-        this.filetName = filetName;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public void setFileInfo(String fileInfo) {

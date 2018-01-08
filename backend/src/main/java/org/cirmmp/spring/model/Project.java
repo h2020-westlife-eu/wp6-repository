@@ -1,13 +1,7 @@
 package org.cirmmp.spring.model;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.format.annotation.DateTimeFormat;
-
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name="PROJECT")
@@ -15,7 +9,7 @@ public class Project {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer Id;
+    private Integer id;
 
 
     @Column(name="USER_ID")
@@ -32,14 +26,20 @@ public class Project {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creation_date;
 
+    //@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    //private Set<FileList> fileDocuments = new HashSet<FileList>();
+
+
+
     public void setCreation_date(Date creation_date) {
+
         this.creation_date = creation_date;
     }
-
     public Date getCreation_date() {
 
         return creation_date;
     }
+
 
 
     public void setUserId(Integer userId) {
@@ -56,12 +56,12 @@ public class Project {
 
 
     public void setId(Integer id) {
-        Id = id;
+        id = id;
     }
 
     public Integer getId() {
 
-        return Id;
+        return id;
     }
 
     public Integer getUserId() {

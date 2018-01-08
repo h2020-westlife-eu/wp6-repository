@@ -1,7 +1,6 @@
 package org.cirmmp.spring.dao;
 
 import org.cirmmp.spring.model.FileList;
-import org.cirmmp.spring.model.Project;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -26,8 +25,8 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
     }
 
     @Override
-    public List<FileList> findByProjectId(String projectId) {
-        logger.info("USER_ID : {}", projectId);
+    public List<FileList> findByProjectId(int projectId) {
+        logger.info("PROJECT_ID : {}", projectId);
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("projectId", projectId));
         List<FileList> fileList = (List<FileList>)crit.list();
@@ -40,9 +39,9 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
     }
 
     @Override
-    public void deleteById(String Id) {
+    public void deleteById(int Id) {
         Criteria crit = createEntityCriteria();
-        crit.add(Restrictions.eq("Id", Id));
+        crit.add(Restrictions.eq("id", Id));
         FileList fileList = (FileList) crit.uniqueResult();
         delete(fileList);
 
@@ -50,7 +49,7 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
 
     @Override
     public List<FileList> findAllFiles() {
-        Criteria criteria = createEntityCriteria().addOrder(Order.asc("filetName"));
+        Criteria criteria = createEntityCriteria().addOrder(Order.asc("fileName"));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);//To avoid duplicates.
         List<FileList> fileLists = (List<FileList>) criteria.list();
         return fileLists;

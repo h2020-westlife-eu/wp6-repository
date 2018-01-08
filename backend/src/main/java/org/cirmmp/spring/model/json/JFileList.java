@@ -4,9 +4,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class JFileList {
 
-    private String projectId;
+    private int projectId;
 
-    private String filetName;
+    private String fileName;
 
     private String fileInfo;
 
@@ -18,12 +18,12 @@ public class JFileList {
         return files;
     }
 
-    public String getProjectId() {
+    public int getProjectId() {
         return projectId;
     }
 
     public String getFiletName() {
-        return filetName;
+        return fileName;
     }
 
     public String getFileInfo() {
@@ -34,12 +34,12 @@ public class JFileList {
         this.files = files;
     }
 
-    public void setProjectId(String projectId) {
+    public void setProjectId(int projectId) {
         this.projectId = projectId;
     }
 
     public void setFiletName(String filetName) {
-        this.filetName = filetName;
+        this.fileName = filetName;
     }
 
     public void setFileInfo(String fileInfo) {
