@@ -19,10 +19,10 @@ export class ProjectApi {
         })
     });
     //needs SSO credentials
-    let apiurl = "/restcon"
-    ;
+    let apiurl = "/restcon";
     //test fronted calls test backend uri - which has test authentication - test credentials added
-    if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
+    if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
+    else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
     this.projecturl=apiurl+"/project";
     this.dataurl=apiurl+"/data";
     this.userinfourl=apiurl+"/user";
