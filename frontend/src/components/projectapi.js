@@ -24,7 +24,7 @@ export class ProjectApi {
     if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
     else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
     this.projecturl=apiurl+"/project";
-    this.dataurl=apiurl+"/data";
+    this.dataurl=apiurl+"/dataset";
     this.userinfourl=apiurl+"/user";
     //needs admin/staff credentials
     this.usersurl="/admin/restcon/users";

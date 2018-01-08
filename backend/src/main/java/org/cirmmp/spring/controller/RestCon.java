@@ -265,6 +265,27 @@ public class RestCon {
 /*    @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {*/
 
+//handles /dataset and /dataset/123, joins both cases in one method
+   @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
+   public ResponseEntity listAllDataset(@PathVariable Optional<Integer> projectId){
+       if (projectId.isPresent()){
+           //with projectid
+           return new ResponseEntity("[{\"projectId\":\""+projectId.get()+"\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
+                   "      {\"projectId\":\""+projectId.get()+"\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"}\n" +
+                   "    ]\n", HttpStatus.OK);
+       }else{
+           //without projectid - list all
+           return new ResponseEntity("[{\"projectId\":\"1\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
+                   "      {\"projectId\":\"1\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"},\n" +
+                   "      {\"projectId\":\"2\",\"date\":\"08/09/2017\",\"summary\":\"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).\", \"info\":\"2.1 Mb\",\"webdavurl\":\"/files/XufWqKa3/\"}\n" +
+                   "    ]\n", HttpStatus.OK);
+       }
+   }
+
+
+//The /filelist and /filelist-{id} violates HATEOAS - it should be /filelis and /filelist/{id}
+
+/*
     @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
     public ResponseEntity listFilesId(@PathVariable int projectId) {
 
@@ -295,7 +316,7 @@ public class RestCon {
         }
 
         return new ResponseEntity(nfiles, HttpStatus.OK);
-    }
+    }*/
 
     // 3.1.3 maps html form to a Model
     @RequestMapping(value = {"/upload/multi/model"}, method = RequestMethod.POST)
