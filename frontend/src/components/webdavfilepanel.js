@@ -72,6 +72,7 @@ export class Webdavfilepanel {
 
   selectFile(file){
     file.webdavurl = this.webdavpath+file.name;
+    //if (file.size < 4096)
     this.ea.publish(new Editfile(file));
   }
 
