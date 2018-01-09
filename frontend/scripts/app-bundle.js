@@ -700,14 +700,13 @@ define('scientist/dashboard',['exports', '../components/messages', 'aurelia-even
 
       this.proposals = [];
 
-      this.alldatasets = [];
-
       this.files = [];
-      this.datasets = this.alldatasets.slice();
+      this.datasets = [];
       this.showProposals = true;
       this.showDatasets = true;
       this.dataseturl = "";
       this.selectedProjectId = 0;
+      this.selectedProposal = {};
     }
 
     Dashboard.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
@@ -725,45 +724,46 @@ define('scientist/dashboard',['exports', '../components/messages', 'aurelia-even
       this.pa.getProjects().then(function (data) {
         console.log("attached(), getProjects():");
 
-        _this.proposalsall = data;
-        _this.proposals = _this.proposalsall.slice(0, 3);
-        _this.proposalslength = _this.proposalsall.length;
-        _this.showallbutton = _this.proposalsall.length > 3;
-        _this.showmorebutton = true;
-        console.log(_this.proposals);
-        console.log(_this.proposalsall);
+        _this.proposals = data;
+        if (_this.selectedProjectId > 0) {
+          console.log(_this.proposals);
+          console.log(_this.selectedProjectId);
+          _this.selectedProposals = _this.proposals.filter(function (filtereditem) {
+            return filtereditem.id == _this.selectedProjectId;
+          });
+          if (_this.selectedProposals.length > 0) _this.selectedProposal = _this.selectedProposals[0];
+          console.log(_this.selectedProposal);
+          _this.showProposals = false;
+        }
       });
 
       this.pa.getDatasets().then(function (data) {
-        _this.alldatasets = data;
+        _this.datasets = data;
         if (_this.selectedProjectId > 0) {
-          _this.showProposals = false;
-          _this.datasets = _this.alldatasets.filter(function (filtereditem) {
-            return filtereditem.projectId == params.projectid;
-          });
-        } else _this.datasets = _this.alldatasets.slice();
-      });
-    };
 
-    Dashboard.prototype.switchMoreLessProposals = function switchMoreLessProposals() {
-      if (this.showmorebutton) {
-        this.proposals = this.proposalsall;
-        this.showmorebutton = false;
-      } else {
-        this.proposals = this.proposalsall.slice(0, 3);
-        this.showmorebutton = true;
-      }
+          _this.datasets = _this.datasets.filter(function (filtereditem) {
+            return filtereditem.projectId == _this.selectedProjectId;
+          });
+        }
+      });
     };
 
     Dashboard.prototype.selectProposal = function selectProposal(item) {
       this.selectedProposal = item;
+      this.alldatasets = this.datasets.slice();
+      console.log("selectProposal()");
+      console.log(item.id);
+      console.log(this.datasets);
+      this.datasets = this.alldatasets.filter(function (filtereditem) {
+        return filtereditem.projectid === item.id;
+      });
+      this.showProposals = false;
       return true;
     };
 
-    Dashboard.prototype.showAllProposals = function showAllProposals() {
+    Dashboard.prototype.deselectProposal = function deselectProposal() {
+      this.datasets = this.alldatasets;
       this.showProposals = true;
-      this.showDatasets = true;
-      this.datasets = this.alldatasets.slice();
     };
 
     Dashboard.prototype.selectDataset = function selectDataset(item) {
@@ -4144,7 +4144,7 @@ define('text!components/webdavfilepanel.html', ['module'], function(module) { mo
 define('text!login/login.html', ['module'], function(module) { module.exports = "<template>\n      <h3>Login</h3>\n      <p>\n        You can login as\n        <a href=\"#visitingscientist\" class=\"w3-button\">Visiting Scientist</a> to access files related to an experiment.\n      </p>\n      <p>\n        You can login as\n        <a href=\"#repositorystaff\" class=\"w3-button\">Support Staff</a> to access, upload files from workstation to the facility repository.\n      </p>\n</template>\n"; });
 define('text!pickerclient/pickerclient.html', ['module'], function(module) { module.exports = "<template mode=\"file\">\n  <div show.bind=\"filepicker\">\n  <button class=\"w3-button\" click.trigger=\"openfilewindow()\">Select File from West-Life Virtual Folder</button>\n  </div>\n  <div show.bind=\"!filepicker\">\n    <button class=\"w3-button\" click.trigger=\"opendirwindow()\">Select Dir from West-Life Virtual Folder</button>\n  </div>\n  <p>Selected Resource URL:<a href.bind=\"vfurl\">${vfurl}</a></p>\n</template>\n"; });
 define('text!repository/app.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../w3.css\"></require>\n  <require from=\"../components/heads.css\"></require>\n  <require from=\"../components/sharedheader.html\"></require>\n  <require from=\"../components/sharedfooter.html\"></require>\n  <require from=\"../components/navigation.html\"></require>\n  <require from=\"../components/userinfo\"></require>\n  <sharedheader></sharedheader>\n\n      <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n\n        <navigation router.bind=\"router\"></navigation>\n        <userinfo></userinfo>\n\n        <router-view></router-view>\n\n        <sharedfooter></sharedfooter>\n\n      </div>\n</template>\n"; });
-define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n      <h3>Repository Dashboard</h3>\n<p>You are logged as visiting scientist.\n  You can view your datasets available after your visit.\n  To review Visit Proposal, go to Instruct <a target=\"_blank\" href=\"https://www.structuralbiology.eu/dashboard?t=instruct\" class=\"w3-button\">Dashboard</a>\n  To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\" class=\"w3-button\">Submission</a>.\n  </p>\n</p>\n<div class=\"w3-card au-animate\">\n    <h4>Select<span show.bind=\"! showProposals\">ed</span> visit/proposal to narrow datasets:</h4>\n    <div show.bind=\"showProposals\" class=\"au-animate\">\n    <table class=\"w3-table-all\">\n      <tr>\n        <th>id</th><th>name</th><th>summary</th>\n      </tr>\n      <tr repeat.for=\"proposal of proposals\"  class=\"w3-hover-green\">\n\n        <td>${proposal.id}</td><td><a route-href=\"route: projectdetail; params.bind: {projectid:proposal.id}\" click.delegate=\"selectProposal(proposal)\" >${proposal.projectName}</a></td><td>${proposal.summary} (${proposal.datasets})</td>\n\n      </tr>\n      <tr show.bind=\"showallbutton\" class=\"w3-hover-green\" click.trigger=\"switchMoreLessProposals()\"><td colspan=\"2\"><span show.bind=\"showmorebutton\">.. see more proposals (${proposalslength})</span><span show.bind=\"!showmorebutton\"> .. see less proposals</span></td> </tr>\n    </table>\n      </div>\n    <div show.bind=\"! showProposals\" class=\"au-animate\">\n      <p class=\"w3-green\" click.trigger=\"showAllProposals()\" title=\"click to show all proposal\">${selectedProposal.projectId} ${selectedProposal.summary}</p>\n    </div>\n\n  <h4>Select<span show.bind=\"! showDatasets\">ed</span> dataset to narrow files:</h4>\n  <div show.bind=\"showDatasets\" class=\"au-animate\">\n  <table class=\"w3-table-all\">\n    <thead>\n    <tr>\n      <th>date</th><th>Summary</th><th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr class=\"w3-hover-green\" repeat.for=\"item of datasets\" click.trigger=\"selectDataset(item)\">\n      <td>${item.date}</td>\n      <td>${item.summary}</td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n    </tr>\n    <tr  class=\"w3-hover-green\"><td colspan=\"3\"><a href=\"#datasets\">... see all datasets ...</a></td> </tr>\n    </tbody>\n  </table>\n  </div>\n    <div show.bind=\"! showDatasets\" class=\"au-animate\">\n      <p class=\"w3-green\" click.trigger=\"deselectDataset()\" title=\"click to show all datasets\">${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>\n    </div>\n  <h4>Files:</h4>\n  <div show.bind=\"! showDatasets\" class=\"w3-half\">\n<webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"! showDatasets\" class=\"w3-half\">\n    <fileeditor></fileeditor>\n  </div>\n</div>\n  <p>&nbsp;</p>\n</template>\n"; });
+define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n      <h3>Repository Dashboard</h3>\n<p>You are logged as visiting scientist.\n  You can view your datasets available after your visit.\n  To review Visit Proposal, go to Instruct <a target=\"_blank\" href=\"https://www.structuralbiology.eu/dashboard?t=instruct\" class=\"w3-button\">Dashboard</a>\n  To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\" class=\"w3-button\">Submission</a>.\n  </p>\n</p>\n<div class=\"w3-card au-animate\">\n    <h4>Select<span show.bind=\"! showProposals\">ed</span> visit/proposal:</h4>\n    <div show.bind=\"showProposals\" class=\"au-animate\">\n    <table class=\"w3-table-all\">\n      <tr>\n        <th>id</th><th>name</th><th>summary</th>\n      </tr>\n      <tr repeat.for=\"proposal of proposals\"  class=\"w3-hover-green\">\n        <td>${proposal.id}</td><td><a route-href=\"route: projectdetail; params.bind: {projectid:proposal.id}\" click.delegate=\"selectProposal(proposal)\" >${proposal.projectName}</a></td><td>${proposal.summary} (${proposal.datasets})</td>\n      </tr>\n    </table>\n      </div>\n    <div show.bind=\"! showProposals\" class=\"au-animate\">\n      <p class=\"w3-green\" click.trigger=\"deselectProposal()\" title=\"click to show all proposal\">${selectedProposal.id} ${selectedProposal.summary}</p>\n    </div>\n\n  <h4>Select<span show.bind=\"! showDatasets\">ed</span> dataset to narrow files:</h4>\n  <div show.bind=\"showDatasets\" class=\"au-animate\">\n  <table class=\"w3-table-all\">\n    <thead>\n    <tr>\n      <th>date</th><th>Summary</th><th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr class=\"w3-hover-green\" repeat.for=\"item of datasets\" click.trigger=\"selectDataset(item)\">\n      <td>${item.date}</td>\n      <td>${item.summary}</td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n    </tr>\n    </tbody>\n  </table>\n  </div>\n    <div show.bind=\"! showDatasets\" class=\"au-animate\">\n      <p class=\"w3-green\" click.trigger=\"deselectDataset()\" title=\"click to show all datasets\">${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>\n    </div>\n  <h4>Files:</h4>\n  <div show.bind=\"! showDatasets\" class=\"w3-half\">\n<webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"! showDatasets\" class=\"w3-half\">\n    <fileeditor></fileeditor>\n  </div>\n</div>\n  <p>&nbsp;</p>\n</template>\n"; });
 define('text!scientist/repositorytovf.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../pickerclient/pickerclient\"></require>\n  <h3>Repository to West-Life Virtual Folder</h3>\n  <p> This page shows dialog to select files or directories to be uploaded from local repository to user's Virtual Folder.</p>\n  <div show.bind=\"selectingfiles\">\n    <p><b>1.</b>Select files or directories that will be uploaded:</p>\n    <h4>Repository files</h4>\n    <table class=\"w3-table-all\">\n      <thead>\n      <tr>\n        <th>filename</th>\n        <th>date</th>\n        <th colspan=\"2\">action</th>\n      </tr>\n      </thead>\n      <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n        <td class=\"w3-padding-tiny\">${item.name}</td>\n        <td class=\"w3-padding-tiny\">${item.date}</td>\n        <td class=\"w3-padding-tiny\">\n          <button class=\"w3-button w3-padding-tiny\" title=\"delete\" click.trigger=\"deleteitem(item)\">x</button>\n        </td>\n\n      </tr>\n    </table>\n    <button class=\"w3-button\" title=\"submit\" click.trigger=\"submitfiles()\">Submit</button>\n  </div>\n\n  <div show.bind=\"!selectingfiles\">\n    <p><b>1.</b>Selected files: ${selectedfiles} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"unsubmitfiles()\">change</button></p>\n    <p><b>2.</b>Select Virtual Folder:</p>\n    <pickerclient mode=\"dir\"></pickerclient>\n  </div>\n\n  <div show.bind=\"selectedUploadDir\">\n    <p><b>3.</b> Press the button to start <button class=\"w3-button w3-pale-green\" click.trigger=\"copy()\">upload all files.</button></p>\n    <p show.bind=\"copyinprogress\">... upload in progress ...</p>\n  </div>\n\n</template>\n"; });
 define('text!staff/app.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../w3.css\"></require>\n  <require from=\"../components/heads.css\"></require>\n  <require from=\"../components/sharedheader.html\"></require>\n  <require from=\"../components/sharedfooter.html\"></require>\n  <require from=\"../components/navigation.html\"></require>\n  <require from=\"../components/userinfo\"></require>\n  <sharedheader></sharedheader>\n\n      <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n\n        <navigation router.bind=\"router\"></navigation>\n        <userinfo></userinfo>\n\n        <router-view></router-view>\n\n        <sharedfooter></sharedfooter>\n\n      </div>\n</template>\n"; });
 define('text!staff/repositorystaff.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Repository Staff UI</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  <label>Project input\n    <input class=\"w3-input\">\n  </label>\n  <div show.bind=\"selectinguser\">\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\" click.trigger=\"selectvisitor(visitor)\">\n      <td>(${visitor.Id})</td><td>${visitor.FirstName} ${visitor.LastName}</td>\n    </tr>\n  </table>\n  </div>\n  <div show.bind=\"!selectinguser\">\n    <p><b>1.</b>Selected user: (${selectedvisitor.Id})${selectedvisitor.FirstName} ${selectedvisitor.LastName} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"deselectvisitor()\">change</button></p>\n    <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>\n    <div class=\"w3-container\">\n      <div class=\"w3-half\">\n        <h4>Local files</h4>\n        <form>\n          <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n            <thead>\n            <tr>\n              <th>drag & drop files/directories here or browse</th>\n            </tr>\n            </thead>\n            <tbody>\n            <tr>\n              <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                         change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n                <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                       change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n              </td>\n              <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n            </tr>\n            <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n              <td class=\"w3-padding-0\">${item.name}</td>\n              <td class=\"w3-padding-0\">\n                <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n              </td>\n            </tr>\n            </tbody>\n          </table>\n        </form>\n      </div>\n      <div class=\"w3-half\">\n\n        <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n        <table class=\"w3-table-all w3-small\">\n          <thead>\n          <tr>\n            <th>filename</th>\n            <th>date</th>\n            <th colspan=\"2\">action</th>\n          </tr>\n          </thead>\n          <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">${item.date}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n            </td>\n\n          </tr>\n        </table>\n      </div>\n    </div>\n    <div>\n      <p><b>3.</b><button class=\"w3-button w3-green\" disabled.bind=\"items.length == 0\">Enable user access. Generate WebDAV endpoint.</button></p>\n    </div>\n  </div>\n\n</template>\n"; });
