@@ -58,6 +58,8 @@ export class Dashboard {
           if (this.selectedProjectId>0) {
             this.showProposals=false;
             this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == params.projectid);
+          } else {
+            this.datasets = this.alldatasets;
           }
 
     });
