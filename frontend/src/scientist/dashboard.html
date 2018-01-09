@@ -11,22 +11,19 @@
   </p>
 </p>
 <div class="w3-card au-animate">
-    <h4>Select<span show.bind="! showProposals">ed</span> visit/proposal to narrow datasets:</h4>
+    <h4>Select<span show.bind="! showProposals">ed</span> visit/proposal:</h4>
     <div show.bind="showProposals" class="au-animate">
     <table class="w3-table-all">
       <tr>
         <th>id</th><th>name</th><th>summary</th>
       </tr>
       <tr repeat.for="proposal of proposals"  class="w3-hover-green">
-
         <td>${proposal.id}</td><td><a route-href="route: projectdetail; params.bind: {projectid:proposal.id}" click.delegate="selectProposal(proposal)" >${proposal.projectName}</a></td><td>${proposal.summary} (${proposal.datasets})</td>
-
       </tr>
-      <tr show.bind="showallbutton" class="w3-hover-green" click.trigger="switchMoreLessProposals()"><td colspan="2"><span show.bind="showmorebutton">.. see more proposals (${proposalslength})</span><span show.bind="!showmorebutton"> .. see less proposals</span></td> </tr>
     </table>
       </div>
     <div show.bind="! showProposals" class="au-animate">
-      <p class="w3-green" click.trigger="showAllProposals()" title="click to show all proposal">${selectedProposal.projectId} ${selectedProposal.summary}</p>
+      <p class="w3-green" click.trigger="deselectProposal()" title="click to show all proposal">${selectedProposal.id} ${selectedProposal.summary}</p>
     </div>
 
   <h4>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</h4>
@@ -44,7 +41,6 @@
       <td>${item.info}</td>
       <td>${item.projectId}</td>
     </tr>
-    <tr  class="w3-hover-green"><td colspan="3"><a href="#datasets">... see all datasets ...</a></td> </tr>
     </tbody>
   </table>
   </div>
