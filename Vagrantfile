@@ -21,10 +21,13 @@ Vagrant.configure(2) do |config|
   #   Display the VirtualBox GUI when booting the machine
     vb.gui = false
   #   Customize the amount of memory on the VM:
-    vb.memory = "2048"
+    vb.memory = "6196"
     vb.cpus = "2"
     vb.customize ["modifyvm", :id, "--vram", "16"]
   end
   config.vm.synced_folder ".", "/vagrant", nfs: false  
   config.vm.provision "shell",  path: "bootstrap.sh"
+
+  config.vm.synced_folder "c:/Users/ras23654/Projects-local/Tools/", "/opt/shared"
+  config.vm.synced_folder "c:/Users/ras23654/", "/vagrant_data"  
 end

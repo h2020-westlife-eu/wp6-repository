@@ -48,7 +48,7 @@ export class Repositorystaff {
   }
 
   dropped(event){
-    console.log("Dropped")
+    console.log("Dropped");
     console.log(event.dataTransfer.files);
     event.stopPropagation();
     event.preventDefault();
@@ -69,7 +69,7 @@ export class Repositorystaff {
   }
 
   appendDir(event) {
-    console.log("appendDir")
+    console.log("appendDir");
     console.log(event.target.files);
     this.filestoupload.unshift(...event.target.files)
   }

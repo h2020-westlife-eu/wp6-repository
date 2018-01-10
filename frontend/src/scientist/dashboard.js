@@ -20,19 +20,19 @@ export class Dashboard {
     ];*/
     this.files=[];
     this.datasets = [];
+    this.alldatasets = [];
     this.showProposals=true;
     this.showDatasets=true;
     this.dataseturl="";
     this.selectedProjectId=0;
-    this.selectedProposal={}
+    this.selectedProposal={};
   }
 
+  /* it is triggered in first click on project - url is generated - should perform selectProposal()*/
   activate(params, routeConfig, navigationInstruction){
-    console.log("Visitingscientist activate()")
-    console.log(params);
+    //console.log("Visitingscientist activate()")
     if (params && params.projectid) {
-      console.log(params.projectid);
-      this.selectedProjectId = params.projectid;
+      this.selectProposal(params.projectid);
     }
   }
 
@@ -40,16 +40,16 @@ export class Dashboard {
     //console.log("Dashboard.attached(): pa:")
     //console.log(this.pa);
     this.pa.getProjects().then(data => {
-          console.log("attached(), getProjects():")
+          console.log("attached(), getProjects():");
           //console.log(data);
           //this.proposalsall = data;
           this.proposals = data;//this.proposalsall.slice(0,3);
       if (this.selectedProjectId>0) {
         console.log(this.proposals);
-        console.log(this.selectedProjectId)
+        console.log(this.selectedProjectId);
         this.selectedProposals=this.proposals.filter(filtereditem=>filtereditem.id == this.selectedProjectId);
         if (this.selectedProposals.length>0) this.selectedProposal=this.selectedProposals[0];
-        console.log(this.selectedProposal)
+        console.log(this.selectedProposal);
         this.showProposals=false;
       }
 //          console.log(this.proposals);
@@ -59,18 +59,15 @@ export class Dashboard {
     this.pa.getDatasets().then(data => {
           //console.log("attahced(), getDatasets():")
           //console.log(data);
-          this.datasets = data;
+          this.alldatasets = data;
           if (this.selectedProjectId>0) {
-
-            this.datasets = this.datasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
+            this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
            }
-
     });
   }
 
   selectProposal(item) {
     this.selectedProposal=item;
-    this.alldatasets = this.datasets.slice();
     console.log("selectProposal()");
     console.log(item.id);
     console.log(this.datasets);
@@ -99,7 +96,7 @@ export class Dashboard {
   }
 
   selectFile(file){
-    console.log("SelectFile()")
+    console.log("SelectFile()");
     console.log(file);
     //not yet implemented
   }

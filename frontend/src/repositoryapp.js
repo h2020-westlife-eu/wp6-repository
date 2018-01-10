@@ -1,7 +1,8 @@
-export class App {
+export class Repositoryapp {
 
   configureRouter(config, router) {
     config.title = 'West-Life Repository Router';
+
     config.map([
       {route: ['', 'dashboard'], name: 'dashboard', moduleId: 'scientist/dashboard', nav: true, title: 'Dataset Dashboard'},
       {route: 'dashboard/project/:projectid/', name: 'projectdetail', moduleId: 'scientist/dashboard'},
@@ -15,7 +16,7 @@ export class App {
   }
 
   activate(params, routeConfig){
-    console.log("App activate()")
+    console.log("repository/app.activate()")
     console.log(params);
   }
 }
