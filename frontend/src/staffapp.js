@@ -1,4 +1,4 @@
-export class App {
+export class Staffapp {
 
   configureRouter(config, router) {
     config.title = 'West-Life Repository Router';
