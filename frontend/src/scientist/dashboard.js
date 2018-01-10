@@ -32,6 +32,8 @@ export class Dashboard {
   activate(params, routeConfig, navigationInstruction){
     //console.log("Visitingscientist activate()")
     if (params && params.projectid) {
+      console.log("Activate() with selectedProject");
+      console.log(params.projectid);
       this.selectProposal(params.projectid);
     }
   }
@@ -41,39 +43,44 @@ export class Dashboard {
     //console.log(this.pa);
     this.pa.getProjects().then(data => {
           console.log("attached(), getProjects():");
-          //console.log(data);
-          //this.proposalsall = data;
           this.proposals = data;//this.proposalsall.slice(0,3);
-      if (this.selectedProjectId>0) {
+      /*if (this.selectedProjectId>0) {
         console.log(this.proposals);
         console.log(this.selectedProjectId);
         this.selectedProposals=this.proposals.filter(filtereditem=>filtereditem.id == this.selectedProjectId);
-        if (this.selectedProposals.length>0) this.selectedProposal=this.selectedProposals[0];
+        if (this.selectedProposals.length>0) {
+          this.selectedProposal=this.selectedProposals[0];
+          this.filterSelectedProposal();
+        }
         console.log(this.selectedProposal);
         this.showProposals=false;
-      }
-//          console.log(this.proposals);
-
+      }*/
       });
-    //not yet implemented on backend
     this.pa.getDatasets().then(data => {
-          //console.log("attahced(), getDatasets():")
-          //console.log(data);
           this.alldatasets = data;
-          if (this.selectedProjectId>0) {
+          /*if (this.selectedProjectId>0) {
             this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
-           }
+           }*/
+
     });
   }
 
   selectProposal(item) {
-    this.selectedProposal=item;
-    console.log("selectProposal()");
-    console.log(item.id);
-    console.log(this.datasets);
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectid === item.id)
-    this.showProposals = false;
+    if (this.selectedProposal != item) {
+      this.selectedProposal = item;
+      this.filterSelectedProposal();
+    }
+
     return true;
+  }
+
+  filterSelectedProposal() {
+    //this.selectedProposal=item;
+    console.log("filterSelectProposal()");
+    console.log(this.selectedProposal);
+    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectid === this.selectedProposal.id)
+    this.showProposals = false;
+
   }
 
   deselectProposal() {
