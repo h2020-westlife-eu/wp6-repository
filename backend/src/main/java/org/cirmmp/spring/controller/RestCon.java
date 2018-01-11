@@ -64,9 +64,9 @@ public class RestCon {
     //OrdiniService ordiniService;
 
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
-    public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname){
-        String username = checkAuthentication(xusername);
-        User user = userService.findBySSO(username);
+    public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        //User user = userService.findBySSO(username);
 
         return new ResponseEntity (gson.toJson(getUserDTO(user)), HttpStatus.OK);
     }
@@ -237,6 +237,7 @@ public class RestCon {
             return ssoId;
         }
     }
+    //checks authentication, either it is authenticated via spring - or via sent arguments x*
     public User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
         LOG.info("checkAuthentication()");
         //String xusername="";
