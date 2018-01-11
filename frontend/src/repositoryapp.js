@@ -6,6 +6,7 @@ export class Repositoryapp {
     config.map([
       {route: ['', 'dashboard'], name: 'dashboard', moduleId: 'scientist/dashboard', nav: true, title: 'Dataset Dashboard'},
       {route: 'dashboard/project/:projectid/', name: 'projectdetail', moduleId: 'scientist/dashboard'},
+      {route: 'dashboard/dataset/:datasetid/', name: 'datasetdetail', moduleId: 'scientist/dashboard'},
       {route: 'repositorytovf', name: 'repositorytovf', moduleId: 'scientist/repositorytovf', nav: true, title: 'Upload to Virtual Folder'},
     ]);
     this.router = router;

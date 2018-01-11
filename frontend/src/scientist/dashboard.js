@@ -10,14 +10,8 @@ export class Dashboard {
     this.ea = ea;
     this.pa=pa;
 
-    this.proposals = [];
+    this.projects = [];
 
-    //this.alldatasets=[];
-    //demo data
-    /*[{projectId:"1",date:"06/09/2017",summary:"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)", info:"1.6 Mb",webdavurl:"/files/XufWqKa1/"},
-      {projectId:"1",date:"07/09/2017",summary:" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)", info:"1.3 Mb",webdavurl:"/files/XufWqKa2/"},
-      {projectId:"2",date:"08/09/2017",summary:"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).", info:"2.1 Mb",webdavurl:"/files/XufWqKa3/"},
-    ];*/
     this.files=[];
     this.datasets = [];
     this.alldatasets = [];
@@ -25,77 +19,114 @@ export class Dashboard {
     this.showDatasets=true;
     this.dataseturl="";
     this.selectedProjectId=0;
-    this.selectedProposal={};
+    this.selectedDatasetId=0;
+    this.selectedProject={};
   }
 
-  /* it is triggered in first click on project - url is generated - should perform selectProposal()*/
+  /* it is triggered in first click on project - url is generated
+  * or when url is submitted directly to browser */
   activate(params, routeConfig, navigationInstruction){
     //console.log("Visitingscientist activate()")
     if (params && params.projectid) {
       console.log("Activate() with selectedProject");
       console.log(params.projectid);
-      this.selectProposal(params.projectid);
+      this.filterSelectedProposal(params.projectid);
+    }
+    if (params && params.datasetid) {
+      console.log("Activate() with selectedDataset");
+      console.log(params.datasetid);
+      this.filterSelectedDataset(params.datasetid);
     }
   }
 
+  /* triggered when the view is shown to user - it requests projects and dataset
+  * available for user from REST api*/
   attached() {
     //console.log("Dashboard.attached(): pa:")
     //console.log(this.pa);
     this.pa.getProjects().then(data => {
           console.log("attached(), getProjects():");
-          this.proposals = data;//this.proposalsall.slice(0,3);
-      /*if (this.selectedProjectId>0) {
-        console.log(this.proposals);
-        console.log(this.selectedProjectId);
-        this.selectedProposals=this.proposals.filter(filtereditem=>filtereditem.id == this.selectedProjectId);
-        if (this.selectedProposals.length>0) {
-          this.selectedProposal=this.selectedProposals[0];
-          this.filterSelectedProposal();
-        }
-        console.log(this.selectedProposal);
-        this.showProposals=false;
-      }*/
+          this.projects = data;//this.proposalsall.slice(0,3);
+          if (this.selectedProjectId>0) {this.filterProject()}
       });
     this.pa.getDatasets().then(data => {
-          this.alldatasets = data;
-          /*if (this.selectedProjectId>0) {
-            this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
-           }*/
-
+          this.alldatasets = data;       
+          if (this.selectedDatasetId>0) {this.filterMyDataset()} //triggered when accessed by url dashboard/dataset/1
+          else 
+          if (this.selectedProjectId>0) {this.filterDataset()}  //triggered when accessed by url dashboard/project/1
+          //  this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
     });
   }
 
-  selectProposal(item) {
-    if (this.selectedProposal != item) {
-      this.selectedProposal = item;
-      this.filterSelectedProposal();
-    }
-
+  //triggered when a project is clicked -
+  // if the same project is selected activate() is not launched - enough to hide all other projects
+  selectProposal(id) {
+    this.showProposals=false;
+    this.showDatasets=true;
     return true;
   }
 
-  filterSelectedProposal() {
+  /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
+  filterSelectedProposal(id) {
     //this.selectedProposal=item;
     console.log("filterSelectProposal()");
-    console.log(this.selectedProposal);
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectid === this.selectedProposal.id)
-    this.showProposals = false;
-
+    console.log(id);
+    this.selectedProjectId=id;
+    this.filterProject();
+    this.filterDataset();
   }
 
+  filterSelectedDataset(id) {
+    //this.selectedProposal=item;
+    console.log("filterSelectDataset()");
+    console.log(id);
+    this.selectedDatasetId=id;
+    //this.filterMyProject();
+    this.filterMyDataset();
+  }
+  
+  //expects that selectedDatasetId contains dataset which should be viewed, based on it it selects projectid
+  //filters project which is owning the dataset and publish webdavresource event with dataset webdavurl
+  filterMyDataset(){
+    this.datasets= this.alldatasets.filter(i=> i.id === this.selectedDatasetId);
+    if (this.datasets.length>0){
+      this.selectedProjectId=this.datasets[0].projectId;
+      this.filterProject();
+      this.showProposals=false;
+      this.selectDataset(this.datasets[0]);
+    }
+  }
+
+  /* helper class called from filterSelecterProposal - or when attached() so activate() call before didn't have
+  * the projects and datasets sets from REST api*/
+  filterProject(){
+    this.selectedProject=this.projects.filter(i=>i.id==this.selectedProjectId)[0];
+    this.showProposals = false;
+    //console.log(this.selectedProject);
+  }
+
+  //filters dataset based on selectedProjectId
+  filterDataset(){
+    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId === this.selectedProjectId);
+    //console.log(this.datasets);
+  }
+
+  //deselect project proposal, shows all proposals and datasets
   deselectProposal() {
     //this.selectedProposal=item;
     this.datasets = this.alldatasets;
     this.showProposals = true;
+    return true; //continues to process <a href>
   }
 
+  //shows only one dataset and publish webdavresource with dataset's url
   selectDataset(item) {
     this.showDatasets=false;
     this.selectedDataset=item;
     //TODO replace URL by the one obtained from API
     this.dataseturl=item.webdavurl;
     this.ea.publish(new Webdavresource(item.webdavurl))
-
+    return true; //continues to process <a href>
   }
 
   deselectDataset() {

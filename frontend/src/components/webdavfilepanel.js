@@ -50,6 +50,7 @@ export class Webdavfilepanel {
             item.date = filedate;
             item.size = filetype == 'httpd/unix-directory' ? 'DIR' : filesize;
             item.type = filetype;
+            item.webdavurl=this.webdavpath+item.name;
             console.log(item);
             this.files.push(item);
           }
@@ -71,7 +72,7 @@ export class Webdavfilepanel {
   }
 
   selectFile(file){
-    file.webdavurl = this.webdavpath+file.name;
+    //file.webdavurl = this.webdavpath+file.name;
     //if (file.size < 4096)
     this.ea.publish(new Editfile(file));
   }

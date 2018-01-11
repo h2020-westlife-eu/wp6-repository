@@ -2,58 +2,73 @@
   <require from="./dashboard.css"></require>
   <require from="../components/webdavfilepanel"></require>
   <require from="../components/fileeditor"></require>
-      <h3>Repository Dashboard</h3>
-<p>You are logged as visiting scientist.
-  You can view your datasets available after your visit.
-  To review Visit Proposal, go to Instruct <a target="_blank" href="https://www.structuralbiology.eu/dashboard?t=instruct" class="w3-button">Dashboard</a>
-  To submit new proposal, go to Instruct
-    <a target="_blank" href="https://www.structuralbiology.eu/submit-proposal/step1/new" class="w3-button">Submission</a>.
+  <h3>Repository Dashboard</h3>
+  <p>You are logged as visiting scientist.
+    You can view your datasets available after your visit.
+    To review Visit Proposal, go to Instruct <a target="_blank"
+                                                href="https://www.structuralbiology.eu/dashboard?t=instruct"
+                                                class="w3-button">Dashboard</a>
+    To submit new proposal, go to Instruct
+    <a target="_blank" href="https://www.structuralbiology.eu/submit-proposal/step1/new"
+       class="w3-button">Submission</a>.
   </p>
-</p>
-<div class="w3-card au-animate">
-    <h4>Select<span show.bind="! showProposals">ed</span> visit/proposal:</h4>
-    <div show.bind="showProposals" class="au-animate">
+
+  <div class="w3-card au-animate">
+    <h4>Select<span show.bind="! showProposals">ed</span> project visit/proposal:</h4>
+
     <table class="w3-table-all">
       <tr>
-        <th>id</th><th>name</th><th>summary</th>
+        <th>id</th>
+        <th>name</th>
+        <th>summary</th>
       </tr>
-      <tr repeat.for="proposal of proposals"  class="w3-hover-green">
-        <td>${proposal.id}</td><td><a route-href="route: projectdetail; params.bind: {projectid:proposal.id}" click.delegate="selectProposal(proposal)" >${proposal.projectName}</a></td><td>${proposal.summary} (${proposal.datasets})</td>
+      <tr show.bind="showProposals" class="au-animate" repeat.for="project of projects">
+        <td>${project.id}</td>
+        <td><a class="w3-hover-green" route-href="route: projectdetail; params.bind: {projectid:project.id}" click.trigger="selectProposal()">${project.projectName}</a>
+        </td>
+        <td>${project.summary} (${project.datasets})</td>
+      </tr>
+      <tr show.bind="! showProposals" title="click to show all projects" class="w3-hover-green">
+        <td>${selectedProject.id}</td>
+        <td ><a class="w3-hover-green" route-href="route: dashboard" click.trigger="deselectProposal()">
+          ${selectedProject.projectName}
+        </td>
+        <td>${selectedProject.summary}</td>
       </tr>
     </table>
-      </div>
-    <div show.bind="! showProposals" class="au-animate">
-      <p class="w3-green" click.trigger="deselectProposal()" title="click to show all proposal">${selectedProposal.id} ${selectedProposal.summary}</p>
-    </div>
+    <h4>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</h4>
 
-  <h4>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</h4>
-  <div show.bind="showDatasets" class="au-animate">
-  <table class="w3-table-all">
-    <thead>
-    <tr>
-      <th>date</th><th>Summary</th><th>i</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr class="w3-hover-green" repeat.for="item of datasets" click.trigger="selectDataset(item)">
-      <td>${item.date}</td>
-      <td>${item.summary}</td>
-      <td>${item.info}</td>
-      <td>${item.projectId}</td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-    <div show.bind="! showDatasets" class="au-animate">
-      <p class="w3-green" click.trigger="deselectDataset()" title="click to show all datasets">${selectedDataset.date} ${selectedDataset.summary} ${selectedDataset.info} ${selectedDataset.projectId}</p>
+      <table class="w3-table-all">
+        <thead>
+        <tr>
+          <th>date</th>
+          <th>Summary</th>
+          <th>i</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr show.bind="showDatasets" class="w3-hover-green" repeat.for="item of datasets" click.trigger="selectDataset(item)">
+          <td>${item.date}</td>
+          <td><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:item.id}"  click.trigger="selectDataset(item)">${item.summary}</a></td>
+          <td>${item.info}</td>
+          <td>${item.projectId}</td>
+        </tr>
+        <tr if.bind="! showDatasets" class="w3-hover-green"  click.trigger="deselectDataset()">
+          <td>${selectedDataset.date}</td>
+          <td>${selectedDataset.summary}</td>
+          <td>${selectedDataset.info}</td>
+          <td>${selectedDataset.projectId}</td>
+        </tr>
+        </tbody>
+      </table>
+
+    <h4>Files:</h4>
+    <div show.bind="! showDatasets" class="w3-half">
+      <webdavfilepanel></webdavfilepanel>
     </div>
-  <h4>Files:</h4>
-  <div show.bind="! showDatasets" class="w3-half">
-<webdavfilepanel></webdavfilepanel>
+    <div show.bind="! showDatasets" class="w3-half">
+      <fileeditor></fileeditor>
+    </div>
   </div>
-  <div show.bind="! showDatasets" class="w3-half">
-    <fileeditor></fileeditor>
-  </div>
-</div>
   <p>&nbsp;</p>
 </template>

@@ -1,10 +1,11 @@
 <template>
   <div class="w3-card">
     <table class="w3-table-all">
-      <tr class="w3-hover-green" repeat.for="file of files" click.trigger="selectFile(file)">
-        <td>${file.name}</td>
-        <td>${file.size}</td>
-        <td>${file.date}</td>
+      <tr class="w3-hover-green" repeat.for="file of files">
+        <td click.trigger="selectFile(file)">${file.name}</td>
+        <td click.trigger="selectFile(file)">${file.size}</td>
+        <td click.trigger="selectFile(file)">${file.date}</td>
+        <td><a href.bind="file.webdavurl">link</a></td>
       </tr>
     </table>
   </div>
