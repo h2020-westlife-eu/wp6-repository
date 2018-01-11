@@ -12,7 +12,9 @@ Tested on Vagrant (1.9.6) and VirtualBox (5.1.30)
     SP_ENDPOINT=http://localhost:8080/mellon 
 
 * (Optionally) if you have your sp-metadata,idp-metadata,sp_key and sp_cert file from previous installation, put it next to the VagrantFile - these will be reused instead of generating new one
+
 Execute following in your command line:
+
 
     git clone https://github.com/h2020-westlife-eu/wp6-repository.git
     cd wp6-repository
