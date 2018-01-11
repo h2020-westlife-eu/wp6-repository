@@ -5,8 +5,6 @@ Reference implementation of a repository that supplies suitable metadata to the 
 If you don't have vagrant and/or virtualbox, download and install [vagrant tool](https://www.vagrantup.com/downloads.html) and [Virtualbox](https://www.virtualbox.org/wiki/Downloads).
 Tested on Vagrant (1.9.6) and VirtualBox (5.1.30)
 
-    git clone https://github.com/h2020-westlife-eu/wp6-repository
-    vagrant up 
 
 * (Optionally) Edit the bootstrap.sh file and change values of variables
     SP_IDENTIFICATION=http://local.west-life.eu
@@ -14,7 +12,9 @@ Tested on Vagrant (1.9.6) and VirtualBox (5.1.30)
     SP_ENDPOINT=http://localhost:8080/mellon 
 
 * (Optionally) if you have your sp-metadata,idp-metadata,sp_key and sp_cert file from previous installation, put it next to the VagrantFile - these will be reused instead of generating new one
-* execute following in your command line:
+
+Execute following in your command line:
+
 
     git clone https://github.com/h2020-westlife-eu/wp6-repository.git
     cd wp6-repository
