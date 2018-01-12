@@ -2,13 +2,24 @@
 # Bootstrap script preparing environment for H2020 West-Life Repository Instance - D6.2
 # expecting that the system is clean, minimal, tested on Scientific Linux 7.x and CernVM 4.x
 
-# WP6REPSRC is directory where sources of D6.2 are available, if not set,
+# WP6REPSRC is directory where sources of D6.2 are available, set default value
 if [ -z ${WP6REPSRC+x} ]; then
-  export WP6REPSRC=/vagrant;
-else
-  cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
-  cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+  if [ -f /vagrant/bootstrap.sh ]; then
+    export WP6REPSRC=/vagrant
+  fi
+  if [ -f ./bootstrap.sh ]; then
+    export WP6REPSRC=`pwd`
+  fi
 fi
+if [ -z ${WP6REPSRC+x} ]; then
+  echo 'please set WP6REPSRC environment variable'
+  exit 1
+fi
+# copy sp_keys if they exists in /vagrant location
+cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
+# copy conf files from /vagrant location if exists
+cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+
 
 ########################################################################
 # Basic system preparation
