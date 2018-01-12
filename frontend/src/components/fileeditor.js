@@ -63,8 +63,11 @@ export class Fileeditor {
 
       //console.log("fileeditor.selectfile() visualizeimg: isimage:")
       //console.log(this.isimage);
+
+      /*get first 2 kB of data, if it is supported by web server in Range header */
       if (!this.isimage)
-        this.client.fetch(file.webdavurl, {credentials: 'same-origin'})
+
+        this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-2047'}})
           .then(response => response.text())
           .then(data =>{
 
