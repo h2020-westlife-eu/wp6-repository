@@ -2,6 +2,7 @@ package org.cirmmp.spring.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name="PROJECT")
@@ -11,25 +12,36 @@ public class Project {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
-
     @Column(name="USER_ID")
     private Integer userId;
-
 
     @Column(name="PROJECT_NAME")
     private String projectName;
 
-
     @Column(name="SUMMARY")
     private String summary;
 
+    @Column(name="SHERABLE")
+    private String shearable;
+
+    @Column(name="HASH_ID")
+    private String hashId;
+
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="CREATION_DATE")
     private Date creation_date;
 
-    //@OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    //private Set<FileList> fileDocuments = new HashSet<FileList>();
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    private List<FileList> fileLists ;
 
 
+    public List<FileList> getFileLists() {
+        return fileLists;
+    }
+
+    public void setFileLists(List<FileList> fileLists) {
+        this.fileLists = fileLists;
+    }
 
     public void setCreation_date(Date creation_date) {
 
@@ -41,6 +53,21 @@ public class Project {
     }
 
 
+    public String getShearable() {
+        return shearable;
+    }
+
+    public void setShearable(String shearable) {
+        this.shearable = shearable;
+    }
+
+    public String getHashId() {
+        return hashId;
+    }
+
+    public void setHashId(String hashId) {
+        this.hashId = hashId;
+    }
 
     public void setUserId(Integer userId) {
         this.userId = userId;

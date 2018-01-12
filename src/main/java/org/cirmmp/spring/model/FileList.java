@@ -1,6 +1,7 @@
 package org.cirmmp.spring.model;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name="FILELIST")
@@ -10,8 +11,8 @@ public class FileList {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name="PROJECT_ID")
-    private int projectId;
+//    @Column(name="PROJECT_ID")
+//    private int projectId;
 
     @Column(name="FILE_NAME")
     private String fileName;
@@ -19,14 +20,37 @@ public class FileList {
     @Column(name="FILE_INFO")
     private String fileInfo;
 
-    @Column(name="type", length=100)
+    @Column(name="TYPE", length=100)
     private String type;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="CREATION_DATE")
+    private Date creation_date;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(name="content", nullable=true)
+    @Column(name="CONTENT", nullable=true)
     private byte[] content;
 
+    @ManyToOne
+    private Project project;
+
+
+    public Date getCreation_date() {
+        return creation_date;
+    }
+
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
     public String getType() {
         return type;
@@ -52,9 +76,6 @@ public class FileList {
         return id;
     }
 
-    public int getProjectId() {
-        return projectId;
-    }
 
     public String getFileName() {
         return fileName;
@@ -69,9 +90,6 @@ public class FileList {
         this.id = id;
     }
 
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
-    }
 
     public void setFileName(String fileName) {
         this.fileName = fileName;

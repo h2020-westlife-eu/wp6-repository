@@ -8,7 +8,7 @@ public interface FileListDao {
 
     FileList findById(int id);
 
-    List<FileList> findByProjectId(int project_id);
+  //  List<FileList> findByProjectId(int project_id);
 
     void save(FileList fileList);
 

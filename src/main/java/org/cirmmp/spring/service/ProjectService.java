@@ -15,5 +15,9 @@ public interface ProjectService {
     void deleteById(int id);
 
     List<Project> findAllProject();
+
     void updateProject(Project project);
+
+    void fileUpdateProject(Project pro);
+
 }

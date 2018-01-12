@@ -24,14 +24,14 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
         return filiList;
     }
 
-    @Override
-    public List<FileList> findByProjectId(int projectId) {
-        logger.info("PROJECT_ID : {}", projectId);
-        Criteria crit = createEntityCriteria();
-        crit.add(Restrictions.eq("projectId", projectId));
-        List<FileList> fileList = (List<FileList>)crit.list();
-        return fileList;
-    }
+//    @Override
+//    public List<FileList> findByProjectId(int projectId) {
+//        logger.info("PROJECT_ID : {}", projectId);
+//        Criteria crit = createEntityCriteria();
+//        crit.add(Restrictions.eq("projectId", projectId));
+//        List<FileList> fileList = (List<FileList>)crit.list();
+//        return fileList;
+//    }
 
     @Override
     public void save(FileList fileList) {

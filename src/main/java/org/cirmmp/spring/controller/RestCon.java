@@ -104,13 +104,14 @@ public class RestCon {
     @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
     public ResponseEntity listFilesId(@PathVariable int projectId) {
 
-        List<FileList> files = fileListService.findByProjectId(projectId);
+        Project project = projectService.findById(projectId);
+        List<FileList> files = project.getFileLists();
         ArrayList<JFileList> nfiles = new ArrayList<>();
         for(FileList ifile :files){
             JFileList infiles = new JFileList();
             infiles.setFiletName(ifile.getFileName());
             infiles.setFileInfo(ifile.getFileInfo());
-            infiles.setProjectId(ifile.getProjectId());
+           // infiles.setProjectId(ifile.getProjectId());
             nfiles.add(infiles);
         }
 
@@ -126,7 +127,7 @@ public class RestCon {
             JFileList infiles = new JFileList();
             infiles.setFiletName(ifile.getFileName());
             infiles.setFileInfo(ifile.getFileInfo());
-            infiles.setProjectId(ifile.getProjectId());
+            //infiles.setProjectId(ifile.getProjectId());
             nfiles.add(infiles);
         }
 

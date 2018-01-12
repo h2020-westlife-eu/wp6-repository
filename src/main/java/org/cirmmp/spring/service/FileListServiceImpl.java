@@ -18,10 +18,10 @@ public class FileListServiceImpl implements FileListService {
         return dao.findById(id);
     }
 
-    @Override
-    public List<FileList> findByProjectId(int project_id) {
-        return dao.findByProjectId(project_id);
-    }
+  //  @Override
+  //  public List<FileList> findByProjectId(int project_id) {
+    // return dao.findByProjectId(project_id);
+    //}
 
     @Override
     public void save(FileList fileList) {

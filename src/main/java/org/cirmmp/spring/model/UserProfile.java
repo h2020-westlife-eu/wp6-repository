@@ -2,6 +2,7 @@ package org.cirmmp.spring.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(name="USER_PROFILE")
@@ -12,12 +13,23 @@ public class UserProfile implements Serializable {
 
 	@Column(name="TYPE", length=15, unique=true, nullable=false)
 	private String type = UserProfileType.USER.getUserProfileType();
-	
+
+	@ManyToMany(mappedBy = "userProfiles")
+	private Set<User> user;
+
 	public Integer getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+    public Set<User> getUser() {
+        return user;
+    }
+
+    public void setUser(Set<User> user) {
+        this.user = user;
+    }
+
+    public void setId(Integer id) {
 		this.id = id;
 	}
 

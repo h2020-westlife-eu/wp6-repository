@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -268,13 +270,16 @@ public class AppController {
 	public String addFiless(@PathVariable int projectId, ModelMap model) {
 
         logger.info("Sono in add-file GET");
+        List<FileList> files = new ArrayList<>();
 		Project project = projectService.findById(projectId);
 		model.addAttribute("project", project);
-
+//
 		FileBucket fileModel = new FileBucket();
 		model.addAttribute("fileBucket", fileModel);
+//        Project projectFiles = projectService.findById(projectId);
+//        List<FileList> files = projectFiles.getFileLists();
 
-		List<FileList> files = fileListService.findByProjectId(projectId);
+		//List<FileList> files = fileListService.findByProjectId(projectId);
 		model.addAttribute("files", files);
 
 		return "managefiles";
@@ -289,8 +294,10 @@ public class AppController {
 			System.out.println("validation errors");
 			Project project = projectService.findById(projectId);
 			model.addAttribute("project", project);
+            Project projectFiles = projectService.findById(projectId);
+            List<FileList> files = projectFiles.getFileLists();
 
-			List<FileList> files = fileListService.findByProjectId(projectId);
+			//List<FileList> files = fileListService.findByProjectId(projectId);
 			model.addAttribute("files", files);
 
 			return "managefiles";
@@ -407,9 +414,12 @@ public class AppController {
     }
 
 
+
 	private void saveFile(FileBucket fileBucket, Project project) throws IOException {
 
 		FileList document = new FileList();
+
+        List<FileList> fileLists = new ArrayList<>();
 
 		MultipartFile multipartFile = fileBucket.getFile();
 
@@ -417,8 +427,13 @@ public class AppController {
 		document.setFileInfo(fileBucket.getDescription());
 		document.setType(multipartFile.getContentType());
 		document.setContent(multipartFile.getBytes());
-		document.setProjectId(project.getId());
-		fileListService.save(document);
+		document.setCreation_date(new Date());
+		//document.setProjectId(project.getId());
+        fileLists.add(document);
+		project.setFileLists(fileLists);
+        logger.info("Update project");
+		projectService.fileUpdateProject(project);
+		//fileListService.save(document);
 	}
 
 }

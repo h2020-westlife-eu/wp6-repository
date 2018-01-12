@@ -35,6 +35,8 @@ public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements Pro
         persist(project);
     }
 
+    public void update(Project project){ update(project);}
+
     public void deleteById(int id){
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("id", id));
