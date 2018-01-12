@@ -28,13 +28,9 @@ export class Dashboard {
   activate(params, routeConfig, navigationInstruction){
     //console.log("Visitingscientist activate()")
     if (params && params.projectid) {
-      console.log("Activate() with selectedProject");
-      console.log(params.projectid);
       this.filterSelectedProposal(params.projectid);
     }
     if (params && params.datasetid) {
-      console.log("Activate() with selectedDataset");
-      console.log(params.datasetid);
       this.filterSelectedDataset(params.datasetid);
     }
   }
@@ -45,7 +41,6 @@ export class Dashboard {
     //console.log("Dashboard.attached(): pa:")
     //console.log(this.pa);
     this.pa.getProjects().then(data => {
-          console.log("attached(), getProjects():");
           this.projects = data;//this.proposalsall.slice(0,3);
           if (this.selectedProjectId>0) {this.filterProject()}
       });
@@ -69,8 +64,6 @@ export class Dashboard {
   /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
   filterSelectedProposal(id) {
     //this.selectedProposal=item;
-    console.log("filterSelectProposal()");
-    console.log(id);
     this.selectedProjectId=id;
     this.filterProject();
     this.filterDataset();
@@ -78,8 +71,6 @@ export class Dashboard {
 
   filterSelectedDataset(id) {
     //this.selectedProposal=item;
-    console.log("filterSelectDataset()");
-    console.log(id);
     this.selectedDatasetId=id;
     //this.filterMyProject();
     this.filterMyDataset();
@@ -136,6 +127,5 @@ export class Dashboard {
   selectFile(file){
     console.log("SelectFile()");
     console.log(file);
-    //not yet implemented
   }
 }

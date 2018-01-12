@@ -69,28 +69,23 @@ export class ProjectApi {
     return this.httpclient.fetch(this.usersurl)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         return data;
       })
       .catch(error => {
-        //console.log(error);
+        console.log('getUsers() returns error:');
         console.log(error);
         //alert("Sorry, error:"+error.statusCode+" "+error.message);
       });
   }
 
   getUserInfo() {
-      console.log("getUserInfo()");
-      console.log(this.httpclient);
-      console.log(this.userinfourl);
       return this.httpclient.fetch(this.userinfourl)
         .then(response => response.json())
         .then(data => {
-          console.log(data);
           return data;
         })
         .catch(error => {
-          //console.log(error);
+          console.log('getUserInfo() returns error:');
           console.log(error);
 //          alert("Sorry, error:"+error.statusCode+" "+error.message);
         });

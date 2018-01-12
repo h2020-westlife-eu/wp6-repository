@@ -34,8 +34,6 @@ export class Webdavfilepanel {
     }).then(response => response.text())
       .then(str => (new window.DOMParser()).parseFromString(str, "text/xml"))
       .then(data => {
-        console.log("selectDataset() files:")
-        console.log(data);
         //parse structure https://stackoverflow.com/questions/17604071/parse-xml-using-javascript
         this.files = [];
         let filesDOM = data.getElementsByTagName("D:response");
@@ -53,7 +51,6 @@ export class Webdavfilepanel {
             item.size = filetype == 'httpd/unix-directory' ? 'DIR' : filesize;
             item.type = filetype;
             item.webdavurl=this.webdavpath+item.name;
-            console.log(item);
             //directory first, files after that
             if (item.isdir) this.files.unshift(item);
             else this.files.push(item);
@@ -62,8 +59,6 @@ export class Webdavfilepanel {
         }
         //adds first row with '..' to cd to parent directory
         if (this.dirs.length>0) this.files.unshift({name:'..',isdir:true,size:'DIR',date:''});
-        console.log(this.files);
-
       }).catch(error => {
       console.log("selectDataset() error");
       console.log(error);

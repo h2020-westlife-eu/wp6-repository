@@ -16,8 +16,4 @@ export class Repositoryapp {
     //window.location="login.html?next"+window.location.pathname;
   }
 
-  activate(params, routeConfig){
-    console.log("repository/app.activate()")
-    console.log(params);
-  }
 }
