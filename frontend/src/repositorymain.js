@@ -6,8 +6,8 @@ Promise.config({
 });
 
 export function configure(aurelia) {
-  //aurelia.use.basicConfiguration();
-  aurelia.use.standardConfiguration().feature('resources');
-  aurelia.use.developmentLogging();
+  aurelia.use
+    .standardConfiguration()
+    .developmentLogging().feature('resources');
   aurelia.start().then(() => aurelia.setRoot('repositoryapp'));
 }

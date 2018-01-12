@@ -23,6 +23,7 @@ export class Webdavfilepanel {
     //this.webdavbase = ;
     this.ea.subscribe(Webdavresource,msg =>this.setwebdav(msg.webdavurl))
     this.webdavpath = '/files/XufWqKau/';
+    this.dirs=[];
   }
 
   setwebdav(webdavurl) {
@@ -48,14 +49,19 @@ export class Webdavfilepanel {
             let item = {};
             item.name = filename.replace(this.webdavpath, '')
             item.date = filedate;
+            item.isdir= filetype == 'httpd/unix-directory';
             item.size = filetype == 'httpd/unix-directory' ? 'DIR' : filesize;
             item.type = filetype;
             item.webdavurl=this.webdavpath+item.name;
             console.log(item);
-            this.files.push(item);
+            //directory first, files after that
+            if (item.isdir) this.files.unshift(item);
+            else this.files.push(item);
           }
 
         }
+        //adds first row with '..' to cd to parent directory
+        if (this.dirs.length>0) this.files.unshift({name:'..',isdir:true,size:'DIR',date:''});
         console.log(this.files);
 
       }).catch(error => {
@@ -73,8 +79,17 @@ export class Webdavfilepanel {
 
   selectFile(file){
     //file.webdavurl = this.webdavpath+file.name;
-    //if (file.size < 4096)
-    this.ea.publish(new Editfile(file));
+    if (file.isdir) {
+      let newdir= '';
+      if (file.name =='..') {
+        newdir = this.dirs.pop();
+      } else {
+        this.dirs.push(this.webdavpath);
+        newdir = this.webdavpath+file.name;
+      }
+      this.setwebdav(newdir);
+    }
+    else  this.ea.publish(new Editfile(file));
   }
 
 }
