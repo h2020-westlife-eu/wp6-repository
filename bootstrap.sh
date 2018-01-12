@@ -134,11 +134,12 @@ systemctl enable mariadb.service
 service mariadb start
 
 # generate random password, store it locally and distribute as a environment variable
-export DBCRED=`openssl rand -base64 32`
-echo DBCRED=${DBCRED} > /home/vagrant/.westlife/repository.key
+if [ ! -f /home/vagrant/.westlife/repository.key ]; then
+  export DBCRED=`openssl rand -base64 32`
+  echo DBCRED=${DBCRED} > /home/vagrant/.westlife/repository.key
 
-echo setting db
-mysql --user=root <<EOF
+  echo setting db
+  mysql --user=root <<EOF
 use mysql
 update user set password=PASSWORD("${DBCRED}") where User="root";
 DELETE FROM mysql.user WHERE User='';
@@ -147,6 +148,9 @@ DROP DATABASE IF EXISTS test;
 DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOF
+else
+  source /home/vagrant/.westlife/repository.key
+fi
 
 echo creating db
 # create db for backend
