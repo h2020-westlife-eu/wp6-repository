@@ -1,5 +1,6 @@
 package org.cirmmp.spring.model;
 
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -35,23 +36,37 @@ public class Project {
     private List<FileList> fileLists ;
 
 
-    public List<FileList> getFileLists() {
-        return fileLists;
+    public Integer getId() {
+        return id;
     }
 
-    public void setFileLists(List<FileList> fileLists) {
-        this.fileLists = fileLists;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setCreation_date(Date creation_date) {
-
-        this.creation_date = creation_date;
-    }
-    public Date getCreation_date() {
-
-        return creation_date;
+    public Integer getUserId() {
+        return userId;
     }
 
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 
     public String getShearable() {
         return shearable;
@@ -69,42 +84,21 @@ public class Project {
         this.hashId = hashId;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public Date getCreation_date() {
+        return creation_date;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
     }
 
-    public void setSummary(String summary) {
-        this.summary = summary;
+    public List<FileList> getFileLists() {
+        return fileLists;
     }
 
-
-    public void setId(Integer id) {
-        id = id;
+    public void setFileLists(List<FileList> fileLists) {
+        this.fileLists = fileLists;
     }
-
-    public Integer getId() {
-
-        return id;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-
-
 
 }
 

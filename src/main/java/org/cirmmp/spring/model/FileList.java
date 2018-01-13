@@ -11,9 +11,6 @@ public class FileList {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
-//    @Column(name="PROJECT_ID")
-//    private int projectId;
-
     @Column(name="FILE_NAME")
     private String fileName;
 
@@ -33,8 +30,40 @@ public class FileList {
     private byte[] content;
 
     @ManyToOne
+    @JoinColumn(name = "PROJECT_ID")
     private Project project;
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileInfo() {
+        return fileInfo;
+    }
+
+    public void setFileInfo(String fileInfo) {
+        this.fileInfo = fileInfo;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public Date getCreation_date() {
         return creation_date;
@@ -44,6 +73,14 @@ public class FileList {
         this.creation_date = creation_date;
     }
 
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
     public Project getProject() {
         return project;
     }
@@ -51,53 +88,4 @@ public class FileList {
     public void setProject(Project project) {
         this.project = project;
     }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-
-        this.type = type;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-
-
-
-    public byte[] getContent() {
-        return content;
-    }
-
-
-    public Integer getId() {
-        return id;
-    }
-
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public String getFileInfo() {
-        return fileInfo;
-    }
-
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public void setFileInfo(String fileInfo) {
-        this.fileInfo = fileInfo;
-    }
-
-
 }

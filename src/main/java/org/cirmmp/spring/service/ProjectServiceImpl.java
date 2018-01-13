@@ -52,7 +52,7 @@ public class ProjectServiceImpl implements ProjectService {
                 entity.setFileLists(project.getFileLists());
             }
         }
-        dao.save(entity);
+        dao.update(entity);
     }
 }
 
