@@ -13,11 +13,11 @@ import java.util.List;
 
 @Repository("project")
 @Transactional
-public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements ProjectDao{
+public class ProjectDaoImpl extends AbstractDao<Long, Project> implements ProjectDao{
 
     static final Logger logger = LoggerFactory.getLogger(ProjectDaoImpl.class);
 
-    public Project findById(int id) {
+    public Project findById(Long id) {
         Project project = getByKey(id);
 
         return project;

@@ -11,7 +11,7 @@ public class Project {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name="USER_ID")
     private Integer userId;
@@ -32,15 +32,14 @@ public class Project {
     @Column(name="CREATION_DATE")
     private Date creation_date;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<FileList> fileLists ;
 
-
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -99,6 +98,12 @@ public class Project {
     public void setFileLists(List<FileList> fileLists) {
         this.fileLists = fileLists;
     }
+    public void addFileLists(FileList fileList){
+        this.fileLists.add(fileList);
+    }
 
+    public void removeFileLists(FileList fileList){
+        this.fileLists.remove(fileList);
+    }
 }
 

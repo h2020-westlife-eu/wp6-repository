@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProjectDao {
 
-    Project findById(int id);
+    Project findById(Long id);
 
     List<Project> findByUserId(int sso);
 

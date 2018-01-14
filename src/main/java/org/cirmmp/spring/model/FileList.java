@@ -9,7 +9,7 @@ public class FileList {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name="FILE_NAME")
     private String fileName;
@@ -30,14 +30,14 @@ public class FileList {
     private byte[] content;
 
     @ManyToOne
-    @JoinColumn(name = "PROJECT_ID")
+   // @JoinColumn(name = "PROJECT_ID")
     private Project project;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

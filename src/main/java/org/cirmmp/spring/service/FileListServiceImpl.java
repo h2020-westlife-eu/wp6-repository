@@ -4,6 +4,7 @@ import org.cirmmp.spring.dao.FileListDao;
 import org.cirmmp.spring.model.FileList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class FileListServiceImpl implements FileListService {
     //}
 
     @Override
+    @Transactional
     public void save(FileList fileList) {
         dao.save(fileList);
 

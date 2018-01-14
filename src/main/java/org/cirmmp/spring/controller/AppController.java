@@ -267,7 +267,7 @@ public class AppController {
 	}
 
 	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.GET)
-	public String addFiless(@PathVariable int projectId, ModelMap model) {
+	public String addFiless(@PathVariable Long projectId, ModelMap model) {
 
         logger.info("Sono in add-file GET");
         List<FileList> files = new ArrayList<>();
@@ -286,7 +286,7 @@ public class AppController {
 	}
 
 	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.POST)
-	public String uploadFile(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable int projectId) throws IOException {
+	public String uploadFile(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable Long projectId) throws IOException {
 
         logger.info("Sono in add-file POST");
 
@@ -378,7 +378,7 @@ public class AppController {
 
 
     @RequestMapping(value = { "/edit-project-{Id}" }, method = RequestMethod.GET)
-    public String editProject(@PathVariable int Id, ModelMap model) {
+    public String editProject(@PathVariable Long Id, ModelMap model) {
         Project project = projectService.findById(Id);
         model.addAttribute("project", project);
         model.addAttribute("edit", true);
@@ -428,12 +428,15 @@ public class AppController {
 		document.setType(multipartFile.getContentType());
 		document.setContent(multipartFile.getBytes());
 		document.setCreation_date(new Date());
+		document.setProject(project);
 		//document.setProjectId(project.getId());
         fileLists.add(document);
 		project.setFileLists(fileLists);
-        logger.info("Update project");
-		projectService.fileUpdateProject(project);
-		//fileListService.save(document);
+        logger.info("------- save Filelist----------");
+		fileListService.save(document);
+        logger.info("------- save Project----------");
+		//projectService.fileUpdateProject(project, document);
+
 	}
 
 }

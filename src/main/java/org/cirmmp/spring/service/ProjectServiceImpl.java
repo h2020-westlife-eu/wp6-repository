@@ -1,6 +1,7 @@
 package org.cirmmp.spring.service;
 
 import org.cirmmp.spring.dao.ProjectDao;
+import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectDao dao;
 
-    public Project findById(Integer id){
+    public Project findById(Long id){
         return dao.findById(id);
     }
 
@@ -34,7 +35,6 @@ public class ProjectServiceImpl implements ProjectService {
         return dao.findAllProject();
     }
 
-
     public void updateProject(Project project) {
         Project entity = dao.findById(project.getId());
         if(entity!=null){
@@ -45,14 +45,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Transactional
-    public void fileUpdateProject(Project project){
+    public void fileUpdateProject(Project project, FileList fileList){
         Project entity = dao.findById(project.getId());
         if(entity!=null){
             if(project.getFileLists()!=null){
-                entity.setFileLists(project.getFileLists());
+                entity.addFileLists(fileList);
             }
         }
-        dao.update(entity);
+        dao.save(entity);
     }
 }
 

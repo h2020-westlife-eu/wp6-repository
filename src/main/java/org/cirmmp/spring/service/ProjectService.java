@@ -1,12 +1,13 @@
 package org.cirmmp.spring.service;
 
+import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 
 import java.util.List;
 
 public interface ProjectService {
 
-    Project findById(Integer id);
+    Project findById(Long id);
 
     List<Project> findByUserId(int sso);
 
@@ -18,6 +19,6 @@ public interface ProjectService {
 
     void updateProject(Project project);
 
-    void fileUpdateProject(Project pro);
+    void fileUpdateProject(Project pro, FileList fileList);
 
 }

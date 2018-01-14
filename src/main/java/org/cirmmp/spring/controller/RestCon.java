@@ -102,7 +102,7 @@ public class RestCon {
     }
 
     @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
-    public ResponseEntity listFilesId(@PathVariable int projectId) {
+    public ResponseEntity listFilesId(@PathVariable Long projectId) {
 
         Project project = projectService.findById(projectId);
         List<FileList> files = project.getFileLists();
