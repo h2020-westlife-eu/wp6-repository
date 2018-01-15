@@ -1,24 +1,8 @@
-<!-- components/navigation.html -->
 <template bindable="router">
-  <!-- breadcrumbs like
-  <span repeat.for="row of router.navigation" class="${row.isActive ? 'active' : ''}">
-    <a class="w3-button  w3-small w3-padding-4 vf-right-border" href.bind="row.href">${row.title}</a>
-  </span>
-  -->
-  <nav style="float:left!important">
-
-    <ul>
-      <li style="padding:0!important">
-        <!--<li class="w3-dropdown-hover">-->
-        <a href="#">&#8801;</a>
         <ul><!-- class="w3-dropdown-content w3-white w3-card-4">-->
           <li repeat.for="row of router.navigation" class="${row.isActive ? 'nav-item active' : 'nav-item'}">
             <a href.bind="row.href">${row.title}</a>
           </li>
         </ul>
-      </li>
-
-    </ul>
-  </nav>
 </template>
 

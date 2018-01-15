@@ -19,11 +19,12 @@ nav {
   nav li li a:visited {
     color: #303030;
     text-decoration: none;
+    padding: 6px 8px;
   }
 
   nav a {
     display: block;
-    padding: 6px 8px;
+
   }
 
   nav li {
