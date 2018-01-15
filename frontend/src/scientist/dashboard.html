@@ -2,7 +2,7 @@
   <require from="./dashboard.css"></require>
   <require from="../components/webdavfilepanel"></require>
   <require from="../components/fileeditor"></require>
-  <h3>Repository Dashboard</h3>
+  <h3>Visitor Dashboard</h3>
   <p>You are logged as visiting scientist.
     You can view your datasets available after your visit.
     To review Visit Proposal, go to Instruct <a target="_blank"
@@ -13,9 +13,9 @@
        class="w3-button  w3-round-small w3-small">Submission</a>.
   </p>
 
-
-    <h4>Select<span show.bind="! showProposals">ed</span> project visit/proposal:</h4>
-
+<div class="w3-half">
+  <div class="w3-margin">
+    <h4>Available project visits/proposals:</h4>
     <table class="w3-table-all">
       <tr>
         <th>id</th>
@@ -32,11 +32,16 @@
         <td>${selectedProject.id}</td>
         <td ><a class="w3-hover-green" route-href="route: dashboard">
           ${selectedProject.projectName}
+        </a>
         </td>
         <td>${selectedProject.summary}</td>
       </tr>
     </table>
-    <h4>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</h4>
+  </div>
+</div>
+  <div class="w3-half">
+    <div class="w3-margin">
+    <h4>Available datasets:</h4>
 
       <table class="w3-table-all">
         <thead>
@@ -61,16 +66,8 @@
         </tr>
         </tbody>
       </table>
-
-    <h4>Files:</h4>
-    <div show.bind="! showDatasets" class="w3-half">
-      <webdavfilepanel></webdavfilepanel>
     </div>
-    <div show.bind="! showDatasets" class="w3-half">
-      <div class="w3-margin-left">
-        <fileeditor></fileeditor>
-      </div>
-    </div>
+  </div>
 
   <p>&nbsp;</p>
 </template>

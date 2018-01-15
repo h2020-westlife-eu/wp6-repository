@@ -1,7 +1,7 @@
 <template bindable="router">
   <div class="w3-bar-block w3-black">
+    <a class='w3-bar-item w3-button w3-white w3-padding-0' href="/">Repository Home</a>
     <a repeat.for="row of router.navigation" class="${row.isActive ? 'w3-bar-item w3-button w3-blue' : 'w3-bar-item w3-button w3-white'}" href.bind="row.href">${row.title}</a>
-
   </div>
 </template>
 

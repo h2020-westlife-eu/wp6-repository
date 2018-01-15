@@ -3,7 +3,8 @@ export class Staffapp {
   configureRouter(config, router) {
     config.title = 'West-Life Repository Router';
     config.map([
-      {route: ['', 'home'], name: 'home', moduleId: 'staff/repositorystaff', nav: true, title: 'Dataset Dashboard'}
+      {route: ['', 'dashboard'], name: 'dashboard', moduleId: 'staff/repositorystaff', nav: true, title: 'Visitor Experiment Dashboard'},
+      {route: 'dataupload', name: 'dataupload', moduleId: 'staff/dataupload', nav: true, title: 'Visitor Dataset Upload'}
     ]);
     this.router = router;
 
