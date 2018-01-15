@@ -39,12 +39,14 @@
           <td><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.summary}</a></td>
           <td>${item.info}</td>
           <td>${item.projectId}</td>
+          <td><icopy href.bind="item.webdavurl"></icopy></td>
         </tr>
-        <tr if.bind="! showDatasets" class="w3-hover-green"  click.trigger="deselectDataset()">
-          <td>${selectedDataset.date}</td>
-          <td>${selectedDataset.summary}</td>
-          <td>${selectedDataset.info}</td>
-          <td>${selectedDataset.projectId}</td>
+        <tr if.bind="! showDatasets" class="w3-hover-green">
+          <td click.trigger="deselectDataset()">${selectedDataset.date}</td>
+          <td click.trigger="deselectDataset()">${selectedDataset.summary}</td>
+          <td click.trigger="deselectDataset()">${selectedDataset.info}</td>
+          <td click.trigger="deselectDataset()">${selectedDataset.projectId}</td>
+          <td><icopy href.bind="selectedDataset.webdavurl"></icopy></td>
         </tr>
         </tbody>
       </table>

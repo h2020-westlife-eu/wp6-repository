@@ -8,6 +8,7 @@
         <td click.trigger="selectFile(file)">${file.size}</td>
         <td click.trigger="selectFile(file)">${file.date}</td>
         <td><ilink if.bind="! file.isdir" href.bind="file.webdavurl"></ilink></td>
+        <td><icopy href.bind="file.webdavurl"></icopy></td>
       </tr>
     </table>
   </div>
