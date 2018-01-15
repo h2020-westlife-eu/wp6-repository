@@ -107,7 +107,7 @@ export class Dashboarddetail {
       this.selectedProject = this.projects.filter(i => i.id == this.selectedProjectId)[0];
       this.showProposals = false;
     }
-    console.log(this.selectedProject);
+    console.log(this.selectedProject.summary);
   }
 
   //filters dataset based on selectedProjectId

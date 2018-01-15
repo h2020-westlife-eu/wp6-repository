@@ -8,7 +8,9 @@ export function configure(config) {
     './ifile.html',
     './ilink.html',
     './icopy',
-    './ifolder.html'
+    './ifolder.html',
+    './idata.html',
+    './iproject.html'
   ]);
 
 }
