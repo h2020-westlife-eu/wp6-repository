@@ -34,9 +34,9 @@
         </tr>
         </thead>
         <tbody>
-        <tr show.bind="showDatasets" class="w3-hover-green" repeat.for="item of datasets" click.trigger="selectDataset(item)">
+        <tr show.bind="showDatasets" class="w3-hover-green" repeat.for="item of datasets">
           <td>${item.date}</td>
-          <td><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:item.id}"  click.trigger="selectDataset(item)">${item.summary}</a></td>
+          <td><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.summary}</a></td>
           <td>${item.info}</td>
           <td>${item.projectId}</td>
         </tr>
