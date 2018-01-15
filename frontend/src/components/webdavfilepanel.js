@@ -27,6 +27,8 @@ export class Webdavfilepanel {
   }
 
   setwebdav(webdavurl) {
+    console.log("setwebdav");
+    console.log(webdavurl);
     this.webdavpath = webdavurl;
     this.httpclient.fetch(this.webdavpath, {
       method: 'PROPFIND',

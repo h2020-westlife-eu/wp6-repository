@@ -1,8 +1,7 @@
 <template bindable="router">
-        <ul><!-- class="w3-dropdown-content w3-white w3-card-4">-->
-          <li repeat.for="row of router.navigation" class="${row.isActive ? 'nav-item active' : 'nav-item'}">
-            <a href.bind="row.href">${row.title}</a>
-          </li>
-        </ul>
+  <div class="w3-bar-block w3-black">
+    <a repeat.for="row of router.navigation" class="${row.isActive ? 'w3-bar-item w3-button w3-blue' : 'w3-bar-item w3-button w3-white'}" href.bind="row.href">${row.title}</a>
+
+  </div>
 </template>
 

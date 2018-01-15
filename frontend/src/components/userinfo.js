@@ -9,12 +9,16 @@ export class Userinfo {
   }
 
   attached(){
-    //console.log("Userinfo atached()")
+    console.log("Userinfo atached()")
     //console.log(this.pa);
     this.pa.getUserInfo().then(data => {
-        //console.log(data);
+        console.log(data);
         this.userinfo=data;
         this.showuserinfo=true;
+      })
+      .catch(error => {
+        console.log("no user info, disable showing it")
+        this.showuserinfo=false;
       })
   }
 }

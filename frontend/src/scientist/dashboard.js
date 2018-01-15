@@ -23,18 +23,6 @@ export class Dashboard {
     this.selectedProject={};
   }
 
-  /* it is triggered in first click on project - url is generated
-  * or when url is submitted directly to browser */
-  activate(params, routeConfig, navigationInstruction){
-    //console.log("Visitingscientist activate()")
-    if (params && params.projectid) {
-      this.filterSelectedProposal(params.projectid);
-    }
-    if (params && params.datasetid) {
-      this.filterSelectedDataset(params.datasetid);
-    }
-  }
-
   /* triggered when the view is shown to user - it requests projects and dataset
   * available for user from REST api*/
   attached() {
@@ -53,79 +41,4 @@ export class Dashboard {
     });
   }
 
-  //triggered when a project is clicked -
-  // if the same project is selected activate() is not launched - enough to hide all other projects
-  selectProposal(id) {
-    this.showProposals=false;
-    this.showDatasets=true;
-    return true;
-  }
-
-  /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
-  filterSelectedProposal(id) {
-    //this.selectedProposal=item;
-    this.selectedProjectId=id;
-    this.filterProject();
-    this.filterDataset();
-  }
-
-  filterSelectedDataset(id) {
-    //this.selectedProposal=item;
-    this.selectedDatasetId=id;
-    //this.filterMyProject();
-    this.filterMyDataset();
-  }
-  
-  //expects that selectedDatasetId contains dataset which should be viewed, based on it it selects projectid
-  //filters project which is owning the dataset and publish webdavresource event with dataset webdavurl
-  filterMyDataset(){
-    this.datasets= this.alldatasets.filter(i=> i.id === this.selectedDatasetId);
-    if (this.datasets.length>0){
-      this.selectedProjectId=this.datasets[0].projectId;
-      this.filterProject();
-      this.showProposals=false;
-      this.selectDataset(this.datasets[0]);
-    }
-  }
-
-  /* helper class called from filterSelecterProposal - or when attached() so activate() call before didn't have
-  * the projects and datasets sets from REST api*/
-  filterProject(){
-    this.selectedProject=this.projects.filter(i=>i.id==this.selectedProjectId)[0];
-    this.showProposals = false;
-    //console.log(this.selectedProject);
-  }
-
-  //filters dataset based on selectedProjectId
-  filterDataset(){
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId === this.selectedProjectId);
-    //console.log(this.datasets);
-  }
-
-  //deselect project proposal, shows all proposals and datasets
-  deselectProposal() {
-    //this.selectedProposal=item;
-    this.datasets = this.alldatasets;
-    this.showProposals = true;
-    return true; //continues to process <a href>
-  }
-
-  //shows only one dataset and publish webdavresource with dataset's url
-  selectDataset(item) {
-    this.showDatasets=false;
-    this.selectedDataset=item;
-    //TODO replace URL by the one obtained from API
-    this.dataseturl=item.webdavurl;
-    this.ea.publish(new Webdavresource(item.webdavurl))
-    return true; //continues to process <a href>
-  }
-
-  deselectDataset() {
-    this.showDatasets=true;
-  }
-
-  selectFile(file){
-    console.log("SelectFile()");
-    console.log(file);
-  }
 }

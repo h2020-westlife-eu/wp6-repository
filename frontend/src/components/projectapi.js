@@ -28,16 +28,24 @@ export class ProjectApi {
     this.userinfourl=apiurl+"/user";
     //needs admin/staff credentials
     this.usersurl="/admin/restcon/users";
+    this.projects=[];
+    this.datasets=[];
   }
 
   getProjects() {
-    return this.httpclient.fetch(this.projecturl)
+    //if the projects is already fetched - returns it, otherwise fetch
+    if (this.projects.length>0)
+      return new Promise(resolve => resolve(this.projects))
+    else
+      return this.httpclient.fetch(this.projecturl)
       .then(response => response.json())
       .then(data => {
+        this.projects= data
         return data
       })
       .catch(error => {
         console.log(error);
+
       });
   }
 
@@ -51,14 +59,16 @@ export class ProjectApi {
       })*/
     //not yet implemented on backend
   getDatasets() {
+    if (this.datasets.length>0)
+      return new Promise(resolve => resolve(this.datasets))
+    else
     return this.httpclient.fetch(this.dataurl)
       .then(response => response.json())
       .then(data => {
-        //console.log(data);
+        this.datasets=data;
         return data;
       })
       .catch(error => {
-        //console.log(error);
         console.log(error);
       });
 
@@ -86,8 +96,9 @@ export class ProjectApi {
         })
         .catch(error => {
           console.log('getUserInfo() returns error:');
-          console.log(error);
-//          alert("Sorry, error:"+error.statusCode+" "+error.message);
+          //console.log(error);
+          throw error;
+          //          alert("Sorry, error:"+error.statusCode+" "+error.message);
         });
     }
 }

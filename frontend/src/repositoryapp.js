@@ -4,9 +4,9 @@ export class Repositoryapp {
     config.title = 'West-Life Repository Router';
 
     config.map([
-      {route: ['', 'dashboard'], name: 'dashboard', moduleId: 'scientist/dashboard', nav: true, title: 'Dataset Dashboard'},
-      {route: 'dashboard/project/:projectid/', name: 'projectdetail', moduleId: 'scientist/dashboard'},
-      {route: 'dashboard/dataset/:datasetid/', name: 'datasetdetail', moduleId: 'scientist/dashboard'},
+      {route: ['', 'dashboard'], name: 'dashboard', moduleId: 'scientist/dashboard', nav: true, title: 'Repository Dashboard'},
+      {route: 'dashboard/project/:projectid/', name: 'projectdetail', moduleId: 'scientist/dashboarddetail'},
+      {route: 'dashboard/dataset/:datasetid/', name: 'datasetdetail', moduleId: 'scientist/dashboarddetail'},
       {route: 'repositorytovf', name: 'repositorytovf', moduleId: 'scientist/repositorytovf', nav: true, title: 'Upload to Virtual Folder'},
     ]);
     this.router = router;
