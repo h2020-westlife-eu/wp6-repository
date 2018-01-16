@@ -37,7 +37,7 @@ public class ProjectDaoImpl extends AbstractDao<Long, Project> implements Projec
 
     public void update(Project project){ update(project);}
 
-    public void deleteById(int id){
+    public void deleteById(Long id){
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("id", id));
          Project project = (Project)crit.uniqueResult();

@@ -101,22 +101,22 @@ public class RestCon {
         return new ResponseEntity(projects, HttpStatus.OK);
     }
 
-    @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
-    public ResponseEntity listFilesId(@PathVariable Long projectId) {
-
-        Project project = projectService.findById(projectId);
-        List<FileList> files = project.getFileLists();
-        ArrayList<JFileList> nfiles = new ArrayList<>();
-        for(FileList ifile :files){
-            JFileList infiles = new JFileList();
-            infiles.setFiletName(ifile.getFileName());
-            infiles.setFileInfo(ifile.getFileInfo());
-           // infiles.setProjectId(ifile.getProjectId());
-            nfiles.add(infiles);
-        }
-
-        return new ResponseEntity(nfiles, HttpStatus.OK);
-    }
+//    @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
+//    public ResponseEntity listFilesId(@PathVariable Long projectId) {
+//
+//        Project project = projectService.findById(projectId);
+//        List<FileList> files = project.getFileLists();
+//        ArrayList<JFileList> nfiles = new ArrayList<>();
+//        for(FileList ifile :files){
+//            JFileList infiles = new JFileList();
+//            infiles.setFiletName(ifile.getFileName());
+//            infiles.setFileInfo(ifile.getFileInfo());
+//           // infiles.setProjectId(ifile.getProjectId());
+//            nfiles.add(infiles);
+//        }
+//
+//        return new ResponseEntity(nfiles, HttpStatus.OK);
+//    }
 
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {

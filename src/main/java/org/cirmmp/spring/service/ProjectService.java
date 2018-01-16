@@ -1,6 +1,5 @@
 package org.cirmmp.spring.service;
 
-import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 
 import java.util.List;
@@ -13,12 +12,12 @@ public interface ProjectService {
 
     void save(Project project);
 
-    void deleteById(int id);
+    void deleteById(Long id);
 
     List<Project> findAllProject();
 
     void updateProject(Project project);
 
-    void fileUpdateProject(Project pro, FileList fileList);
+   // void fileUpdateProject(Project pro, FileList fileList);
 
 }

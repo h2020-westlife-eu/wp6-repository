@@ -33,7 +33,7 @@ public class Project {
     private Date creation_date;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<FileList> fileLists ;
+    private List<DataSet> dataset ;
 
     public Long getId() {
         return id;
@@ -91,19 +91,20 @@ public class Project {
         this.creation_date = creation_date;
     }
 
-    public List<FileList> getFileLists() {
-        return fileLists;
+    public List<DataSet> getDataset() {
+        return dataset;
     }
 
-    public void setFileLists(List<FileList> fileLists) {
-        this.fileLists = fileLists;
-    }
-    public void addFileLists(FileList fileList){
-        this.fileLists.add(fileList);
+    public void setDataset(List<DataSet> dataset) {
+        this.dataset = dataset;
     }
 
-    public void removeFileLists(FileList fileList){
-        this.fileLists.remove(fileList);
+    public void addDataSet(DataSet dataset){
+        this.dataset.add(dataset);
+    }
+
+    public void removeDataSet(DataSet dataSet){
+        this.dataset.remove(dataSet);
     }
 }
 

@@ -1,11 +1,9 @@
 package org.cirmmp.spring.service;
 
 import org.cirmmp.spring.dao.ProjectDao;
-import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class ProjectServiceImpl implements ProjectService {
         dao.save(project);
     }
 
-    public void deleteById(int id){
+    public void deleteById(Long id){
         dao.deleteById(id);
     }
 
@@ -44,15 +42,15 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    @Transactional
-    public void fileUpdateProject(Project project, FileList fileList){
-        Project entity = dao.findById(project.getId());
-        if(entity!=null){
-            if(project.getFileLists()!=null){
-                entity.addFileLists(fileList);
-            }
-        }
-        dao.save(entity);
-    }
+//    @Transactional
+//    public void fileUpdateProject(Project project, FileList fileList){
+//        Project entity = dao.findById(project.getId());
+//        if(entity!=null){
+//            if(project.getDataset()!=null){
+//                entity.addDataSet(DataSet);
+//            }
+//        }
+//        dao.save(entity);
+//    }
 }
 

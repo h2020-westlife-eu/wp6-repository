@@ -31,7 +31,7 @@ public class FileList {
 
     @ManyToOne
    // @JoinColumn(name = "PROJECT_ID")
-    private Project project;
+    private DataSet dataSet;
 
     public Long getId() {
         return id;
@@ -81,11 +81,11 @@ public class FileList {
         this.content = content;
     }
 
-    public Project getProject() {
-        return project;
+    public DataSet getDataSet() {
+        return dataSet;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
+    public void setDataSet(DataSet dataSet) {
+        this.dataSet = dataSet;
     }
 }

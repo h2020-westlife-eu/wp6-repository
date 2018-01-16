@@ -13,12 +13,12 @@ import java.util.List;
 
 @Repository("fileList")
 @Transactional
-public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements FileListDao {
+public class FileListDaoImpl extends AbstractDao<Long, FileList> implements FileListDao {
 
     static final Logger logger = LoggerFactory.getLogger(FileListDaoImpl.class);
 
     @Override
-    public FileList findById(int id) {
+    public FileList findById(Long id) {
         FileList filiList = getByKey(id);
 
         return filiList;
@@ -39,7 +39,7 @@ public class FileListDaoImpl extends AbstractDao<Integer, FileList> implements F
     }
 
     @Override
-    public void deleteById(int Id) {
+    public void deleteById(Long Id) {
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("id", Id));
         FileList fileList = (FileList) crit.uniqueResult();

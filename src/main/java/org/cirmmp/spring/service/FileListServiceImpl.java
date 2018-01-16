@@ -15,7 +15,7 @@ public class FileListServiceImpl implements FileListService {
     private FileListDao dao;
 
     @Override
-    public FileList findById(int id) {
+    public FileList findById(Long id) {
         return dao.findById(id);
     }
 
@@ -32,7 +32,7 @@ public class FileListServiceImpl implements FileListService {
     }
 
     @Override
-    public void deleteById(int fillist_id) {
+    public void deleteById(Long fillist_id) {
         dao.deleteById(fillist_id);
 
     }

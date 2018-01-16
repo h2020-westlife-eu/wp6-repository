@@ -13,7 +13,7 @@
 <div class="generic-container">
     <div class="panel panel-default">
         <!-- Default panel contents -->
-        <div class="panel-heading"><span class="lead">List of Project </span></div>
+        <div class="panel-heading"><span class="lead">List of Dataset </span></div>
         <div class="tablecontainer">
             <table class="table table-hover">
                 <thead>
@@ -21,6 +21,8 @@
                     <th>Project Name</th>
                     <th>Summary</th>
                     <th>UserId</th>
+                    <th>Dataset Name</th>
+                    <th>Dataset Summary</th>
                     <th width="100"></th>
                     <th width="100"></th>
                 </tr>
@@ -28,12 +30,16 @@
                 <tbody>
                 <c:forEach items="${projects}" var="project">
                     <tr>
-                        <td>${project.projectName}</td>
-                        <td>${project.summary}</td>
-                        <td>${project.userId}</td>
-                        <td><a href="<c:url value='/add-dataset-${project.id}' />" class="btn btn-success custom-width">Add Dataset</a></td>
-                        <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
-                        <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        <c:forEach items="${projects.dataset}" var="dataset">
+                            <td>${project.projectName}</td>
+                            <td>${project.summary}</td>
+                            <td>${project.userId}</td>
+                            <td>${dataset.dataName}</td>
+                            <tf>${dataset.summary}</tf>
+                            <td><a href="<c:url value='/add-file-${project.id}' />" class="btn btn-success custom-width">Add File</a></td>
+                            <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
+                            <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        </c:forEach>
                     </tr>
                 </c:forEach>
                 </tbody>

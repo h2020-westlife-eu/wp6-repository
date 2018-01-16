@@ -1,10 +1,7 @@
 package org.cirmmp.spring.controller;
 
 import org.cirmmp.spring.model.*;
-import org.cirmmp.spring.service.FileListService;
-import org.cirmmp.spring.service.ProjectService;
-import org.cirmmp.spring.service.UserProfileService;
-import org.cirmmp.spring.service.UserService;
+import org.cirmmp.spring.service.*;
 import org.cirmmp.spring.util.FileValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +56,9 @@ public class AppController {
 
 	@Autowired
 	FileListService fileListService;
+
+	@Autowired
+	DataSetService dataSetService;
 
 	//@Autowired
 	//LinkService linkService;
@@ -266,13 +266,30 @@ public class AppController {
 		return "projectList";
 	}
 
-	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.GET)
-	public String addFiless(@PathVariable Long projectId, ModelMap model) {
+    @RequestMapping(value = { "/listData" }, method = RequestMethod.GET)
+    public String listData(ModelMap model) {
+
+        List<Project> projects = projectService.findAllProject();
+        model.addAttribute("projects", projects);
+        return "datasetlist";
+    }
+
+
+    @RequestMapping(value = {"/add-dataset-{proId}"}, method = RequestMethod.GET)
+    public String addDataset(@PathVariable Long proId, ModelMap model){
+        logger.info("Sono in add-dataset GET");
+        DataSet dataset = new DataSet();
+        model.addAttribute("dataset", dataset);
+        return "newdataset";
+    }
+
+	@RequestMapping(value = { "/add-file-{dataId}" }, method = RequestMethod.GET)
+	public String addFiless(@PathVariable Long dataId, ModelMap model) {
 
         logger.info("Sono in add-file GET");
         List<FileList> files = new ArrayList<>();
-		Project project = projectService.findById(projectId);
-		model.addAttribute("project", project);
+		DataSet dataset = dataSetService.findById(dataId);
+		model.addAttribute("dataset", dataset);
 //
 		FileBucket fileModel = new FileBucket();
 		model.addAttribute("fileBucket", fileModel);
@@ -285,17 +302,17 @@ public class AppController {
 		return "managefiles";
 	}
 
-	@RequestMapping(value = { "/add-file-{projectId}" }, method = RequestMethod.POST)
-	public String uploadFile(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable Long projectId) throws IOException {
+	@RequestMapping(value = { "/add-file-{dataId}" }, method = RequestMethod.POST)
+	public String uploadFile(@Valid FileBucket fileBucket, BindingResult result, ModelMap model, @PathVariable Long dataId) throws IOException {
 
         logger.info("Sono in add-file POST");
 
 		if (result.hasErrors()) {
 			System.out.println("validation errors");
-			Project project = projectService.findById(projectId);
-			model.addAttribute("project", project);
-            Project projectFiles = projectService.findById(projectId);
-            List<FileList> files = projectFiles.getFileLists();
+			DataSet dataSet = dataSetService.findById(dataId);
+			model.addAttribute("dataset", dataSet);
+
+            List<FileList> files = dataSet.getFileLists();
 
 			//List<FileList> files = fileListService.findByProjectId(projectId);
 			model.addAttribute("files", files);
@@ -305,14 +322,26 @@ public class AppController {
 
 			System.out.println("Fetching file");
 
-			Project project = projectService.findById(projectId);
-			model.addAttribute("project", project);
 
-			saveFile(fileBucket, project);
+			DataSet dataSet = dataSetService.findById(dataId);
+			model.addAttribute("dataset", dataSet);
 
-			return "redirect:/add-file-" + projectId;
+
+			saveFile(fileBucket, dataSet);
+
+			return "redirect:/add-file-" + dataId;
 		}
 	}
+
+
+	@RequestMapping(value = { "/newdataset" }, method = RequestMethod.GET)
+	public String newDataset(ModelMap model){
+        DataSet dataSet = new DataSet();
+        model.addAttribute("dataset",dataSet);
+        model.addAttribute("edit", false);
+        return "newdataset";
+    }
+
 
 
 	@RequestMapping(value = { "/newproject" }, method = RequestMethod.GET)
@@ -358,7 +387,7 @@ public class AppController {
 	}
 
     @RequestMapping(value = { "/download-file-{prId}-{fileId}" }, method = RequestMethod.GET)
-    public String downloadFile(@PathVariable int prId, @PathVariable int fileId, HttpServletResponse response) throws IOException {
+    public String downloadFile(@PathVariable int prId, @PathVariable Long fileId, HttpServletResponse response) throws IOException {
         FileList document = fileListService.findById(fileId);
         response.setContentType(document.getType());
         response.setContentLength(document.getContent().length);
@@ -370,7 +399,7 @@ public class AppController {
     }
 
     @RequestMapping(value = { "/delete-file-{prId}-{fileId}" }, method = RequestMethod.GET)
-    public String deleteFile(@PathVariable int prId, @PathVariable int fileId) {
+    public String deleteFile(@PathVariable int prId, @PathVariable Long fileId) {
         fileListService.deleteById(fileId);
         return "redirect:/add-file-"+prId;
     }
@@ -391,7 +420,7 @@ public class AppController {
      */
     @RequestMapping(value = { "/edit-project-{Id}" }, method = RequestMethod.POST)
     public String updateUser(@Valid Project project, BindingResult result,
-                             ModelMap model, @PathVariable int Id) {
+                             ModelMap model, @PathVariable Long Id) {
 
         if (result.hasErrors()) {
             return "registration";
@@ -408,18 +437,18 @@ public class AppController {
      * This method will delete an user by it's SSOID value.
      */
     @RequestMapping(value = { "/delete-project-{Id}" }, method = RequestMethod.GET)
-    public String deleteProject(@PathVariable int Id) {
+    public String deleteProject(@PathVariable Long Id) {
         projectService.deleteById(Id);
         return "redirect:/listPro";
     }
 
 
 
-	private void saveFile(FileBucket fileBucket, Project project) throws IOException {
+	private void saveFile(FileBucket fileBucket, DataSet dataset) throws IOException {
 
 		FileList document = new FileList();
 
-        List<FileList> fileLists = new ArrayList<>();
+        //List<FileList> fileLists = new ArrayList<>();
 
 		MultipartFile multipartFile = fileBucket.getFile();
 
@@ -428,10 +457,10 @@ public class AppController {
 		document.setType(multipartFile.getContentType());
 		document.setContent(multipartFile.getBytes());
 		document.setCreation_date(new Date());
-		document.setProject(project);
+		document.setDataSet(dataset);
 		//document.setProjectId(project.getId());
-        fileLists.add(document);
-		project.setFileLists(fileLists);
+        //fileLists.add(document);
+		//project.setFileLists(fileLists);
         logger.info("------- save Filelist----------");
 		fileListService.save(document);
         logger.info("------- save Project----------");
