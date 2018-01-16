@@ -55,7 +55,6 @@ export class Webdavfilepanel {
             item.size = filetype == 'httpd/unix-directory' ? 'DIR' : filesize;
             //convert to 4GB or 30MB or 20kB or 100b
             item.nicesize = item.isdir ? item.size: ~~(item.size / 1000000000) > 0 ? ~~(item.size / 1000000000) + "GB" : (~~(item.size / 1000000) > 0 ? ~~(item.size / 1000000) + "MB" : (~~(item.size / 1000) > 0 ? ~~(item.size / 1000) + "kB" : item.size + " b"));
-
             item.type = filetype;
             item.webdavurl=this.webdavpath+item.name;
             //directory first, files after that
