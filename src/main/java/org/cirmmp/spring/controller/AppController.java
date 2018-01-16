@@ -266,11 +266,14 @@ public class AppController {
 		return "projectList";
 	}
 
-    @RequestMapping(value = { "/listData" }, method = RequestMethod.GET)
-    public String listData(ModelMap model) {
-
-        List<Project> projects = projectService.findAllProject();
-        model.addAttribute("projects", projects);
+    @RequestMapping(value = { "/listData-{proId}" }, method = RequestMethod.GET)
+    public String listData(@PathVariable Long proId, ModelMap model) {
+      //  Project projects = projectService.findById(proId);
+        List<DataSet> dataset = projectService.findDatasetByProjectId(proId);
+        logger.info("-----DATASET----");
+        logger.info(dataset.get(0).getDataName());
+        model.addAttribute("dataset", dataset);
+        model.addAttribute("proid",proId);
         return "datasetlist";
     }
 
@@ -281,6 +284,20 @@ public class AppController {
         DataSet dataset = new DataSet();
         model.addAttribute("dataset", dataset);
         return "newdataset";
+    }
+
+    @RequestMapping(value = {"/add-dataset-{proId}"}, method = RequestMethod.POST)
+    public String addDatasetPost(@PathVariable Long proId, @Valid DataSet dataSet, BindingResult result,
+                                 ModelMap model){
+        if (result.hasErrors()) {
+            return "newdataset";
+        }
+        logger.info("Sono in add-dataset POST");
+        Project project = projectService.findById(proId);
+        dataSet.setProject(project);
+        dataSetService.save(dataSet);
+        return "redirect:/listData-"+proId;
+
     }
 
 	@RequestMapping(value = { "/add-file-{dataId}" }, method = RequestMethod.GET)

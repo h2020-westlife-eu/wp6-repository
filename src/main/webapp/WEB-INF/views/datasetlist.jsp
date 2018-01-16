@@ -18,7 +18,7 @@
             <table class="table table-hover">
                 <thead>
                 <tr>
-                    <th>Project Name</th>
+                    <th>Project Id</th>
                     <th>Summary</th>
                     <th>UserId</th>
                     <th>Dataset Name</th>
@@ -28,26 +28,23 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${projects}" var="project">
+                 <c:forEach items="${dataset}" var="dataset">
                     <tr>
-                        <c:forEach items="${projects.dataset}" var="dataset">
-                            <td>${project.projectName}</td>
-                            <td>${project.summary}</td>
-                            <td>${project.userId}</td>
-                            <td>${dataset.dataName}</td>
-                            <tf>${dataset.summary}</tf>
-                            <td><a href="<c:url value='/add-file-${project.id}' />" class="btn btn-success custom-width">Add File</a></td>
-                            <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
-                            <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
-                        </c:forEach>
-                    </tr>
+                        <td>${proid}</td>
+                        <td>${dataset.dataName}</td>
+                        <tf>${dataset.summary}</tf>
+                        <td><a href="<c:url value='/add-file-${project.id}' />" class="btn btn-success custom-width">Add File</a></td>
+                        <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
+                        <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
+
+                     </tr>
                 </c:forEach>
                 </tbody>
             </table>
         </div>
     </div>
     <div class="well">
-        <a href="<c:url value='/newproject' />">Add New Project</a>
+        <a href="<c:url value='//add-dataset-${proid}' />">Add New Dataset to project number ${proid}</a>
     </div>
 </div>
 </body>

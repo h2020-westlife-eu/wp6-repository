@@ -1,9 +1,11 @@
 package org.cirmmp.spring.service;
 
 import org.cirmmp.spring.dao.ProjectDao;
+import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,8 +15,18 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectDao dao;
 
+    //@Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
     public Project findById(Long id){
         return dao.findById(id);
+    }
+
+    //@Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional
+    @Override
+    public  List<DataSet> findDatasetByProjectId(Long id){
+        Project entity = dao.findById(id);
+        List<DataSet> dataset = entity.getDataset();
+        return dataset;
     }
 
     public List<Project> findByUserId(int sso){

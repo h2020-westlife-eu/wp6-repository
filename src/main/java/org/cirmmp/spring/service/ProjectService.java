@@ -1,5 +1,6 @@
 package org.cirmmp.spring.service;
 
+import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public interface ProjectService {
     void deleteById(Long id);
 
     List<Project> findAllProject();
+
+    List<DataSet> findDatasetByProjectId(Long id);
 
     void updateProject(Project project);
 

@@ -25,6 +25,18 @@ public class DataSet {
     @Column(name="SUMMARY")
     private String summary;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="CREATION_DATE")
+    private Date creation_date;
+
+    @ManyToOne
+    // @JoinColumn(name = "PROJECT_ID")
+    private Project project;
+
+    @OneToMany(mappedBy = "dataSet", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<FileList> fileLists ;
+
+
     public Long getId() {
         return id;
     }
@@ -80,19 +92,6 @@ public class DataSet {
     public void setProject(Project project) {
         this.project = project;
     }
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="CREATION_DATE")
-    private Date creation_date;
-
-    @ManyToOne
-    // @JoinColumn(name = "PROJECT_ID")
-    private Project project;
-
-    @OneToMany(mappedBy = "dataSet", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<FileList> fileLists ;
-
-
 
     public List<FileList> getFileLists() {
         return fileLists;
