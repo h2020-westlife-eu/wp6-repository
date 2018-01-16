@@ -131,6 +131,7 @@ export class Dashboarddetail {
     console.log(item);
     this.showDatasets=false;
     this.selectedDataset=item;
+
     //TODO replace URL by the one obtained from API
     this.dataseturl=item.webdavurl;
     this.ea.publish(new Webdavresource(item.webdavurl))
