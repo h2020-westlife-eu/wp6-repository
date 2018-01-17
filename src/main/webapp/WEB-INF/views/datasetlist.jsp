@@ -33,9 +33,9 @@
                         <td>${proid}</td>
                         <td>${dataset.dataName}</td>
                         <tf>${dataset.summary}</tf>
-                        <td><a href="<c:url value='/add-file-${project.id}' />" class="btn btn-success custom-width">Add File</a></td>
-                        <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
-                        <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        <td><a href="<c:url value='/add-file-${dataset.id}' />" class="btn btn-success custom-width">Add File</a></td>
+                        <td><a href="<c:url value='/edit-dataset-${dataset.id}' />" class="btn btn-success custom-width">edit</a></td>
+                        <td><a href="<c:url value='/delete-dataset-${dataset.id}' />" class="btn btn-danger custom-width">delete</a></td>
 
                      </tr>
                 </c:forEach>

@@ -29,14 +29,14 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${files}" var="file" varStatus="counter">
+                <c:forEach items="${resfiles}" var="file" varStatus="counter">
                     <tr>
                         <td>${counter.index + 1}</td>
                         <td>${file.fileName}</td>
                         <td>${file.type}</td>
                         <td>${file.fileInfo}</td>
-                        <td><a href="<c:url value='/download-file-${project.id}-${file.id}' />" class="btn btn-success custom-width">download</a></td>
-                        <td><a href="<c:url value='/delete-file-${project.id}-${file.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        <td><a href="<c:url value='/download-file-${dataset.id}-${file.id}' />" class="btn btn-success custom-width">download</a></td>
+                        <td><a href="<c:url value='/delete-file-${dataset.id}-${file.id}' />" class="btn btn-danger custom-width">delete</a></td>
                     </tr>
                 </c:forEach>
                 </tbody>

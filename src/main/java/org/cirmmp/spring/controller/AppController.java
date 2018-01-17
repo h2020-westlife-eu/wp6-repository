@@ -1,6 +1,7 @@
 package org.cirmmp.spring.controller;
 
 import org.cirmmp.spring.model.*;
+import org.cirmmp.spring.model.rest.RestFileList;
 import org.cirmmp.spring.service.*;
 import org.cirmmp.spring.util.FileValidator;
 import org.slf4j.Logger;
@@ -306,10 +307,12 @@ public class AppController {
         logger.info("Sono in add-file GET");
         List<FileList> files = new ArrayList<>();
 		DataSet dataset = dataSetService.findById(dataId);
+		List<RestFileList> restfiles = dataSetService.restFileFindById(dataId);
 		model.addAttribute("dataset", dataset);
 //
 		FileBucket fileModel = new FileBucket();
 		model.addAttribute("fileBucket", fileModel);
+		model.addAttribute("resfiles",restfiles);
 //        Project projectFiles = projectService.findById(projectId);
 //        List<FileList> files = projectFiles.getFileLists();
 
