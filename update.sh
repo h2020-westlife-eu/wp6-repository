@@ -15,6 +15,7 @@ if [ $LOCAL = $REMOTE ]; then
 elif [ $LOCAL = $BASE ]; then
     echo "Need to pull"
 git pull
+git secret reveal
 sudo bash <<EOF
 service westlife-repository stop
 service httpd stop
