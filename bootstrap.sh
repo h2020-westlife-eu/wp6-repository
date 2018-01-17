@@ -30,7 +30,8 @@ cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
 yum -y install epel-release
 yum repolist
 yum -y install davfs2 httpd
-
+# php only for ARIA demo
+yum -y install php php-common
 
 # prepare all configuration
 cp -R $WP6REPSRC/conf-template/* /
