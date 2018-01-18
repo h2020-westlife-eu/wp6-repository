@@ -18,6 +18,7 @@ public class JFileList {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date creation_date;
 
+
     private int dataSetId;
 
     private String summary;
