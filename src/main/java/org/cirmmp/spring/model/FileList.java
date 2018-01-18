@@ -29,6 +29,16 @@ public class FileList {
     @Column(name="CONTENT", nullable=true)
     private byte[] content;
 
+    @Column(name="SUMMARY")
+    private String summary;
+
+    @Column(name="INFO")
+    private String info;
+
+    @Column(name="WEBDAVURL")
+    private String webdavurl;
+
+
     @ManyToOne
    // @JoinColumn(name = "PROJECT_ID")
     private DataSet dataSet;
@@ -87,5 +97,29 @@ public class FileList {
 
     public void setDataSet(DataSet dataSet) {
         this.dataSet = dataSet;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public String getWebdavurl() {
+        return webdavurl;
+    }
+
+    public void setWebdavurl(String webdavurl) {
+        this.webdavurl = webdavurl;
     }
 }

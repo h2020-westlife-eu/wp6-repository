@@ -29,11 +29,12 @@ public class DataSet {
     @Column(name="CREATION_DATE")
     private Date creation_date;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     // @JoinColumn(name = "PROJECT_ID")
     private Project project;
 
-    @OneToMany(mappedBy = "dataSet", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "dataSet", cascade = CascadeType.ALL)
+    @org.hibernate.annotations.Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private List<FileList> fileLists ;
 
 

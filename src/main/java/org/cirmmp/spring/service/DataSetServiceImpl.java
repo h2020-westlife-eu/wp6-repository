@@ -31,6 +31,14 @@ public class DataSetServiceImpl implements DataSetService{
 
     @Transactional
     @Override
+    public List<FileList> FileFindById(Long id) {
+        DataSet dataset = findById(id);
+        List<FileList> filelist = dataset.getFileLists();
+        return filelist;
+    }
+
+    @Transactional
+    @Override
     public List<RestFileList> restFileFindById(Long id) {
         DataSet dataset = findById(id);
         List<FileList> filelist = dataset.getFileLists();

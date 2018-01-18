@@ -13,7 +13,11 @@ public interface ProjectService {
 
     void save(Project project);
 
+    void update(Project project);
+
     void deleteById(Long id);
+
+    void flushAndClear();
 
     List<Project> findAllProject();
 

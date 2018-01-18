@@ -25,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -60,6 +60,9 @@ public class AppController {
 
 	@Autowired
 	DataSetService dataSetService;
+
+    @Autowired
+    TarService tarService;
 
 	//@Autowired
 	//LinkService linkService;
@@ -271,6 +274,10 @@ public class AppController {
     public String listData(@PathVariable Long proId, ModelMap model) {
       //  Project projects = projectService.findById(proId);
         List<DataSet> dataset = projectService.findDatasetByProjectId(proId);
+
+        if(dataset.isEmpty()){
+            return "redirect:/listPro";
+        }
         logger.info("-----DATASET----");
         logger.info(dataset.get(0).getDataName());
         model.addAttribute("dataset", dataset);
@@ -418,6 +425,26 @@ public class AppController {
         return "redirect:/add-file-"+prId;
     }
 
+
+    @RequestMapping(value = { "/create-tar-{prId}" }, method = RequestMethod.GET)
+    public String createTarFile(@PathVariable Long prId, HttpServletResponse response) throws IOException {
+
+        //FileList document = fileListService.findById(fileId);
+        File tarFile = tarService.createTarFile("/tmp/wp6/",prId);
+        response.setContentType("application/gzip");
+
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(tarFile));
+
+        response.setContentLength((int)tarFile.length());
+        //response.setContentLength(document.getContent().length);
+        response.setHeader("Content-Disposition","attachment; filename=\"" + tarFile.getName() +"\"");
+
+        FileCopyUtils.copy(inputStream, response.getOutputStream());
+
+        return "redirect:/add-file-"+prId;
+    }
+
+
     @RequestMapping(value = { "/delete-file-{prId}-{fileId}" }, method = RequestMethod.GET)
     public String deleteFile(@PathVariable int prId, @PathVariable Long fileId) {
         fileListService.deleteById(fileId);
@@ -431,7 +458,7 @@ public class AppController {
         Project project = projectService.findById(Id);
         model.addAttribute("project", project);
         model.addAttribute("edit", true);
-        return "registration";
+        return "newproject";
     }
 
     /**
@@ -463,6 +490,16 @@ public class AppController {
     }
 
 
+
+    @RequestMapping(value = { "/delete-dataset-{proId}-{dataId}" }, method = RequestMethod.GET)
+    public String deleteDataSet(@PathVariable Long proId, @PathVariable Long dataId) {
+        //dataSetService.deleteById(Id);
+        DataSet dataSet = dataSetService.findById(dataId);
+        Project project = projectService.findById(proId);
+        project.removeDataSet(dataSet);
+        projectService.flushAndClear();
+        return "redirect:/listData-"+proId;
+    }
 
 	private void saveFile(FileBucket fileBucket, DataSet dataset) throws IOException {
 

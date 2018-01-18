@@ -79,8 +79,16 @@
             </form:form>
         </div>
     </div>
+
+    <div class="well">
+        Go to <a href="<c:url value='/listData' />">Dataset List</a>
+    </div>
+    <br>
     <div class="well">
         Go to <a href="<c:url value='/listPro' />">Project List</a>
+    </div>
+    <div class="well">
+        <a href="<c:url value='/create-tar-${dataset.id}' />">Download and create tar</a>
     </div>
 </div>
 </body>

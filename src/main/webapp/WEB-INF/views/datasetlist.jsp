@@ -4,7 +4,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    <title>Users List</title>
+    <title>File List</title>
     <link href="<c:url value='/static/css/bootstrap.css' />" rel="stylesheet"></link>
     <link href="<c:url value='/static/css/app.css' />" rel="stylesheet"></link>
 </head>
@@ -34,8 +34,8 @@
                         <td>${dataset.dataName}</td>
                         <tf>${dataset.summary}</tf>
                         <td><a href="<c:url value='/add-file-${dataset.id}' />" class="btn btn-success custom-width">Add File</a></td>
-                        <td><a href="<c:url value='/edit-dataset-${dataset.id}' />" class="btn btn-success custom-width">edit</a></td>
-                        <td><a href="<c:url value='/delete-dataset-${dataset.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        <%--<td><a href="<c:url value='/edit-dataset-${dataset.id}' />" class="btn btn-success custom-width">edit</a></td>--%>
+                        <td><a href="<c:url value='/delete-dataset-${proid}-${dataset.id}' />" class="btn btn-danger custom-width">delete</a></td>
 
                      </tr>
                 </c:forEach>
@@ -44,7 +44,11 @@
         </div>
     </div>
     <div class="well">
-        <a href="<c:url value='//add-dataset-${proid}' />">Add New Dataset to project number ${proid}</a>
+        <a href="<c:url value='/add-dataset-${proid}' />">Add New Dataset to project number ${proid}</a>
+        <br>
+        <a href="<c:url value='/listPro' />">Return to project list</a>
+        <br>
+
     </div>
 </div>
 </body>

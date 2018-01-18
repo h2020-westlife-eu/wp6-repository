@@ -17,5 +17,7 @@ public interface ProjectDao {
 
     List<Project> findAllProject();
 
+    void flushAndClear();
+
     void  update(Project project);
 }

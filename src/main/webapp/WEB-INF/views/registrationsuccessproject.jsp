@@ -15,9 +15,9 @@
         ${success}
     </div>
 
-    <span class="well pull-left">
+    <%--<span class="well pull-left">
 			<a href="<c:url value='/add-file-${project.id}' />">Click here to upload/manage your files</a>
-		</span>
+		</span>--%>
     <span class="well pull-right">
 			Go to <a href="<c:url value='/listPro' />">Pooject List</a>
 		</span>

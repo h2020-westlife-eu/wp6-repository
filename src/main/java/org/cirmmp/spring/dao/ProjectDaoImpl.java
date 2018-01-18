@@ -31,6 +31,11 @@ public class ProjectDaoImpl extends AbstractDao<Long, Project> implements Projec
         return project;
     }
 
+    public void flushAndClear(){
+        flush();
+        clear();
+    }
+
     public void save(Project project) {
         persist(project);
     }

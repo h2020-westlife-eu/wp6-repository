@@ -16,6 +16,14 @@ public class RestFileList {
 
     private int dataSetId;
 
+    private String summary;
+
+    private String info;
+
+    private String webdavurl;
+
+    private int projectid;
+
 
     public Long getId() {
         return id;
@@ -64,4 +72,37 @@ public class RestFileList {
     public void setDataSetId(int dataSetId) {
         this.dataSetId = dataSetId;
     }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public String getWebdavurl() {
+        return webdavurl;
+    }
+
+    public void setWebdavurl(String webdavurl) {
+        this.webdavurl = webdavurl;
+    }
+
+    public int getProjectid() {
+        return projectid;
+    }
+
+    public void setProjectid(int projectid) {
+        this.projectid = projectid;
+    }
+
 }

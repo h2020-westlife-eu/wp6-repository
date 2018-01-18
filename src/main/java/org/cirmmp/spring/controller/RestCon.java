@@ -128,9 +128,11 @@ public class RestCon {
             infiles.setFiletName(ifile.getFileName());
             infiles.setFileInfo(ifile.getFileInfo());
             //infiles.setProjectId(ifile.getProjectId());
+            infiles.setCreation_date(ifile.getCreation_date());
+            infiles.setSummary(infiles.getSummary());
+            infiles.setWebdavurl(infiles.getWebdavurl());
             nfiles.add(infiles);
         }
-
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 }

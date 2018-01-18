@@ -37,6 +37,14 @@ public class ProjectServiceImpl implements ProjectService {
         dao.save(project);
     }
 
+    public void update(Project project) {
+        dao.update(project);
+    }
+
+    @Transactional
+    public void flushAndClear(){
+        dao.flushAndClear();
+    }
     public void deleteById(Long id){
         dao.deleteById(id);
     }
