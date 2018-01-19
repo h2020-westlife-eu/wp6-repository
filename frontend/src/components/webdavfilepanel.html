@@ -6,7 +6,7 @@
         <td click.trigger="selectFile(file)" if.bind="! file.isdir" title="click to preview file in right panel">
           <span style="display:block;overflow:hidden;">
           ${file.name}
-          </span>ums
+          </span>
         </td>
         <td click.trigger="selectFile(file)" if.bind="file.isdir" title="click to go to directory"><b>${file.name}</b></td>
         <td click.trigger="selectFile(file)">${file.nicesize}</td>

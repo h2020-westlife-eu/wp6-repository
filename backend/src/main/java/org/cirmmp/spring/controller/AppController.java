@@ -217,13 +217,13 @@ public class AppController {
 			if (redirecturl.length()>0 ) {
 				//sets redirection attribute if not logged
 				logger.info("loginPage() branch1 redirecturl:"+redirecturl);
-				request.getSession().setAttribute("url_prior_login", redirecturl);
-
 				logger.info("reguesturl:"+request.getRequestURL());
 				logger.info("requestreferrer:"+request.getHeader("referer"));
 				if (redirecturl.startsWith("..")) redirecturl=request.getHeader("referer")+redirecturl.substring(3);
 				logger.info("loginPage() branch1 redirecturl2:"+redirecturl);
-				return "redirect:" + redirecturl;
+				request.getSession().setAttribute("url_prior_login", redirecturl);
+				//return "login";
+				//return "redirect:" + redirecturl;
 			}
 			return "login";
 	    } else {//redirect if already logged

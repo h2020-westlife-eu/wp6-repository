@@ -1,5 +1,4 @@
 #!/bin/sh
-echo asdf
 cd /home/vagrant/wp6-repository
 UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 git fetch
