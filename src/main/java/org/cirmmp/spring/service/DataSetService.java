@@ -20,4 +20,6 @@ public interface DataSetService {
     void deleteById(Long dataset_id);
 
     List<DataSet> findAllDataset();
+
+    //void update(DataSet dataSet);
 }

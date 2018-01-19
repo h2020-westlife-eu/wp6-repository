@@ -29,7 +29,9 @@ public class DataSet {
     @Column(name="CREATION_DATE")
     private Date creation_date;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    // This remove dataset and project
+    //@ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     // @JoinColumn(name = "PROJECT_ID")
     private Project project;
 

@@ -25,6 +25,7 @@ public interface ProjectService {
 
     void updateProject(Project project);
 
+    void deleteDataSet(Project project, DataSet dataset);
    // void fileUpdateProject(Project pro, FileList fileList);
 
 }

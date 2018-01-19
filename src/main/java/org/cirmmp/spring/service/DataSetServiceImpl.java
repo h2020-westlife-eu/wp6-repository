@@ -56,6 +56,7 @@ public class DataSetServiceImpl implements DataSetService{
         return outFile;
     }
 
+    @Transactional
     @Override
     public void deleteById(Long dataset_id) {
         dao.deleteById(dataset_id);
@@ -67,4 +68,10 @@ public class DataSetServiceImpl implements DataSetService{
         return dao.findAllDataset();
 
     }
+//    @Override
+//    public void update(DataSet dataSet){
+//        dao.findById(dataSet.getId());
+//        dao.
+//    }
+
 }

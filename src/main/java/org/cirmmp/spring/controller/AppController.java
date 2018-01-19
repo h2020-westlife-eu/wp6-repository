@@ -493,11 +493,14 @@ public class AppController {
 
     @RequestMapping(value = { "/delete-dataset-{proId}-{dataId}" }, method = RequestMethod.GET)
     public String deleteDataSet(@PathVariable Long proId, @PathVariable Long dataId) {
-        //dataSetService.deleteById(Id);
+        //dataSetService.deleteById(dataId);
         DataSet dataSet = dataSetService.findById(dataId);
         Project project = projectService.findById(proId);
-        project.removeDataSet(dataSet);
-        projectService.flushAndClear();
+        //dataSet.setProject(null);
+        //project.removeDataSet(dataSet);
+        projectService.deleteDataSet(project,dataSet);
+        //dataSetService.deleteById(dataId);
+        //projectService.save(project);
         return "redirect:/listData-"+proId;
     }
 
