@@ -3,6 +3,9 @@
   <require from="../components/webdavfilepanel"></require>
   <require from="../components/fileeditor"></require>
   <require from="../components/searchbydate"></require>
+  <require from="../components/projecttable"></require>
+  <require from="../components/datasettable"></require>
+  <require from="../components/importaria"></require>
   <h3>Visitor Dashboard</h3>
   <p>You are logged as visiting scientist.
     You can view your datasets available after your visit.
@@ -13,60 +16,18 @@
     <a target="_blank" href="https://www.structuralbiology.eu/submit-proposal/step1/new"
        class="w3-button  w3-round-small w3-small">Submission</a>.
   </p>
-  <searchbydate></searchbydate>
+  <importaria></importaria>
 <div class="w3-half">
   <div class="w3-margin">
-    <h4>Available project visits/proposals:</h4>
-    <table class="w3-table-all">
-      <tr>
-        <th>id</th>
-        <th>name</th>
-        <th>summary</th>
-      </tr>
-      <tr show.bind="showProposals" class="au-animate" repeat.for="project of projects">
-        <td>${project.id}</td>
-        <td><iproject></iproject><a class="w3-hover-green" route-href="route: projectdetail; params.bind: {projectid:project.id}">${project.projectName}</a>
-        </td>
-        <td>${project.summary} (${project.datasets})</td>
-      </tr>
-      <tr show.bind="! showProposals" title="click to show all projects" class="w3-hover-green">
-        <td>${selectedProject.id}</td>
-        <td ><iproject></iproject><a class="w3-hover-green" route-href="route: dashboard">
-          ${selectedProject.projectName}
-        </a>
-        </td>
-        <td>${selectedProject.summary}</td>
-      </tr>
-    </table>
+
+    <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>
+    <projecttable></projecttable>
   </div>
 </div>
   <div class="w3-half">
     <div class="w3-margin">
     <h4>Available datasets:</h4>
-
-      <table class="w3-table-all">
-        <thead>
-        <tr>
-          <th>date</th>
-          <th>Summary</th>
-          <th>i</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr show.bind="showDatasets" class="w3-hover-green" repeat.for="item of alldatasets">
-          <td>${item.date}</td>
-          <td><idata></idata><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.summary}</a></td>
-          <td>${item.info}</td>
-          <td>${item.projectId}</td>
-        </tr>
-        <tr if.bind="! showDatasets" class="w3-hover-green">
-          <td>${selectedDataset.date}</td>
-          <td>${selectedDataset.summary}</td>
-          <td>${selectedDataset.info}</td>
-          <td>${selectedDataset.projectId}</td>
-        </tr>
-        </tbody>
-      </table>
+      <datasettable></datasettable>
     </div>
   </div>
 
