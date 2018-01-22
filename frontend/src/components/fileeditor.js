@@ -17,28 +17,38 @@ import {bindable} from 'aurelia-framework';
 
 
 export class Fileeditor {
-  static inject = [Element,EventAggregator, HttpClient];
+  static inject = [EventAggregator, HttpClient];
   @bindable pid;
 
-  constructor(el,ea,httpclient) {
-    this.el = el;
+  constructor(ea,httpclient) {
+
     this.ea = ea;
     this.client = httpclient;
     this.ea.subscribe(Editfile, msg => this.selectFile(msg.file));
     this.isimage=false;
     this.filename="";
+    this.showtable=false;
+
   }
 
   attached() {
-    let editor = this.el.querySelector(".Codemirror");
-    //prevent blured render if not shown before
-    //if (editor==null)
+    console.log("Fileeditor.attached()1");
     this.codemirror = CodeMirror.fromTextArea(this.cmTextarea, {
       lineNumbers: true,
       mode: "text/x-less",
       lineWrapping: true
     });
     this.codemirror.refresh();
+    //sample data ofr table
+    this.data=[["no data file parsed",0],[1,1],[1,1]];
+
+    //handsontable needs to be inlcuded in <script ...> of index.html page
+    this.ht2 = new Handsontable (this.filetable, {
+      data: this.data,
+      rowHeaders: true,
+      colHeaders: true
+    });
+    console.log(this.ht2);
   }
 
   selectFile(file) {
@@ -68,14 +78,21 @@ export class Fileeditor {
       if (!this.isimage)
 
         this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-2047'}})
-          .then(response => response.text())
-          .then(data =>{
+          .then(response => {
+            let response2= response.clone();
+              response.text().then(data => {
+                that.codemirror.setValue(data);
+                that.codemirror.refresh();
+                that.filename = file.webdavurl;
+              });
+              response2.blob().then(data2 => {
+                console.log("file blob content:");
+                console.log(data2);
+                let bindata= this.convert(data2);
+                console.log(bindata)
+                that.ht2.updateSettings({data:bindata})
 
-              //console.log("fileeditor.selectfile() loading:" + file.webdavurl);
-              //console.log(data);
-              that.codemirror.setValue(data);
-              that.codemirror.refresh();
-              that.filename=file.webdavurl;
+              })
             }
           ).catch(error => {
           alert('Error retrieving content from ' + file.webdavurl);
@@ -83,5 +100,22 @@ export class Fileeditor {
         });
 
 
+  }
+  //triggered when click on button
+  table() {
+    this.showtable= ! this.showtable;
+  }
+
+  convert(data) {
+    //convert blob to array of floats
+    let float32array  = null;
+    let arrayBufferNew = null;
+    let fileReader     = new FileReader();
+    fileReader.onload  = function(progressEvent) {
+      arrayBufferNew = this.result;
+      float32array  = new Float32Array(arrayBufferNew);
+    };
+    fileReader.readAsArrayBuffer(data);
+    return fileReader.result;
   }
 }

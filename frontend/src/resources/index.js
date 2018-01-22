@@ -10,7 +10,8 @@ export function configure(config) {
     './icopy',
     './ifolder.html',
     './idata.html',
-    './iproject.html'
+    './iproject.html',
+    './itable.html'
   ]);
 
 }
