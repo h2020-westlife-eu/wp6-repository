@@ -46,7 +46,11 @@ export class Fileeditor {
     this.ht2 = new Handsontable (this.filetable, {
       data: this.data,
       rowHeaders: true,
-      colHeaders: true
+      colHeaders: true,
+      autoColumnSize: {
+        samplingRatio: 23
+      },
+      manualColumnResize: true
     });
     console.log(this.ht2);
   }
@@ -80,19 +84,19 @@ export class Fileeditor {
         this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-2047'}})
           .then(response => {
             let response2= response.clone();
-              response.text().then(data => {
+            response.blob().then(data2 => {
+              console.log("file blob content:");
+              console.log(data2);
+              let bindata= this.convert(data2);
+//              console.log(bindata);
+//              that.ht2.updateSettings({data:bindata})
+
+            })
+              response2.text().then(data => {
                 that.codemirror.setValue(data);
                 that.codemirror.refresh();
                 that.filename = file.webdavurl;
               });
-              response2.blob().then(data2 => {
-                console.log("file blob content:");
-                console.log(data2);
-                let bindata= this.convert(data2);
-                console.log(bindata)
-                that.ht2.updateSettings({data:bindata})
-
-              })
             }
           ).catch(error => {
           alert('Error retrieving content from ' + file.webdavurl);
@@ -106,16 +110,26 @@ export class Fileeditor {
     this.showtable= ! this.showtable;
   }
 
-  convert(data) {
+  convert(blob) {
     //convert blob to array of floats
-    let float32array  = null;
-    let arrayBufferNew = null;
-    let fileReader     = new FileReader();
-    fileReader.onload  = function(progressEvent) {
-      arrayBufferNew = this.result;
-      float32array  = new Float32Array(arrayBufferNew);
-    };
-    fileReader.readAsArrayBuffer(data);
-    return fileReader.result;
+    let arrayBuffer;
+    let fileReader = new FileReader();
+    let that = this;
+    fileReader.addEventListener("loadend", function() {
+      console.log("fileeditor.convert() raw data read:")
+      console.log(fileReader.result);
+      that.rawdata = new Float32Array(fileReader.result);
+      that.data = []
+      for (let i=0;i<that.rawdata.length;i+=2){
+        that.data.push([that.rawdata[i],that.rawdata[i+1]]);
+      }
+      console.log(that.data);
+      that.ht2.updateSettings({data:that.data,   autoColumnSize: {
+          samplingRatio: 23
+        },
+      });
+      // reader.result contains the contents of blob as a typed array
+    });
+    fileReader.readAsArrayBuffer(blob);
   }
 }
