@@ -40,17 +40,17 @@ export class Fileeditor {
     });
     this.codemirror.refresh();
     //sample data ofr table
-    this.data=[["no data file parsed",0],[1,1],[1,1]];
+    this.data=[["no data for preview",1],[1,1]];
 
     //handsontable needs to be inlcuded in <script ...> of index.html page
     this.ht2 = new Handsontable (this.filetable, {
       data: this.data,
       rowHeaders: true,
-      colHeaders: true,
-      autoColumnSize: {
-        samplingRatio: 23
-      },
-      manualColumnResize: true
+      colHeaders: ["R","I"],
+      autoWrapRow:true,
+      stretchH: "all",
+      autoResizeColumn: true
+
     });
     console.log(this.ht2);
   }
@@ -108,6 +108,10 @@ export class Fileeditor {
   //triggered when click on button
   table() {
     this.showtable= ! this.showtable;
+    //workaround - table width is incorect when rendered hidden
+    //render it after 100 ms again, usually after it is shown, thus calculating
+    //correct width
+    if (this.showtable) window.setTimeout(function(that){that.ht2.render()},100,this);
   }
 
   convert(blob) {
@@ -117,17 +121,16 @@ export class Fileeditor {
     let that = this;
     fileReader.addEventListener("loadend", function() {
       console.log("fileeditor.convert() raw data read:")
-      console.log(fileReader.result);
+      //console.log(fileReader.result);
       that.rawdata = new Float32Array(fileReader.result);
       that.data = []
-      for (let i=0;i<that.rawdata.length;i+=2){
+      for (let i=0;(i+1)<that.rawdata.length;i+=2){
+        console.log(that.rawdata[i]);
+        console.log(that.rawdata[i+1])
         that.data.push([that.rawdata[i],that.rawdata[i+1]]);
       }
       console.log(that.data);
-      that.ht2.updateSettings({data:that.data,   autoColumnSize: {
-          samplingRatio: 23
-        },
-      });
+      that.ht2.updateSettings({data:that.data});
       // reader.result contains the contents of blob as a typed array
     });
     fileReader.readAsArrayBuffer(blob);

@@ -29,6 +29,7 @@
 /**
  * Fix for bootstrap styles
  */
+table {width:100%}
 .handsontable .table th, .handsontable .table td {
   border-top: none;
 }
