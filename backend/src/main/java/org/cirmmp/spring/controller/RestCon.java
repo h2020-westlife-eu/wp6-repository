@@ -265,7 +265,7 @@ public class RestCon {
 
 /*    @RequestMapping(value = { "/upload" },method = RequestMethod.POST)
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadfile) {*/
-
+//TODO replace this demo with real data
 //handles /dataset and /dataset/123, joins both cases in one method
    @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
    public ResponseEntity listAllDataset(@PathVariable Optional<Integer> projectId){
@@ -284,7 +284,7 @@ public class RestCon {
    }
 
 
-//The /filelist and /filelist-{id} violates HATEOAS - it should be /filelis and /filelist/{id}
+//The /filelist and /filelist-{id} violates HATEOAS - it should be /filelist and /filelist/{id}
 
 /*
     @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
@@ -337,8 +337,9 @@ public class RestCon {
 
         FileList fileList = new FileList();
         fileList.setFileInfo(model.getFileInfo());
-        fileList.setProjectId(model.getProjectId());
-        fileList.setFileName(model.getFileName());
+        //TODO syntax error?
+        //fileList.setProjectId(model.getProjectId());
+        //fileList.setFileName(model.getFileName());
         fileListService.save(fileList);
 
         return new ResponseEntity("Successfully uploaded!", HttpStatus.OK);
