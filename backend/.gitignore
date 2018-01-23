@@ -32,3 +32,4 @@ out
 gen
 wp6-backend.iml
 target
+!/pom.xml

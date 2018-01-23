@@ -1,11 +1,13 @@
 package org.cirmmp.spring.dao;
 
 import org.cirmmp.spring.model.FileList;
+import org.cirmmp.spring.service.TarService;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
