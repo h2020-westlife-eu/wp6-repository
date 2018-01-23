@@ -14,7 +14,7 @@
 <body>
 
 <div class="generic-container">
-    <div class="well lead">User Registration Form</div>
+    <div class="well lead">Project Registration Form</div>
     <form:form method="POST" modelAttribute="project" class="form-horizontal">
         <form:input type="hidden" path="id" id="id"/>
 
@@ -66,20 +66,20 @@
             <div class="form-actions floatRight">
                 <c:choose>
                     <c:when test="${edit}">
-                        <input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/list' />">Cancel</a>
+                        <input type="submit" value="Update" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/listPro' />">Cancel</a>
                     </c:when>
                     <c:otherwise>
-                        <input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/list' />">Cancel</a>
+                        <input type="submit" value="Register" class="btn btn-primary btn-sm"/> or <a href="<c:url value='/listPro' />">Cancel</a>
                     </c:otherwise>
                 </c:choose>
             </div>
         </div>
 
-        <c:if test="${edit}">
-			<span class="well pull-left">
-				<a href="<c:url value='/add-document-${project.id}' />">Click here to upload/manage your documents</a>
-			</span>
-        </c:if>
+        <%--<c:if test="${edit}">--%>
+			<%--<span class="well pull-left">--%>
+				<%--<a href="<c:url value='/add-document-${project.id}' />">Click here to upload/manage your documents</a>--%>
+			<%--</span>--%>
+        <%--</c:if>--%>
 
     </form:form>
 </div>

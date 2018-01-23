@@ -220,22 +220,42 @@
 		</dependency>
 
 
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok-maven -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.8</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.15</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+
 	</dependencies>
 
     <build>
 		<finalName>wp6</finalName>
-		<directory>/tmp/repository/target</directory>
-		<outputDirectory>/tmp/repository/target/classes</outputDirectory>
+
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.3.18.v20170406</version>
-				<configuration>
+				<!--<configuration>
 					<webApp>
 						<contextPath>/admin</contextPath>
 					</webApp>
-				</configuration>
+				</configuration>-->
 				<!--<configuration>
 					<jettyXml>jetty.xml,jetty-http.xml,jetty-ssl.xml,jetty-https.xml</jettyXml>
 				</configuration>-->

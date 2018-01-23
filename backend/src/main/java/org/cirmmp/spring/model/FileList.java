@@ -1,6 +1,7 @@
 package org.cirmmp.spring.model;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name="FILELIST")
@@ -8,10 +9,7 @@ public class FileList {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(name="PROJECT_ID")
-    private int projectId;
+    private Long id;
 
     @Column(name="FILE_NAME")
     private String fileName;
@@ -19,67 +17,109 @@ public class FileList {
     @Column(name="FILE_INFO")
     private String fileInfo;
 
-    @Column(name="type", length=100)
+    @Column(name="TYPE", length=100)
     private String type;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="CREATION_DATE")
+    private Date creation_date;
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(name="content", nullable=true)
+    @Column(name="CONTENT", nullable=true)
     private byte[] content;
 
+    @Column(name="SUMMARY")
+    private String summary;
 
-    public String getType() {
-        return type;
-    }
+    @Column(name="INFO")
+    private String info;
 
-    public void setType(String type) {
-
-        this.type = type;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
+    @Column(name="WEBDAVURL")
+    private String webdavurl;
 
 
+    @ManyToOne
+   // @JoinColumn(name = "PROJECT_ID")
+    private DataSet dataSet;
 
-    public byte[] getContent() {
-        return content;
-    }
-
-
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public int getProjectId() {
-        return projectId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFileName() {
         return fileName;
     }
 
-    public String getFileInfo() {
-        return fileInfo;
-    }
-
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
-    }
-
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getFileInfo() {
+        return fileInfo;
     }
 
     public void setFileInfo(String fileInfo) {
         this.fileInfo = fileInfo;
     }
 
+    public String getType() {
+        return type;
+    }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Date getCreation_date() {
+        return creation_date;
+    }
+
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public DataSet getDataSet() {
+        return dataSet;
+    }
+
+    public void setDataSet(DataSet dataSet) {
+        this.dataSet = dataSet;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public String getWebdavurl() {
+        return webdavurl;
+    }
+
+    public void setWebdavurl(String webdavurl) {
+        this.webdavurl = webdavurl;
+    }
 }

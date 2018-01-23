@@ -6,13 +6,14 @@ import java.util.List;
 
 public interface FileListService {
 
-    FileList findById(int id);
+    FileList findById(Long id);
 
-    List<FileList> findByProjectId(int project_id);
+   // List<FileList> findByProjectId(int project_id);
+
 
     void save(FileList fileList);
 
-    void deleteById(int fillist_id);
+    void deleteById(Long fillist_id);
 
     List<FileList> findAllFiles();
 }

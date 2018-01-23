@@ -1,23 +1,18 @@
-package org.cirmmp.spring.model.json;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.web.multipart.MultipartFile;
+package org.cirmmp.spring.model.rest;
 
 import java.util.Date;
 
-public class JFileList {
+public class RestFileList {
 
-    private int projectId;
+    private Long id;
 
     private String fileName;
 
     private String fileInfo;
 
-    private MultipartFile[] files;
+    private String type;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Date creation_date;
-
 
     private int dataSetId;
 
@@ -29,37 +24,13 @@ public class JFileList {
 
     private int projectid;
 
-    public MultipartFile[] getFiles() {
 
-        return files;
+    public Long getId() {
+        return id;
     }
 
-    public int getProjectId() {
-        return projectId;
-    }
-
-    public String getFiletName() {
-        return fileName;
-    }
-
-    public String getFileInfo() {
-        return fileInfo;
-    }
-
-    public void setFiles(MultipartFile[] files) {
-        this.files = files;
-    }
-
-    public void setProjectId(int projectId) {
-        this.projectId = projectId;
-    }
-
-    public void setFiletName(String filetName) {
-        this.fileName = filetName;
-    }
-
-    public void setFileInfo(String fileInfo) {
-        this.fileInfo = fileInfo;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFileName() {
@@ -68,6 +39,22 @@ public class JFileList {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getFileInfo() {
+        return fileInfo;
+    }
+
+    public void setFileInfo(String fileInfo) {
+        this.fileInfo = fileInfo;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Date getCreation_date() {
@@ -117,4 +104,5 @@ public class JFileList {
     public void setProjectid(int projectid) {
         this.projectid = projectid;
     }
+
 }

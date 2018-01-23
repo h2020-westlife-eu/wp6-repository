@@ -1,7 +1,5 @@
 package org.cirmmp.spring.model.json;
 
-import java.util.Date;
-
 public class JProject {
 
     private String projectName;

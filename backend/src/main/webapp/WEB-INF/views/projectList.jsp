@@ -31,9 +31,11 @@
                         <td>${project.projectName}</td>
                         <td>${project.summary}</td>
                         <td>${project.userId}</td>
-                        <td><a href="<c:url value='/add-file-${project.id}' />" class="btn btn-success custom-width">Add File</a></td>
+                        <td><a href="<c:url value='/add-dataset-${project.id}' />" class="btn btn-success custom-width">Add Data</a></td>
                         <td><a href="<c:url value='/edit-project-${project.id}' />" class="btn btn-success custom-width">edit</a></td>
+                        <td><a href="<c:url value='/listData-${project.id}' />" class="btn btn-success custom-width">Dataset</a></td>
                         <td><a href="<c:url value='/delete-project-${project.id}' />" class="btn btn-danger custom-width">delete</a></td>
+
                     </tr>
                 </c:forEach>
                 </tbody>
