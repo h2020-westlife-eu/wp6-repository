@@ -32,7 +32,7 @@ public class Project {
     @Column(name="CREATION_DATE")
     private Date creation_date;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DataSet> dataset ;
 
     public Long getId() {

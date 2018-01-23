@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
@@ -270,6 +271,7 @@ public class AppController {
 		return "projectList";
 	}
 
+	@Transactional
     @RequestMapping(value = { "/listData-{proId}" }, method = RequestMethod.GET)
     public String listData(@PathVariable Long proId, ModelMap model) {
       //  Project projects = projectService.findById(proId);

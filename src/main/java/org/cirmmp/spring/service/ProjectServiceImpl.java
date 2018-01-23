@@ -1,5 +1,6 @@
 package org.cirmmp.spring.service;
 
+import org.cirmmp.spring.dao.DataSetDao;
 import org.cirmmp.spring.dao.ProjectDao;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
@@ -21,6 +22,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private ProjectDao dao;
+
+    @Autowired
+    private DataSetDao dataDao;
 
     //@Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
     public Project findById(Long id){
@@ -80,10 +84,11 @@ public class ProjectServiceImpl implements ProjectService {
     public void deleteDataSet(Project project, DataSet dataset){
         Project entity = dao.findById(project.getId());
         List<DataSet> datasets = entity.getDataset();
-        datasets.remove(dataset);
+        Long dataId = dataset.getId();
         entity.removeDataSet(dataset);
-        //dao.flushAndClear();
-        dao.save(entity);
+        dao.flushAndClear();
+        dataDao.deleteById(dataId);
+        //dao.save(entity);
     }
 
 
