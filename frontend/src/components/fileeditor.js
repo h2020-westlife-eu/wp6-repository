@@ -10,6 +10,7 @@ import "codemirror/mode/javascript/javascript";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Editfile} from './messages';
+import {Nmrapi} from './nmrapi';
 import {bindable} from 'aurelia-framework';
 
 
@@ -17,18 +18,17 @@ import {bindable} from 'aurelia-framework';
 
 
 export class Fileeditor {
-  static inject = [EventAggregator, HttpClient];
+  static inject = [EventAggregator, HttpClient,Nmrapi];
   @bindable pid;
 
-  constructor(ea,httpclient) {
-
+  constructor(ea,httpclient,nmrapi) {
     this.ea = ea;
     this.client = httpclient;
+    this.nmrapi = nmrapi;
     this.ea.subscribe(Editfile, msg => this.selectFile(msg.file));
     this.isimage=false;
     this.filename="";
     this.showtable=false;
-
   }
 
   attached() {
@@ -60,8 +60,6 @@ export class Fileeditor {
 
       this.imageurl = file.webdavurl;
       //visualizeimg is set & image extension is detected
-      //console.log("fileeditor.selectfile() visualizeimg: isimage:")
-      //console.log(localStorage.getItem("visualizeimg"));
       //vfstorage returns string - should convert to boolean
       this.isimage =
         ((file.name.endsWith('.JPG'))||
@@ -78,19 +76,16 @@ export class Fileeditor {
       //console.log("fileeditor.selectfile() visualizeimg: isimage:")
       //console.log(this.isimage);
 
-      /*get first 2 kB of data, if it is supported by web server in Range header */
+      /*get first 4 kB of data, if it is supported by web server in Range header */
       if (!this.isimage)
 
-        this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-2047'}})
+        this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-4095'}})
           .then(response => {
+            //have duplicate of blob and text
             let response2= response.clone();
             response.blob().then(data2 => {
-              console.log("file blob content:");
-              console.log(data2);
-              let bindata= this.convert(data2);
-//              console.log(bindata);
-//              that.ht2.updateSettings({data:bindata})
-
+              that.data={};
+              let bindata= that.nmrapi.convert(data2,that.data,that.ht2);
             })
               response2.text().then(data => {
                 that.codemirror.setValue(data);
@@ -114,25 +109,4 @@ export class Fileeditor {
     if (this.showtable) window.setTimeout(function(that){that.ht2.render()},100,this);
   }
 
-  convert(blob) {
-    //convert blob to array of floats
-    let arrayBuffer;
-    let fileReader = new FileReader();
-    let that = this;
-    fileReader.addEventListener("loadend", function() {
-      console.log("fileeditor.convert() raw data read:")
-      //console.log(fileReader.result);
-      that.rawdata = new Float32Array(fileReader.result);
-      that.data = []
-      for (let i=0;(i+1)<that.rawdata.length;i+=2){
-        console.log(that.rawdata[i]);
-        console.log(that.rawdata[i+1])
-        that.data.push([that.rawdata[i],that.rawdata[i+1]]);
-      }
-      console.log(that.data);
-      that.ht2.updateSettings({data:that.data});
-      // reader.result contains the contents of blob as a typed array
-    });
-    fileReader.readAsArrayBuffer(blob);
-  }
 }
