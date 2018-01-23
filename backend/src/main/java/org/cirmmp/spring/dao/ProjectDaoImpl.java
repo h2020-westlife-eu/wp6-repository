@@ -13,7 +13,7 @@ import java.util.List;
 
 @Repository("project")
 @Transactional
-public class ProjectDaoImpl extends AbstractDao<Long, Project> implements ProjectDao{
+public class ProjectDaoImpl extends AbstractDao<Long, Project> implements ProjectDao {
 
     static final Logger logger = LoggerFactory.getLogger(ProjectDaoImpl.class);
 

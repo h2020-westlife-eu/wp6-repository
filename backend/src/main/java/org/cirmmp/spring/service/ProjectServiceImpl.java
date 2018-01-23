@@ -34,7 +34,7 @@ public class ProjectServiceImpl implements ProjectService {
     //@Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
     @Transactional
     @Override
-    public  List<DataSet> findDatasetByProjectId(Long id){
+    public List<DataSet> findDatasetByProjectId(Long id){
         Project entity = dao.findById(id);
         List<DataSet> empty = new ArrayList<>();
         if(entity.getDataset()!=null){

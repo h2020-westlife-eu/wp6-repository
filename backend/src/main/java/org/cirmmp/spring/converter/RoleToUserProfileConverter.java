@@ -17,11 +17,11 @@ public class RoleToUserProfileConverter implements Converter<Object, UserProfile
 	static final Logger logger = LoggerFactory.getLogger(RoleToUserProfileConverter.class);
 	
 	@Autowired
-	UserProfileService userProfileService;
+    UserProfileService userProfileService;
 
 	/**
 	 * Gets UserProfile by Id
-	 * @see org.springframework.core.convert.converter.Converter#convert(java.lang.Object)
+	 * @see Converter#convert(java.lang.Object)
 	 */
 	public UserProfile convert(Object element) {
 		Integer id = Integer.parseInt((String)element);

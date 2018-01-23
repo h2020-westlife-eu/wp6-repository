@@ -38,7 +38,7 @@ public class JFileList {
         return projectId;
     }
 
-    public String getFileName() {
+    public String getFiletName() {
         return fileName;
     }
 

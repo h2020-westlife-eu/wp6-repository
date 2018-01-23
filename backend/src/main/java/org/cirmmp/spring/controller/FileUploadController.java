@@ -27,8 +27,8 @@ public class FileUploadController {
 	 */
 	@RequestMapping(value = "/uploadFile", method = RequestMethod.POST)
 	public @ResponseBody
-	String uploadFileHandler(@RequestParam("name") String name,
-			@RequestParam("file") MultipartFile file) {
+    String uploadFileHandler(@RequestParam("name") String name,
+                             @RequestParam("file") MultipartFile file) {
 
 		if (!file.isEmpty()) {
 			try {
@@ -66,8 +66,8 @@ public class FileUploadController {
 	 */
 	@RequestMapping(value = "/uploadMultipleFile", method = RequestMethod.POST)
 	public @ResponseBody
-	String uploadMultipleFileHandler(@RequestParam("name") String[] names,
-			@RequestParam("file") MultipartFile[] files) {
+    String uploadMultipleFileHandler(@RequestParam("name") String[] names,
+                                     @RequestParam("file") MultipartFile[] files) {
 
 		if (files.length != names.length)
 			return "Mandatory information missing";

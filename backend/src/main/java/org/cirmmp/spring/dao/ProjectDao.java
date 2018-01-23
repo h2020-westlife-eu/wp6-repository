@@ -2,7 +2,6 @@ package org.cirmmp.spring.dao;
 
 import org.cirmmp.spring.model.Project;
 
-
 import java.util.List;
 
 public interface ProjectDao {

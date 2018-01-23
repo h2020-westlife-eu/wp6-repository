@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
@@ -38,13 +37,12 @@ import java.util.Locale;
 @RequestMapping("/")
 @SessionAttributes("roles")
 public class AppController {
-	private static final Logger LOG = LoggerFactory.getLogger(AppController.class);
 
 	@Autowired
-	UserService userService;
+    UserService userService;
 	
 	@Autowired
-	UserProfileService userProfileService;
+    UserProfileService userProfileService;
 	
 	@Autowired
     MessageSource messageSource;
@@ -56,13 +54,13 @@ public class AppController {
 	AuthenticationTrustResolver authenticationTrustResolver;
 
 	@Autowired
-	ProjectService projectService;
+    ProjectService projectService;
 
 	@Autowired
-	FileListService fileListService;
+    FileListService fileListService;
 
 	@Autowired
-	DataSetService dataSetService;
+    DataSetService dataSetService;
 
     @Autowired
     TarService tarService;
@@ -77,7 +75,7 @@ public class AppController {
 	//OrdiniService ordiniService;
 
 	@Autowired
-	FileValidator fileValidator;
+    FileValidator fileValidator;
 
 	@InitBinder("fileBucket")
 	protected void initBinder(WebDataBinder binder) {
@@ -218,27 +216,10 @@ public class AppController {
 	 * If users is already logged-in and tries to goto login page again, will be redirected to list page.
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String loginPage(HttpServletRequest request, Model model, @RequestParam(name="next",defaultValue="") String redirecturl) {
-		LOG.info("loginPage(), redirect next "+redirecturl);
+	public String loginPage() {
 		if (isCurrentAuthenticationAnonymous()) {
-			if (redirecturl.length()>0 ) {
-				//sets redirection attribute if not logged
-				logger.info("loginPage() branch1 redirecturl:"+redirecturl);
-				logger.info("reguesturl:"+request.getRequestURL());
-				logger.info("requestreferrer:"+request.getHeader("referer"));
-				if (redirecturl.startsWith("..")) redirecturl=request.getHeader("referer")+redirecturl.substring(3);
-				logger.info("loginPage() branch1 redirecturl2:"+redirecturl);
-				request.getSession().setAttribute("url_prior_login", redirecturl);
-				//return "login";
-				//return "redirect:" + redirecturl;
-			}
 			return "login";
-	    } else {//redirect if already logged
-			if (redirecturl.length()>0 ) {
-				logger.info("loginPage() branch2 redirecturl:"+redirecturl);
-				return "redirect:" + redirecturl;
-			}
-			else
+	    } else {
 	    	return "redirect:/list";  
 	    }
 	}
@@ -406,7 +387,7 @@ public class AppController {
 	 */
 	@RequestMapping(value = { "/newproject" }, method = RequestMethod.POST)
 	public String saveProject(@Valid Project project, BindingResult result,
-						   ModelMap model) {
+                              ModelMap model) {
 
 		if (result.hasErrors()) {
 			return "newproject";

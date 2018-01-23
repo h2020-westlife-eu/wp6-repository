@@ -11,10 +11,10 @@ import java.util.List;
 
 @Service("userProfileService")
 @Transactional
-public class UserProfileServiceImpl implements UserProfileService{
+public class UserProfileServiceImpl implements UserProfileService {
 	
 	@Autowired
-	UserProfileDao dao;
+    UserProfileDao dao;
 	
 	public UserProfile findById(int id) {
 		return dao.findById(id);
