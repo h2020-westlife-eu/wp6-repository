@@ -302,7 +302,7 @@ public class RestCon {
 
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
-
+*/
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {
 
@@ -312,12 +312,14 @@ public class RestCon {
             JFileList infiles = new JFileList();
             infiles.setFiletName(ifile.getFileName());
             infiles.setFileInfo(ifile.getFileInfo());
-            infiles.setProjectId(ifile.getProjectId());
+            //infiles.setProjectId(ifile.getProjectId());
+            infiles.setCreation_date(ifile.getCreation_date());
+            infiles.setSummary(infiles.getSummary());
+            infiles.setWebdavurl(infiles.getWebdavurl());
             nfiles.add(infiles);
         }
-
         return new ResponseEntity(nfiles, HttpStatus.OK);
-    }*/
+    }
 
     // 3.1.3 maps html form to a Model
     @RequestMapping(value = {"/upload/multi/model"}, method = RequestMethod.POST)

@@ -13,11 +13,11 @@ import java.util.List;
 
 @Repository("project")
 @Transactional
-public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements ProjectDao{
+public class ProjectDaoImpl extends AbstractDao<Long, Project> implements ProjectDao{
 
     static final Logger logger = LoggerFactory.getLogger(ProjectDaoImpl.class);
 
-    public Project findById(int id) {
+    public Project findById(Long id) {
         Project project = getByKey(id);
 
         return project;
@@ -31,11 +31,18 @@ public class ProjectDaoImpl extends AbstractDao<Integer, Project> implements Pro
         return project;
     }
 
+    public void flushAndClear(){
+        flush();
+        clear();
+    }
+
     public void save(Project project) {
         persist(project);
     }
 
-    public void deleteById(int id){
+    public void update(Project project){ update(project);}
+
+    public void deleteById(Long id){
         Criteria crit = createEntityCriteria();
         crit.add(Restrictions.eq("id", id));
          Project project = (Project)crit.uniqueResult();

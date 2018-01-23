@@ -15,28 +15,26 @@
 <div class="generic-container">
     <div class="panel panel-default">
         <!-- Default panel contents -->
-        <div class="panel-heading"><span class="lead">List of Files </span></div>
+        <div class="panel-heading"><span class="lead">List of Dataset </span></div>
         <div class="tablecontainer">
             <table class="table table-hover">
                 <thead>
                 <tr>
                     <th>No.</th>
-                    <th>File Name</th>
-                    <th>Type</th>
-                    <th>Description</th>
+                    <th>Dataset Name</th>
+                    <th>Summary</th>
+
                     <th width="100"></th>
                     <th width="100"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${resfiles}" var="file" varStatus="counter">
+                <c:forEach items="${dataset}" var="dataset" ">
                     <tr>
-                        <td>${counter.index + 1}</td>
-                        <td>${file.fileName}</td>
-                        <td>${file.type}</td>
-                        <td>${file.fileInfo}</td>
-                        <td><a href="<c:url value='/download-file-${dataset.id}-${file.id}' />" class="btn btn-success custom-width">download</a></td>
-                        <td><a href="<c:url value='/delete-file-${dataset.id}-${file.id}' />" class="btn btn-danger custom-width">delete</a></td>
+                        <td>${dataset.dataName}</td>
+                        <td>${dataset.summary}</td>
+                        <td><a href="<c:url value='/add-file-${dataset.id}-${file.id}' />" class="btn btn-success custom-width">Add File</a></td>
+                        <td><a href="<c:url value='/delete-dataset-${dataset.id}' />" class="btn btn-danger custom-width">delete</a></td>
                     </tr>
                 </c:forEach>
                 </tbody>
@@ -79,16 +77,8 @@
             </form:form>
         </div>
     </div>
-
     <div class="well">
-        Go to <a href="<c:url value='/listData' />">Dataset List</a>
-    </div>
-    <br>
-    <div class="well">
-        Go to <a href="<c:url value='/listPro' />">Project List</a>
-    </div>
-    <div class="well">
-        <a href="<c:url value='/create-tar-${dataset.id}' />">Download and create tar</a>
+        Go to <a href="<c:url value='/listData' />">Project List</a>
     </div>
 </div>
 </body>
