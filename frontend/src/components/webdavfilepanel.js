@@ -6,7 +6,10 @@ export class Webdavfilepanel {
   static inject = [EventAggregator,HttpClient];
 
   constructor(ea,httpclient) {
+    //even aggregator to listen for webdav resource to be presented/updated in panel
     this.ea =ea;
+    this.ea.subscribe(Webdavresource,msg =>this.setwebdav(msg.webdavurl))
+    //http client to perform WEBDAV queries
     this.httpclient = httpclient;
     this.httpclient.configure(config => {
       config
@@ -20,14 +23,14 @@ export class Webdavfilepanel {
           }
         })
     });
-    //this.webdavbase = ;
-    this.ea.subscribe(Webdavresource,msg =>this.setwebdav(msg.webdavurl))
     this.webdavpath = '/files/XufWqKau/';
+    //hold depth of directory structure if cd into them
     this.dirs=[];
   }
 
   setwebdav(webdavurl) {
     this.webdavpath = webdavurl;
+    //query the directory content
     this.httpclient.fetch(this.webdavpath, {
       method: 'PROPFIND',
       headers: {'Depth': '1'}
@@ -47,8 +50,11 @@ export class Webdavfilepanel {
             let item = {};
             item.name = filename.replace(this.webdavpath, '')
             item.date = filedate;
+            item.nicedate = this.formatdate(new Date(filedate));
             item.isdir= filetype == 'httpd/unix-directory';
             item.size = filetype == 'httpd/unix-directory' ? 'DIR' : filesize;
+            //convert to 4GB or 30MB or 20kB or 100b
+            item.nicesize = item.isdir ? item.size: ~~(item.size / 1000000000) > 0 ? ~~(item.size / 1000000000) + "GB" : (~~(item.size / 1000000) > 0 ? ~~(item.size / 1000000) + "MB" : (~~(item.size / 1000) > 0 ? ~~(item.size / 1000) + "kB" : item.size + " b"));
             item.type = filetype;
             item.webdavurl=this.webdavpath+item.name;
             //directory first, files after that
@@ -87,4 +93,36 @@ export class Webdavfilepanel {
     else  this.ea.publish(new Editfile(file));
   }
 
+  formatdate(date) {
+      let diff = new Date() - date; // the difference in milliseconds
+
+      if (diff < 1000) { // less than 1 second
+        return 'right now';
+      }
+
+      let sec = Math.floor(diff / 1000); // convert diff to seconds
+
+      if (sec < 60) {
+        return sec + ' sec. ago';
+      }
+
+      let min = Math.floor(diff / 60000); // convert diff to minutes
+      if (min < 60) {
+        return min + ' min. ago';
+      }
+
+      // format the date
+      // add leading zeroes to single-digit day/month/hours/minutes
+      let d = date;
+      d = [
+        '0' + d.getDate(),
+        '0' + (d.getMonth() + 1),
+        '' + d.getFullYear(),
+        '0' + d.getHours(),
+        '0' + d.getMinutes()
+      ].map(component => component.slice(-2)); // take last 2 digits of every component
+
+      // join the components into date
+      return d.slice(0, 3).join('.') + ' ' + d.slice(3).join(':');
+    }
 }

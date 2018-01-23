@@ -214,13 +214,23 @@ public class AppController {
 	public String loginPage(HttpServletRequest request, Model model, @RequestParam(name="next",defaultValue="") String redirecturl) {
 		LOG.info("loginPage(), redirect next "+redirecturl);
 		if (isCurrentAuthenticationAnonymous()) {
-			if (redirecturl.length()>0 )
+			if (redirecturl.length()>0 ) {
 				//sets redirection attribute if not logged
+				logger.info("loginPage() branch1 redirecturl:"+redirecturl);
+				logger.info("reguesturl:"+request.getRequestURL());
+				logger.info("requestreferrer:"+request.getHeader("referer"));
+				if (redirecturl.startsWith("..")) redirecturl=request.getHeader("referer")+redirecturl.substring(3);
+				logger.info("loginPage() branch1 redirecturl2:"+redirecturl);
 				request.getSession().setAttribute("url_prior_login", redirecturl);
+				//return "login";
+				//return "redirect:" + redirecturl;
+			}
 			return "login";
 	    } else {//redirect if already logged
-			if (redirecturl.length()>0 )
-				return "redirect:"+redirecturl;
+			if (redirecturl.length()>0 ) {
+				logger.info("loginPage() branch2 redirecturl:"+redirecturl);
+				return "redirect:" + redirecturl;
+			}
 			else
 	    	return "redirect:/list";  
 	    }

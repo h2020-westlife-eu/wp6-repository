@@ -6,15 +6,17 @@
   <require from="components/navigation.html"></require>
   <require from="components/userinfo"></require>
   <sharedheader></sharedheader>
-
+  <div class="w3-row">
+    <div class="w3-col m4 l3">
+      <navigation router.bind="router"></navigation>
+    </div>
+    <div class="w3-col m8 l9">
       <div class="w3-card-2 w3-white w3-margin w3-padding">
-
-        <navigation router.bind="router"></navigation>
-        <userinfo></userinfo>
-
         <router-view></router-view>
-
-        <sharedfooter></sharedfooter>
-
       </div>
+
+
+    </div>
+  </div>
+  <sharedfooter></sharedfooter>
 </template>

@@ -1,5 +1,17 @@
 export function configure(config) {
   //config.globalResources([]);
-  config.globalResources(['./irep.html', './irepdemo.html', './iadmin.html', './istaff.html','./ifile.html','./ilink.html','./ifolder.html']);
+  config.globalResources([
+    './irep.html',
+    './irepdemo.html',
+    './iadmin.html',
+    './istaff.html',
+    './ifile.html',
+    './ilink.html',
+    './icopy',
+    './ifolder.html',
+    './idata.html',
+    './iproject.html',
+    './itable.html'
+  ]);
 
 }

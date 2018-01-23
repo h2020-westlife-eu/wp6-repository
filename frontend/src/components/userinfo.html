@@ -1,3 +1,8 @@
 <template>
-  <span show.bind="showuserinfo" class="w3-small w3-right"> Logged as ${userinfo.FirstName} ${userinfo.LastName}</span>
+  <li class="nav-item" show.bind="showuserinfo"> ${userinfo.FirstName} ${userinfo.LastName}
+  <ul>
+    <li class="nav-item"><a href="https://auth.west-life.eu/user">West-Life User Account </a></li>
+    <li class="nav-item"><a href="/mellon/logout?ReturnTo=/">Logout</a></li>
+  </ul>
+  </li>
 </template>

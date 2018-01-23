@@ -24,3 +24,11 @@ hs_err_pid*
 node_modules
 .idea
 .DS_STORE
+sp_cert.pem
+sp_key.pem
+idp_metadata.xml
+sp_metadata.pem
+sp-metadata.pem
+sp-metadata.xml
+idp-metadata.xml
+index.php

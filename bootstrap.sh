@@ -30,7 +30,8 @@ cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
 yum -y install epel-release
 yum repolist
 yum -y install davfs2 httpd
-
+# php only for ARIA demo
+yum -y install php php-common
 
 # prepare all configuration
 cp -R $WP6REPSRC/conf-template/* /
@@ -134,11 +135,15 @@ systemctl enable mariadb.service
 service mariadb start
 
 # generate random password, store it locally and distribute as a environment variable
-export DBCRED=`openssl rand -base64 32`
-echo DBCRED=${DBCRED} > /home/vagrant/.westlife/repository.key
+if [ ! -f /etc/westlife/repository.key ]; then
+  export DBCRED=`openssl rand -base64 32`
+  mkdir -p /etc/westlife
+  echo DBCRED=${DBCRED} > /etc/westlife/repository.key
+  chown vagrant:vagrant /etc/westlife/repository.key
+  chmod 600 /etc/westlife/repository.key
 
-echo setting db
-mysql --user=root <<EOF
+  echo setting db
+  mysql --user=root <<EOF
 use mysql
 update user set password=PASSWORD("${DBCRED}") where User="root";
 DELETE FROM mysql.user WHERE User='';
@@ -147,6 +152,9 @@ DROP DATABASE IF EXISTS test;
 DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 FLUSH PRIVILEGES;
 EOF
+else
+  source /etc/westlife/repository.key
+fi
 
 echo creating db
 # create db for backend

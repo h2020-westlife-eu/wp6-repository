@@ -10,6 +10,7 @@ import "codemirror/mode/javascript/javascript";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {HttpClient} from 'aurelia-fetch-client';
 import {Editfile} from './messages';
+import {Nmrapi} from './nmrapi';
 import {bindable} from 'aurelia-framework';
 
 
@@ -17,28 +18,41 @@ import {bindable} from 'aurelia-framework';
 
 
 export class Fileeditor {
-  static inject = [Element,EventAggregator, HttpClient];
+  static inject = [EventAggregator, HttpClient,Nmrapi];
   @bindable pid;
 
-  constructor(el,ea,httpclient) {
-    this.el = el;
+  constructor(ea,httpclient,nmrapi) {
     this.ea = ea;
     this.client = httpclient;
+    this.nmrapi = nmrapi;
     this.ea.subscribe(Editfile, msg => this.selectFile(msg.file));
     this.isimage=false;
     this.filename="";
+    this.showtable=false;
   }
 
   attached() {
-    let editor = this.el.querySelector(".Codemirror");
-    //prevent blured render if not shown before
-    //if (editor==null)
+    console.log("Fileeditor.attached()1");
     this.codemirror = CodeMirror.fromTextArea(this.cmTextarea, {
       lineNumbers: true,
       mode: "text/x-less",
       lineWrapping: true
     });
     this.codemirror.refresh();
+    //sample data ofr table
+    this.data=[["no data for preview",1],[1,1]];
+
+    //handsontable needs to be inlcuded in <script ...> of index.html page
+    this.ht2 = new Handsontable (this.filetable, {
+      data: this.data,
+      rowHeaders: true,
+      colHeaders: ["R","I"],
+      autoWrapRow:true,
+      stretchH: "all",
+      autoResizeColumn: true
+
+    });
+    console.log(this.ht2);
   }
 
   selectFile(file) {
@@ -46,8 +60,6 @@ export class Fileeditor {
 
       this.imageurl = file.webdavurl;
       //visualizeimg is set & image extension is detected
-      //console.log("fileeditor.selectfile() visualizeimg: isimage:")
-      //console.log(localStorage.getItem("visualizeimg"));
       //vfstorage returns string - should convert to boolean
       this.isimage =
         ((file.name.endsWith('.JPG'))||
@@ -64,18 +76,22 @@ export class Fileeditor {
       //console.log("fileeditor.selectfile() visualizeimg: isimage:")
       //console.log(this.isimage);
 
-      /*get first 2 kB of data, if it is supported by web server in Range header */
+      /*get first 4 kB of data, if it is supported by web server in Range header */
       if (!this.isimage)
 
-        this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-2047'}})
-          .then(response => response.text())
-          .then(data =>{
-
-              //console.log("fileeditor.selectfile() loading:" + file.webdavurl);
-              //console.log(data);
-              that.codemirror.setValue(data);
-              that.codemirror.refresh();
-              that.filename=file.webdavurl;
+        this.client.fetch(file.webdavurl, {credentials: 'same-origin',headers:{'Range': 'bytes=0-4095'}})
+          .then(response => {
+            //have duplicate of blob and text
+            let response2= response.clone();
+            response.blob().then(data2 => {
+              that.data={};
+              let bindata= that.nmrapi.convert(data2,that.data,that.ht2);
+            })
+              response2.text().then(data => {
+                that.codemirror.setValue(data);
+                that.codemirror.refresh();
+                that.filename = file.webdavurl;
+              });
             }
           ).catch(error => {
           alert('Error retrieving content from ' + file.webdavurl);
@@ -84,4 +100,13 @@ export class Fileeditor {
 
 
   }
+  //triggered when click on button
+  table() {
+    this.showtable= ! this.showtable;
+    //workaround - table width is incorect when rendered hidden
+    //render it after 100 ms again, usually after it is shown, thus calculating
+    //correct width
+    if (this.showtable) window.setTimeout(function(that){that.ht2.render()},100,this);
+  }
+
 }
