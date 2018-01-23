@@ -192,4 +192,96 @@ public class RestCon {
         }
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
+
+    /** utils to create user in database if it is logged using SSO and not in DB yet
+     *
+     */
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static SecureRandom rnd = new SecureRandom();
+
+    private String randomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
+    private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId, @RequestHeader(name = "X-GROUPS", defaultValue = "")String xgroups) {
+        User user;//user doesn't exist in local system yet, create it from SSO West-Life information
+        user = new User();
+        user.setSsoId(xusername);
+        String[] names = xname.split(" ");
+        user.setFirstName(getFirstNames(names)); //first name in names, or first two names "Jose" or "Jose Maria"?
+        user.setLastName(names[names.length-1]); //last name or last names "Maria Carazo" or "Carazo"
+        user.setEmail(xemail);
+        //TODO: disable password - or generate random
+        user.setPassword(randomString(30));
+
+
+        //TODO where to put user groups? issue #10
+        //if (xgroups contains 'West-Life' or 'ARIA') user.setUserProfiles('USER')
+        //if (xusername == 'admin eppn' user.setUserProfile('ADMIN')...
+        //now everybody logged via West-Life SSO is USER
+        HashSet<UserProfile> ups = new HashSet<>();
+        ups.add(userProfileService.findByType("USER"));
+        user.setUserProfiles(ups);
+
+        LOG.info("creating user:"+user.toString());
+        LOG.info("groups:"+xgroups);
+        userService.saveUser(user);
+        user = userService.findBySSO(ssoId);
+        //should have the user.getId() set now
+        return user;
+    }
+
+    //returns all names except last one delimited by space;
+    private String getFirstNames(String[] names){
+        StringBuffer s = new StringBuffer();
+        for (int i=0;i<names.length-1;i++)
+        {
+            if (i>0) s.append(" ");
+            s.append(names[i]);
+        }
+        return s.toString();
+    }
+
+
+    public String checkAuthentication(String xusername) {
+        LOG.info("checkAuthentication()");
+        //String xusername="";
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+        if (ssoId=="") {
+            LOG.info("checkAuthentication: not authenticated");
+            throw new UnauthorizedUserException("authorization required");
+            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
+        } else {
+            return ssoId;
+        }
+    }
+    //checks authentication, either it is authenticated via spring - or via sent arguments x*
+    public User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
+        LOG.info("checkAuthentication()");
+        //String xusername="";
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+        if (ssoId=="") {
+            LOG.info("checkAuthentication: not authenticated");
+            throw new AuthenticationCredentialsNotFoundException("authorization required");
+
+            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
+        } else {
+            User user= userService.findBySSO(ssoId);
+            //fix issue #9
+            if (user==null) {
+                if (xusername.length()>0)
+                    user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
+                else {//return http 401
+                    LOG.info("checkAuthentication: not authenticated");
+                    throw new AuthenticationCredentialsNotFoundException("authorization required");
+                }
+            }
+            LOG.info("checkAuthentication: OK");
+            return user;
+        }
+    }
+
 }
