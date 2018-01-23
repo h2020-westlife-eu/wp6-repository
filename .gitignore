@@ -24,6 +24,8 @@ hs_err_pid*
 node_modules
 .idea
 .DS_STORE
+*.iml
+
 sp_cert.pem
 sp_key.pem
 idp_metadata.xml
