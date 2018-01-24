@@ -27,22 +27,18 @@ public class TarServiceImpl implements TarService {
 
     @Transactional
     public File createTarFile(String root, Long datasetId) {
-
         //create a random string
         String generatedString = RandomStringUtils.randomAlphanumeric(10);
-
         logger.info("genereted String-> "+generatedString);
         //check and create a directori
         File rootDir = new File(root);
         File directory = new File(rootDir,generatedString);
-
         //File directory = new File(SRC_FOLDER);
 
         //make sure directory exists
         if(!directory.exists()){
             System.out.println("Directory does not exist.");
             directory.mkdirs();
-
         }else{
             try{
                 delete(directory);
@@ -52,14 +48,12 @@ public class TarServiceImpl implements TarService {
                 System.exit(0);
             }
         }
-
         List<FileList> fileLists = dataSetService.FileFindById(datasetId);
         for (FileList file : fileLists) {
 
             byte[] fileBytes = file.getContent();
             String filename = file.getFileName();
             String dirFilename = new File(directory, filename).toString();
-
             try {
                 FileOutputStream outputStream = new FileOutputStream(dirFilename);
                 outputStream.write(fileBytes);
@@ -68,8 +62,7 @@ public class TarServiceImpl implements TarService {
                 System.out.println(ex.toString());
             }
         }
-
-        File source = new File(directory, "Dataset.tar.tgz");
+        File source = new File(directory, "Dataset.tar.gz");
         TarArchiveOutputStream tarOs = null;
         try {
             // Using input name to create output name
@@ -94,7 +87,6 @@ public class TarServiceImpl implements TarService {
                 e.printStackTrace();
             }
         }
-
         return source;
     }
 
@@ -133,16 +125,13 @@ public class TarServiceImpl implements TarService {
             throws IOException {
 
         if (file.isDirectory()) {
-
             //directory is empty, then delete it
             if (file.list().length == 0) {
 
                 file.delete();
                 System.out.println("Directory is deleted : "
                         + file.getAbsolutePath());
-
             } else {
-
                 //list all the directory contents
                 String files[] = file.list();
 
@@ -153,7 +142,6 @@ public class TarServiceImpl implements TarService {
                     //recursive delete
                     delete(fileDelete);
                 }
-
                 //check the directory again, if empty then delete it
                 if (file.list().length == 0) {
                     file.delete();
@@ -161,7 +149,6 @@ public class TarServiceImpl implements TarService {
                             + file.getAbsolutePath());
                 }
             }
-
         } else {
             //if file, then delete it
             file.delete();
