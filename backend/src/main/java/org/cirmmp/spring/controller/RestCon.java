@@ -19,21 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.oauth2.common.exceptions.UnauthorizedUserException;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -55,44 +46,13 @@ public class RestCon {
     @Autowired
     UserProfileService userProfileService;
 
-    //@Autowired
-    //LinkService linkService;
-
-    //@Autowired
-    //OfferService offerService;
-
-    //@Autowired
-    //OrdiniService ordiniService;
-
-/*    @RequestMapping(value = { "/user" },method = RequestMethod.GET)
+    /* returns spring authenticated as well as SSO authenticated (in http headers)*/
+    @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
-        //User user = userService.findBySSO(username);
-
-        return new ResponseEntity (gson.toJson(getUserDTO(user)), HttpStatus.OK);
-    }
-*/
-
-    @RequestMapping(value = { "/user" },method = RequestMethod.GET,produces = {"application/json"})
-    public ResponseEntity listOrder() {
-        LOG.info("sono in user");
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        //return "Welcome, " + username;
-        Gson gson = new Gson();
-        //List<Offer> offers = offerService.findAllOffer();
-        //String jsonOffers = gson.toJson(username);
-        LOG.info("JSON OFFERS");
-        LOG.info(username);
-        return new ResponseEntity(username, HttpStatus.OK);
+        return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
     }
 
-    public class UserDTO {
-      String FirstName;
-      String LastName;
-      String Email;
-      String Id;
-      String SsoId;
-    }
 
     /* return list of users registered inside repository DB*/
     @RequestMapping(value = { "/users" },method = RequestMethod.GET)
@@ -101,44 +61,23 @@ public class RestCon {
         List<UserDTO> userdtos = new ArrayList<UserDTO>();
         for (Iterator<User> it=users.iterator(); it.hasNext(); ){
           User user = it.next();
-          userdtos.add(getUserDTO(user));
+          userdtos.add(DTOUtils.getUserDTO(user));
         }
 
         return new ResponseEntity (gson.toJson(userdtos), HttpStatus.OK);
     }
 
-    private UserDTO getUserDTO(User user) {
-        UserDTO udto= new UserDTO();
-        udto.FirstName = user.getFirstName();
-        udto.LastName = user.getLastName();
-        udto.Email = user.getEmail();
-        udto.Id = user.getId().toString();
-        udto.SsoId = user.getSsoId();
-        return udto;
-    }
 
+    //'/createproject' and '/listproject' urls violates common HATEOAS of REST - it should be all '/project' - verb is already specified in http request
+    // POST = create, PUT=update, GET = list GET/id = project detail, DELETE = delete, application/json - spring doesn't operate it automatically?
+    // Does spring framework have some automatic handling of content type - application/json is processed by json, application/xml is proccessed by some xml binding
+    // tool?
 
-    @RequestMapping(value = {"/createProject","/project"}, method=RequestMethod.POST)
-    public ResponseEntity createProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+    @RequestMapping(value = {"/project"}, method=RequestMethod.POST,consumes = {"application/json"},produces = {"application/json"})
+    public ResponseEntity createProject(@RequestBody JProject jProject, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
-        LOG.info("sono in createproject");
 
         //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
-        Date now = new Date();
-        Project project = new Project();
-        project.setCreation_date(now);
-        project.setUserId(user.getId());
-        project.setProjectName("Test");
-        project.setSummary("TEST TEST TEST");
-        LOG.info("sono in createproject 2");
-        projectService.save(project);
-        return new ResponseEntity(gson.toJson(project), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/createProject", method = RequestMethod.POST,consumes = {"application/json"},produces = {"application/json"})
-    public ResponseEntity createProject(@RequestBody JProject jProject){
-        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
         Date now = new Date();
         Project project = new Project();
         project.setCreation_date(now);
@@ -146,34 +85,19 @@ public class RestCon {
         project.setProjectName(jProject.getProjectName());
         project.setSummary(jProject.getSummary());
         projectService.save(project);
-        return new ResponseEntity(project, HttpStatus.OK);
+        return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(project)), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/listProject")
-    public ResponseEntity listProject(){
-        LOG.info("sono in createproject");
+    @RequestMapping(value = "/project", method=RequestMethod.GET)
+    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        LOG.info("listProject()");
         String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findBySSO(ssoId);
         List<Project> projects =projectService.findByUserId(user.getId());
-        return new ResponseEntity(projects, HttpStatus.OK);
+        LOG.info("list projects size:"+projects.size()+" first: "+ ((projects.size()>0) ? (projects.get(0).getProjectName()) : "NA"));
+        return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(projects)), HttpStatus.OK);
     }
 
-//    @RequestMapping(value = { "/filelist-{projectId}" }, method = RequestMethod.GET)
-//    public ResponseEntity listFilesId(@PathVariable Long projectId) {
-//
-//        Project project = projectService.findById(projectId);
-//        List<FileList> files = project.getFileLists();
-//        ArrayList<JFileList> nfiles = new ArrayList<>();
-//        for(FileList ifile :files){
-//            JFileList infiles = new JFileList();
-//            infiles.setFiletName(ifile.getFileName());
-//            infiles.setFileInfo(ifile.getFileInfo());
-//           // infiles.setProjectId(ifile.getProjectId());
-//            nfiles.add(infiles);
-//        }
-//
-//        return new ResponseEntity(nfiles, HttpStatus.OK);
-//    }
 
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {
@@ -191,6 +115,23 @@ public class RestCon {
             nfiles.add(infiles);
         }
         return new ResponseEntity(nfiles, HttpStatus.OK);
+    }
+
+    //TODO demo replace by filelist
+    @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
+    public ResponseEntity listAllDataset(@PathVariable Optional<Integer> projectId){
+        if (projectId.isPresent()){
+            //with projectid
+            return new ResponseEntity("[{\"id\":\"1\",\"projectId\":\""+projectId.get()+"\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
+                    "      {\"id\":\"2\",\"projectId\":\""+projectId.get()+"\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"}\n" +
+                    "    ]\n", HttpStatus.OK);
+        }else{
+            //without projectid - list all
+            return new ResponseEntity("[{\"id\":\"1\",\"projectId\":\"1\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
+                    "      {\"id\":\"2\",\"projectId\":\"1\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"},\n" +
+                    "      {\"id\":\"3\",\"projectId\":\"2\",\"date\":\"08/09/2017\",\"summary\":\"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).\", \"info\":\"2.1 Mb\",\"webdavurl\":\"/files/XufWqKa3/\"}\n" +
+                    "    ]\n", HttpStatus.OK);
+        }
     }
 
     /** utils to create user in database if it is logged using SSO and not in DB yet
@@ -222,12 +163,18 @@ public class RestCon {
         //if (xgroups contains 'West-Life' or 'ARIA') user.setUserProfiles('USER')
         //if (xusername == 'admin eppn' user.setUserProfile('ADMIN')...
         //now everybody logged via West-Life SSO is USER
-        HashSet<UserProfile> ups = new HashSet<>();
-        ups.add(userProfileService.findByType("USER"));
+
+        //TODO what user profile???? - fails on Column 'USER_PROFILE_ID' cannot be null,
+        //'USER' should be in batchSchema.sql
+        HashSet<UserProfile> ups = new HashSet();
+        UserProfile up = userProfileService.findByType("USER");
+        LOG.info("profile id:"+up.getId()+" profile type:"+up.getType());
+        ups.add(up);
         user.setUserProfiles(ups);
 
-        LOG.info("creating user:"+user.toString());
-        LOG.info("groups:"+xgroups);
+
+        LOG.info("creating user in local db from SSO information:"+user.toString());
+        LOG.info("groups in contruction now ignored:"+xgroups);
         userService.saveUser(user);
         user = userService.findBySSO(ssoId);
         //should have the user.getId() set now
@@ -245,32 +192,28 @@ public class RestCon {
         return s.toString();
     }
 
-
-    public String checkAuthentication(String xusername) {
-        LOG.info("checkAuthentication()");
-        //String xusername="";
-        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
-        if (ssoId=="") {
-            LOG.info("checkAuthentication: not authenticated");
-            throw new UnauthorizedUserException("authorization required");
-            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
-        } else {
-            return ssoId;
-        }
-    }
     //checks authentication, either it is authenticated via spring - or via sent arguments x*
-    public User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
+    //synchronized - multiple calls might be concurrent in - userService.findBySSO(ssoid);
+    public synchronized User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
         LOG.info("checkAuthentication()");
         //String xusername="";
+        //ssoid is xusername - if set, otherwise ask for context - spring authenticated
         String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+
+        //if ssoid is not found or is empty
         if (ssoId=="") {
             LOG.info("checkAuthentication: not authenticated");
-            throw new AuthenticationCredentialsNotFoundException("authorization required");
-
+            throw new AuthenticationCredentialsNotFoundException("authentication required");
             //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
         } else {
+            //try to find sso in DB - if authenticated by spring - it is there
+            LOG.info("authenticated user ssoid:"+ssoId);
             User user= userService.findBySSO(ssoId);
+            //only logs
+            if (user!=null) LOG.info("authenticated user id:"+user.getId());
+            else LOG.info("authenticated user is not yet in DB");
             //fix issue #9
+            // if authenticated by SSO first time it is not in DB, thus create the user info in DB
             if (user==null) {
                 if (xusername.length()>0)
                     user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);

@@ -245,17 +245,18 @@
 
     <build>
 		<finalName>wp6</finalName>
-
+		<directory>/tmp/repository/target</directory>
+		<outputDirectory>/tmp/repository/target/classes</outputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>9.3.18.v20170406</version>
-				<!--<configuration>
+				<configuration>
 					<webApp>
 						<contextPath>/admin</contextPath>
 					</webApp>
-				</configuration>-->
+				</configuration>
 				<!--<configuration>
 					<jettyXml>jetty.xml,jetty-http.xml,jetty-ssl.xml,jetty-https.xml</jettyXml>
 				</configuration>-->
