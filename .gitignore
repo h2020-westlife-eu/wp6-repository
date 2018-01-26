@@ -35,5 +35,5 @@ sp-metadata.xml
 idp-metadata.xml
 index.php
 frontend/ariademo/refreshToken.php
-frontend/ariademo/ariaimport2.php
+frontend/ariademo/accessToken.php
 backend/wp6-backend.iml
