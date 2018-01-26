@@ -1,13 +1,24 @@
+import {Ariaapi} from '../components/ariaapi';
+
+/* Dashboard receives list of projects and list of datasets, in case the project or dataset is selected either by click or within url it is filtered */
 export class Importaria {
-  constructor () {
-   this.client_id = "asdf"
-   this.oaservice='https://www.structuralbiology.eu/ws/oauth/';
-   //random int between 1000000, 9999999
-   this.oastate=Math.floor(Math.random() * (9999999 - 1000000) ) + 1000000;
+  static inject = [Ariaapi];
+  constructor(ariaapi){
+    this.ariaapi = ariaapi;
+    this.ariaurl = "";
+    this.showspinner=true;
   }
 
   attached () {
-    this.ariaurl=this.oaservice+
-      "authorize?client_id="+this.client_id+"&state="+this.oastate;
+    this.ariaapi.getAriaLink().then(
+      linkdata => {
+        console.log('importaria.attached() recieved linkdata');
+        console.log(linkdata);
+        this.ariaurl = linkdata.url;
+        this.showspinner=false;
+      }
+    )
+    //this.ariaurl=this.aoaservice+
+
   }
 }

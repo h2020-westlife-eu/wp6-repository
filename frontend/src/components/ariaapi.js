@@ -1,5 +1,6 @@
 import {HttpClient} from 'aurelia-fetch-client';
 
+
 /* Provides methods to return promise of data from REST Project api*/
 export class Ariaapi {
   static inject = [HttpClient];
@@ -9,7 +10,6 @@ export class Ariaapi {
     this.httpclient.configure(config => {
       config
         .rejectErrorResponses()
-        .withBaseUrl('https://www.structuralbiology.eu/')
         .withDefaults({
           credentials: 'same-origin',
           headers: {
@@ -19,8 +19,17 @@ export class Ariaapi {
         })
     });
     //needs SSO credentials
-    this.proposallisturl = "/ws/oauth/proposallist";
-    this.proposalurl = "/ws/oauth/proposal";
+    this.proposallisturl = "https://www.structuralbiology.eu/ws/oauth/proposallist";
+    this.proposalurl = "https://www.structuralbiology.eu/ws/oauth/proposal";
+    this.accesstokenserviceurl="/ariademo/accessToken.php";
+  }
+
+  attached() {
+    console.log('ariaapi.attached()');
+  }
+
+  created() {
+    console.log('ariaapi.created()');
   }
 
   getProposallist() {
@@ -47,4 +56,16 @@ export class Ariaapi {
           console.log(error);
         });
   }
+
+  getAriaLink() {
+    return this.httpclient.fetch(this.accesstokenserviceurl)
+      .then(response => response.json())
+      .then(data => {
+        return data;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
 }
