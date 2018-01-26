@@ -36,3 +36,4 @@ idp-metadata.xml
 index.php
 frontend/ariademo/refreshToken.php
 frontend/ariademo/ariaimport2.php
+backend/wp6-backend.iml
