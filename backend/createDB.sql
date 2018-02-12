@@ -58,8 +58,10 @@ create table DATASET (
   id BIGINT NOT NULL AUTO_INCREMENT,
   project_id BIGINT ,
   type VARCHAR(100),
-  name VARCHAR(100) ,
-  info VARCHAR(2000) ,
+  name VARCHAR(100),
+  info VARCHAR(2000),
+  summary VARCHAR(2000),
+  uri VARCHAR(2000),
   PRIMARY KEY (id),
   CONSTRAINT dataset_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
 );

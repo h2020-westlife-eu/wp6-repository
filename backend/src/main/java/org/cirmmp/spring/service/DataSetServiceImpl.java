@@ -28,6 +28,8 @@ public class DataSetServiceImpl implements DataSetService {
 
     }
 
+//should be removed - dataset = directory, filelist = directory listing, should be deleagated for
+//API handling files = WEBDAV
 
     @Transactional
     @Override

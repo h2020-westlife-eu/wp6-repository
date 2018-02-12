@@ -2,16 +2,10 @@ package org.cirmmp.spring.controller;
 
 
 import com.google.gson.Gson;
-import org.cirmmp.spring.model.FileList;
-import org.cirmmp.spring.model.Project;
-import org.cirmmp.spring.model.User;
+import org.cirmmp.spring.model.*;
 import org.cirmmp.spring.model.json.JFileList;
 import org.cirmmp.spring.model.json.JProject;
-import org.cirmmp.spring.service.FileListService;
-import org.cirmmp.spring.model.UserProfile;
-import org.cirmmp.spring.service.ProjectService;
-import org.cirmmp.spring.service.UserProfileService;
-import org.cirmmp.spring.service.UserService;
+import org.cirmmp.spring.service.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +36,9 @@ public class RestCon {
 
     @Autowired
     FileListService fileListService;
+
+    @Autowired
+    DataSetService dataSetService;
 
     @Autowired
     UserProfileService userProfileService;
@@ -117,7 +114,42 @@ public class RestCon {
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
+//    @RequestMapping(value = { "/dataset" }, method = RequestMethod.GET)
+    @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
+    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId) {
+        List<DataSet> files;
+        if (projectId.isPresent()) {
+            //TODO implement it in DB layer dataSetService.findByProjectId(projectId.get())
+            files = dataSetService.findAllDataset();
+            for (Iterator<DataSet> iter = files.iterator(); iter.hasNext(); ) {
+                 DataSet a= iter.next();
+                if (a.getProject().getId()!=projectId.get()) {
+                    iter.remove();
+                }
+            }
+
+        } else {
+            files = dataSetService.findAllDataset();
+        }
+
+        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
+
+        for(DataSet ds :files){
+            DatasetDTO dto = new DatasetDTO();
+            dto.name=ds.getDataName();
+            dto.info=ds.getDataInfo();
+            //infiles.setProjectId(ifile.getProjectId());
+            dto.creation_date=ds.getCreation_date();
+            dto.summary=ds.getSummary();
+            dto.webdavurl=ds.getUri();
+            dto.projectId=ds.getProject().getId();
+            dto.id=ds.getId();
+            nfiles.add(dto);
+        }
+        return new ResponseEntity(nfiles, HttpStatus.OK);
+    }
     //TODO demo replace by filelist
+/*
     @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
     public ResponseEntity listAllDataset(@PathVariable Optional<Integer> projectId){
         if (projectId.isPresent()){
@@ -133,6 +165,7 @@ public class RestCon {
                     "    ]\n", HttpStatus.OK);
         }
     }
+*/
 
     /** utils to create user in database if it is logged using SSO and not in DB yet
      *

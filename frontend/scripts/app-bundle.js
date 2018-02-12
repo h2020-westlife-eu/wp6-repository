@@ -621,7 +621,7 @@ define('components/projectapi',['exports', 'aurelia-fetch-client'], function (ex
 
       if (window.location.pathname.indexOf('repositorytest2') > 0) apiurl = "/restcontest2";else if (window.location.pathname.indexOf('repositorytest') > 0) apiurl = "/restcontest";
       this.projecturl = apiurl + "/project";
-      this.dataurl = apiurl + "/filelist";
+      this.dataurl = apiurl + "/dataset";
       this.userinfourl = apiurl + "/user";
 
       this.usersurl = "/admin/restcon/users";
@@ -1129,6 +1129,139 @@ define('resources/index',['exports'], function (exports) {
     config.globalResources(['./irep.html', './irepdemo.html', './iadmin.html', './istaff.html', './ifile.html', './ilink.html', './icopy', './ifolder.html', './idata.html', './iproject.html', './itable.html', './ispincog.html']);
   }
 });
+define('staff/dataupload',['exports', '../components/projectapi'], function (exports, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Dataupload = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Dataupload = exports.Dataupload = (_temp = _class = function Dataupload(pa) {
+    _classCallCheck(this, Dataupload);
+
+    this.pa = pa;
+  }, _class.inject = [_projectapi.ProjectApi], _temp);
+});
+define('staff/repositorystaff',["exports", "../components/projectapi"], function (exports, _projectapi) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Repositorystaff = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Repositorystaff = exports.Repositorystaff = (_temp = _class = function () {
+    function Repositorystaff(pa) {
+      _classCallCheck(this, Repositorystaff);
+
+      console.log("Repositorystaff()");
+      this.visitors = [];
+      this.datasets = [];
+      this.filestoupload = [];
+      this.uploadfiles = [];
+      this.uploaddir = "";
+      this.selectinguser = true;
+      this.selectedvisitor = "";
+      this.pa = pa;
+    }
+
+    Repositorystaff.prototype.attached = function attached() {
+      var _this = this;
+
+      this.pa.getUsers().then(function (data) {
+        _this.visitors = data;
+      });
+    };
+
+    Repositorystaff.prototype.selectitem = function selectitem(item) {
+      console.log("Selected", item);
+    };
+
+    Repositorystaff.prototype.selectvisitor = function selectvisitor(visitor) {
+      this.selectinguser = false;
+      this.selectedvisitor = visitor;
+    };
+
+    Repositorystaff.prototype.deselectvisitor = function deselectvisitor() {
+      this.selectinguser = true;
+    };
+
+    Repositorystaff.prototype.deleteitem = function deleteitem(item) {
+      var indexremoved = this.datasets.indexOf(item);
+      if (indexremoved >= 0) this.datasets.splice(indexremoved, 1);
+    };
+
+    Repositorystaff.prototype.selectItemToUpload = function selectItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+    };
+
+    Repositorystaff.prototype.removeItemToUpload = function removeItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+      var i = this.filestoupload.indexOf(item);
+      this.filestoupload.splice(i, 1);
+    };
+
+    Repositorystaff.prototype.dropped = function dropped(event) {
+      var _filestoupload;
+
+      console.log("Dropped");
+      console.log(event.dataTransfer.files);
+      event.stopPropagation();
+      event.preventDefault();
+      (_filestoupload = this.filestoupload).unshift.apply(_filestoupload, event.dataTransfer.files);
+      return true;
+    };
+
+    Repositorystaff.prototype.dragged = function dragged(event) {
+      return true;
+    };
+
+    Repositorystaff.prototype.appendFiles = function appendFiles(event) {
+      var _filestoupload2;
+
+      console.log("appendFiles()");
+      console.log(event.target.files);
+
+      (_filestoupload2 = this.filestoupload).unshift.apply(_filestoupload2, event.target.files);
+    };
+
+    Repositorystaff.prototype.appendDir = function appendDir(event) {
+      var _filestoupload3;
+
+      console.log("appendDir");
+      console.log(event.target.files);
+      (_filestoupload3 = this.filestoupload).unshift.apply(_filestoupload3, event.target.files);
+    };
+
+    Repositorystaff.prototype.submitUpload = function submitUpload() {
+      var _datasets;
+
+      (_datasets = this.datasets).unshift.apply(_datasets, this.filestoupload);
+      this.filestoupload = [];
+    };
+
+    return Repositorystaff;
+  }(), _class.inject = [_projectapi.ProjectApi], _temp);
+});
 define('scientist/dashboard',['exports', '../components/ariaapi'], function (exports, _ariaapi) {
   'use strict';
 
@@ -1464,139 +1597,6 @@ define('scientist/repositorytovf',['exports', 'aurelia-event-aggregator', '../co
 
     return Repositorytovf;
   }(), _class.inject = [_aureliaEventAggregator.EventAggregator], _temp);
-});
-define('staff/dataupload',['exports', '../components/projectapi'], function (exports, _projectapi) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Dataupload = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Dataupload = exports.Dataupload = (_temp = _class = function Dataupload(pa) {
-    _classCallCheck(this, Dataupload);
-
-    this.pa = pa;
-  }, _class.inject = [_projectapi.ProjectApi], _temp);
-});
-define('staff/repositorystaff',["exports", "../components/projectapi"], function (exports, _projectapi) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Repositorystaff = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Repositorystaff = exports.Repositorystaff = (_temp = _class = function () {
-    function Repositorystaff(pa) {
-      _classCallCheck(this, Repositorystaff);
-
-      console.log("Repositorystaff()");
-      this.visitors = [];
-      this.datasets = [];
-      this.filestoupload = [];
-      this.uploadfiles = [];
-      this.uploaddir = "";
-      this.selectinguser = true;
-      this.selectedvisitor = "";
-      this.pa = pa;
-    }
-
-    Repositorystaff.prototype.attached = function attached() {
-      var _this = this;
-
-      this.pa.getUsers().then(function (data) {
-        _this.visitors = data;
-      });
-    };
-
-    Repositorystaff.prototype.selectitem = function selectitem(item) {
-      console.log("Selected", item);
-    };
-
-    Repositorystaff.prototype.selectvisitor = function selectvisitor(visitor) {
-      this.selectinguser = false;
-      this.selectedvisitor = visitor;
-    };
-
-    Repositorystaff.prototype.deselectvisitor = function deselectvisitor() {
-      this.selectinguser = true;
-    };
-
-    Repositorystaff.prototype.deleteitem = function deleteitem(item) {
-      var indexremoved = this.datasets.indexOf(item);
-      if (indexremoved >= 0) this.datasets.splice(indexremoved, 1);
-    };
-
-    Repositorystaff.prototype.selectItemToUpload = function selectItemToUpload(item) {
-      console.log("selected item");
-      console.log(item);
-    };
-
-    Repositorystaff.prototype.removeItemToUpload = function removeItemToUpload(item) {
-      console.log("selected item");
-      console.log(item);
-      var i = this.filestoupload.indexOf(item);
-      this.filestoupload.splice(i, 1);
-    };
-
-    Repositorystaff.prototype.dropped = function dropped(event) {
-      var _filestoupload;
-
-      console.log("Dropped");
-      console.log(event.dataTransfer.files);
-      event.stopPropagation();
-      event.preventDefault();
-      (_filestoupload = this.filestoupload).unshift.apply(_filestoupload, event.dataTransfer.files);
-      return true;
-    };
-
-    Repositorystaff.prototype.dragged = function dragged(event) {
-      return true;
-    };
-
-    Repositorystaff.prototype.appendFiles = function appendFiles(event) {
-      var _filestoupload2;
-
-      console.log("appendFiles()");
-      console.log(event.target.files);
-
-      (_filestoupload2 = this.filestoupload).unshift.apply(_filestoupload2, event.target.files);
-    };
-
-    Repositorystaff.prototype.appendDir = function appendDir(event) {
-      var _filestoupload3;
-
-      console.log("appendDir");
-      console.log(event.target.files);
-      (_filestoupload3 = this.filestoupload).unshift.apply(_filestoupload3, event.target.files);
-    };
-
-    Repositorystaff.prototype.submitUpload = function submitUpload() {
-      var _datasets;
-
-      (_datasets = this.datasets).unshift.apply(_datasets, this.filestoupload);
-      this.filestoupload = [];
-    };
-
-    return Repositorystaff;
-  }(), _class.inject = [_projectapi.ProjectApi], _temp);
 });
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
