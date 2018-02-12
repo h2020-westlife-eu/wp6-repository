@@ -12,12 +12,18 @@ INSERT INTO USER_PROFILE(type)
 VALUES ('DBA');
 
 INSERT INTO APP_USER(id,sso_id, password, first_name, last_name, email)
-VALUES (1,'user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'User','User','user@xyz.com');
+VALUES (1,'user','$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW', 'User','User','user@xyz.com'),
+(2, 'demo@repository.west-life.eu', '$2a$10$q1M2rwLvNFOXiArJAG7OFei49Aj1WJrF6CDveoAOEixUAk5e5uNWW','Demo','User','demo.user@repository.west-life.eu');
 
 /* Populate JOIN Table */
 INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
   SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
   where user.sso_id='user' and profile.type='ADMIN';
+
+/* Populate JOIN Table */
+INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
+  SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
+  where user.sso_id='demo@repository.west-life.eu' and profile.type='USER';
 
 /* create demo project */
 INSERT INTO PROJECT(user_id,project_name,summary)
