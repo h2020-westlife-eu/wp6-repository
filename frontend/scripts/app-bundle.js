@@ -229,6 +229,18 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
       });
     };
 
+    Ariaapi.prototype.getAccessToken = function getAccessToken(code, state) {
+      return this.httpclient.fetch(this.accesstokenserviceurl + "?code=" + code + "&state=" + state).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        console.log("ariaapi.getaccesstoken()");
+        console.log(data);
+        return data;
+      }).catch(function (error) {
+        console.log(error);
+      });
+    };
+
     return Ariaapi;
   }(), _class.inject = [_aureliaFetchClient.HttpClient], _temp);
 });
@@ -1161,7 +1173,9 @@ define('scientist/dashboard',['exports', '../components/ariaapi'], function (exp
       console.log(this.params);
       this.code = this.params.code;
       this.state = this.params.state;
-      if (this.code && this.state) {}
+      if (this.code && this.state) {
+        this.ariaapi.getAccessToken(this.code, this.state);
+      }
     };
 
     return Dashboard;
@@ -2075,27 +2089,6 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     return "string";
   }
 
-  function tokenNestedComment(depth) {
-    return function (stream, state) {
-      var ch
-      while (ch = stream.next()) {
-        if (ch == "*" && stream.eat("/")) {
-          if (depth == 1) {
-            state.tokenize = null
-            break
-          } else {
-            state.tokenize = tokenNestedComment(depth - 1)
-            return state.tokenize(stream, state)
-          }
-        } else if (ch == "/" && stream.eat("*")) {
-          state.tokenize = tokenNestedComment(depth + 1)
-          return state.tokenize(stream, state)
-        }
-      }
-      return "comment"
-    }
-  }
-
   def("text/x-scala", {
     name: "clike",
     keywords: words(
@@ -2151,12 +2144,6 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         } else {
           return false
         }
-      },
-
-      "/": function(stream, state) {
-        if (!stream.eat("*")) return false
-        state.tokenize = tokenNestedComment(1)
-        return state.tokenize(stream, state)
       }
     },
     modeProps: {closeBrackets: {triples: '"'}}
@@ -2191,7 +2178,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       "file import where by get set abstract enum open inner override private public internal " +
       "protected catch finally out final vararg reified dynamic companion constructor init " +
       "sealed field property receiver param sparam lateinit data inline noinline tailrec " +
-      "external annotation crossinline const operator infix suspend actual expect"
+      "external annotation crossinline const operator infix suspend"
     ),
     types: words(
       /* package java.lang */
@@ -2609,7 +2596,6 @@ var xmlConfig = {
   doNotIndent: {},
   allowUnquoted: false,
   allowMissing: false,
-  allowMissingTagName: false,
   caseFold: false
 }
 
@@ -2784,9 +2770,6 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
       state.tagName = stream.current();
       setStyle = "tag";
       return attrState;
-    } else if (config.allowMissingTagName && type == "endTag") {
-      setStyle = "tag bracket";
-      return attrState(type, stream, state);
     } else {
       setStyle = "error";
       return tagNameState;
@@ -2805,9 +2788,6 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
         setStyle = "tag error";
         return closeStateErr;
       }
-    } else if (config.allowMissingTagName && type == "endTag") {
-      setStyle = "tag bracket";
-      return closeState(type, stream, state);
     } else {
       setStyle = "error";
       return closeStateErr;
@@ -2985,7 +2965,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c"), D = kw("keyword d");
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
 
-    return {
+    var jsKeywords = {
       "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
       "return": D, "break": D, "continue": D, "new": kw("new"), "delete": C, "void": C, "throw": C,
       "debugger": kw("debugger"), "var": kw("var"), "const": kw("var"), "let": kw("var"),
@@ -2997,6 +2977,33 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       "yield": C, "export": kw("export"), "import": kw("import"), "extends": C,
       "await": C
     };
+
+    // Extend the 'normal' keywords with the TypeScript language extensions
+    if (isTS) {
+      var type = {type: "variable", style: "type"};
+      var tsKeywords = {
+        // object-like things
+        "interface": kw("class"),
+        "implements": C,
+        "namespace": C,
+
+        // scope modifiers
+        "public": kw("modifier"),
+        "private": kw("modifier"),
+        "protected": kw("modifier"),
+        "abstract": kw("modifier"),
+        "readonly": kw("modifier"),
+
+        // types
+        "string": type, "number": type, "boolean": type, "any": type
+      };
+
+      for (var attr in tsKeywords) {
+        jsKeywords[attr] = tsKeywords[attr];
+      }
+    }
+
+    return jsKeywords;
   }();
 
   var isOperatorChar = /[+\-*&%=<>!?|~^@]/;
@@ -3242,10 +3249,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
   }
 
-  function isModifier(name) {
-    return name == "public" || name == "private" || name == "protected" || name == "abstract" || name == "readonly"
-  }
-
   // Combinators
 
   var defaultVars = {name: "this", next: {name: "arguments"}};
@@ -3302,7 +3305,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "function") return cont(functiondef);
     if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
-    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), className, poplex); }
     if (type == "variable") {
       if (isTS && value == "type") {
         cx.marked = "keyword"
@@ -3313,9 +3315,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (isTS && (value == "module" || value == "enum") && cx.stream.match(/^\s*\w/, false)) {
         cx.marked = "keyword"
         return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
-      } else if (isTS && value == "namespace") {
-        cx.marked = "keyword"
-        return cont(pushlex("form"), expression, block, poplex)
       } else {
         return cont(pushlex("stat"), maybelabel);
       }
@@ -3326,23 +3325,24 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "default") return cont(expect(":"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                      statement, poplex, popcontext);
+    if (type == "class") return cont(pushlex("form"), className, poplex);
     if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
     if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
     if (type == "async") return cont(statement)
     if (value == "@") return cont(expression, statement)
     return pass(pushlex("stat"), expression, expect(";"), poplex);
   }
-  function expression(type, value) {
-    return expressionInner(type, value, false);
+  function expression(type) {
+    return expressionInner(type, false);
   }
-  function expressionNoComma(type, value) {
-    return expressionInner(type, value, true);
+  function expressionNoComma(type) {
+    return expressionInner(type, true);
   }
   function parenExpr(type) {
     if (type != "(") return pass()
     return cont(pushlex(")"), expression, expect(")"), poplex)
   }
-  function expressionInner(type, value, noComma) {
+  function expressionInner(type, noComma) {
     if (cx.state.fatArrowAt == cx.stream.start) {
       var body = noComma ? arrowBodyNoComma : arrowBody;
       if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, expect("=>"), body, popcontext);
@@ -3352,7 +3352,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
     if (type == "function") return cont(functiondef, maybeop);
-    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
+    if (type == "class") return cont(pushlex("form"), classExpression, poplex);
     if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
     if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
     if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
@@ -3450,11 +3450,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(afterprop);
     } else if (type == "jsonld-keyword") {
       return cont(afterprop);
-    } else if (isTS && isModifier(value)) {
-      cx.marked = "keyword"
+    } else if (type == "modifier") {
       return cont(objprop)
     } else if (type == "[") {
-      return cont(expression, maybetype, expect("]"), afterprop);
+      return cont(expression, expect("]"), afterprop);
     } else if (type == "spread") {
       return cont(expressionNoComma, afterprop);
     } else if (value == "*") {
@@ -3556,7 +3555,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
     if (value == "|" || type == ".") return cont(typeexpr)
     if (type == "[") return cont(expect("]"), afterType)
-    if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
+    if (value == "extends") return cont(typeexpr)
   }
   function maybeTypeArgs(_, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
@@ -3571,7 +3570,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     return pass(pattern, maybetype, maybeAssign, vardefCont);
   }
   function pattern(type, value) {
-    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(pattern) }
+    if (type == "modifier") return cont(pattern)
     if (type == "variable") { register(value); return cont(); }
     if (type == "spread") return cont(pattern);
     if (type == "[") return contCommasep(pattern, "]");
@@ -3625,8 +3624,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function funarg(type, value) {
     if (value == "@") cont(expression, funarg)
-    if (type == "spread") return cont(funarg);
-    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
+    if (type == "spread" || type == "modifier") return cont(funarg);
     return pass(pattern, maybetype, maybeAssign);
   }
   function classExpression(type, value) {
@@ -3644,9 +3642,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "{") return cont(pushlex("}"), classBody, poplex);
   }
   function classBody(type, value) {
-    if (type == "async" ||
+    if (type == "modifier" || type == "async" ||
         (type == "variable" &&
-         (value == "static" || value == "get" || value == "set" || (isTS && isModifier(value))) &&
+         (value == "static" || value == "get" || value == "set") &&
          cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false))) {
       cx.marked = "keyword";
       return cont(classBody);
@@ -3656,7 +3654,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(isTS ? classfield : functiondef, classBody);
     }
     if (type == "[")
-      return cont(expression, maybetype, expect("]"), isTS ? classfield : functiondef, classBody)
+      return cont(expression, expect("]"), isTS ? classfield : functiondef, classBody)
     if (value == "*") {
       cx.marked = "keyword";
       return cont(classBody);
@@ -3894,9 +3892,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return ret("qualifier", "qualifier");
     } else if (/[:;{}\[\]\(\)]/.test(ch)) {
       return ret(null, ch);
-    } else if (((ch == "u" || ch == "U") && stream.match(/rl(-prefix)?\(/i)) ||
-               ((ch == "d" || ch == "D") && stream.match("omain(", true, true)) ||
-               ((ch == "r" || ch == "R") && stream.match("egexp(", true, true))) {
+    } else if ((ch == "u" && stream.match(/rl(-prefix)?\(/)) ||
+               (ch == "d" && stream.match("omain(")) ||
+               (ch == "r" && stream.match("egexp("))) {
       stream.backUp(1);
       state.tokenize = tokenParenthesized;
       return ret("property", "word");
@@ -3979,16 +3977,16 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return pushContext(state, stream, "block");
     } else if (type == "}" && state.context.prev) {
       return popContext(state);
-    } else if (supportsAtComponent && /@component/i.test(type)) {
+    } else if (supportsAtComponent && /@component/.test(type)) {
       return pushContext(state, stream, "atComponentBlock");
-    } else if (/^@(-moz-)?document$/i.test(type)) {
+    } else if (/^@(-moz-)?document$/.test(type)) {
       return pushContext(state, stream, "documentTypes");
-    } else if (/^@(media|supports|(-moz-)?document|import)$/i.test(type)) {
+    } else if (/^@(media|supports|(-moz-)?document|import)$/.test(type)) {
       return pushContext(state, stream, "atBlock");
-    } else if (/^@(font-face|counter-style)/i.test(type)) {
+    } else if (/^@(font-face|counter-style)/.test(type)) {
       state.stateArg = type;
       return "restricted_atBlock_before";
-    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/i.test(type)) {
+    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/.test(type)) {
       return "keyframes";
     } else if (type && type.charAt(0) == "@") {
       return pushContext(state, stream, "at");
@@ -4610,7 +4608,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       },
       "@": function(stream) {
         if (stream.eat("{")) return [null, "interpolation"];
-        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/i, false)) return false;
+        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/, false)) return false;
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ["variable-2", "variable-definition"];
@@ -4676,6 +4674,7 @@ define('text!resources/ilink.html', ['module'], function(module) { module.export
 define('text!resources/iproject.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-suitcase\"></i>\n</template>\n"; });
 define('text!resources/irep.html', ['module'], function(module) { module.exports = "<template>\n<span class=\"fa-stack\">\n        <i class=\"fa fa-square-o fa-stack-2x\"></i>\n        <i class=\"fa fa-archive fa-stack-1x\"></i>\n</span>\n</template>\n"; });
 define('text!resources/irepdemo.html', ['module'], function(module) { module.exports = "<template>\n<span class=\"fa-stack\" style=\"color:grey\">\n        <i class=\"fa fa-square-o fa-stack-2x\"></i>\n        <i class=\"fa fa-archive fa-stack-1x\"></i>\n</span>\n</template>\n"; });
+define('text!resources/ispincog.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-cog fa-spin fa-fw\"></i>\n  <span class=\"sr-only\">Loading...</span>\n</template>\n"; });
 define('text!resources/istaff.html', ['module'], function(module) { module.exports = "<template>\n<span class=\"fa-stack\">\n        <i class=\"fa fa-square-o fa-stack-2x\"></i>\n        <i class=\"fa fa-id-badge fa-stack-1x\"></i>\n</span>\n</template>\n"; });
 define('text!resources/itable.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-table\"></i>\n</template>\n"; });
 define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/searchbydate\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../components/importaria\"></require>\n  <h3>Visitor Dashboard</h3>\n  <htable></htable>\n  <p>You are logged as visiting scientist.\n\n    You can view your datasets available after your visit.\n    <ul><li>To review Visit Proposal, go to Instruct <a target=\"_blank\"\n                                                href=\"https://www.structuralbiology.eu/dashboard?t=instruct\"\n                                                class=\"w3-button w3-round-small w3-small\">Dashboard</a>\n</li>\n    <li>To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\"\n       class=\"w3-button  w3-round-small w3-small\">Submission</a>.\n    </li>\n  <li>\n      To get existing projects from Instruct <importaria></importaria>.\n  </li>\n</ul>\n  </p>\n<div class=\"w3-half\">\n  <div class=\"w3-margin\">\n\n    <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>\n    <projecttable></projecttable>\n  </div>\n</div>\n  <div class=\"w3-half\">\n    <div class=\"w3-margin\">\n    <h4>Available datasets:</h4>\n      <datasettable></datasettable>\n    </div>\n  </div>\n\n  <p class=\"w3-clear\">&nbsp;</p>\n</template>\n"; });
@@ -4683,5 +4682,4 @@ define('text!scientist/dashboarddetail.html', ['module'], function(module) { mod
 define('text!scientist/repositorytovf.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../pickerclient/pickerclient\"></require>\n  <h3>Repository to West-Life Virtual Folder</h3>\n  <p> This page shows dialog to select files or directories to be uploaded from local repository to user's Virtual Folder.</p>\n  <div show.bind=\"selectingfiles\">\n    <p><b>1.</b>Select files or directories that will be uploaded:</p>\n    <h4>Repository files</h4>\n    <table class=\"w3-table-all\">\n      <thead>\n      <tr>\n        <th>filename</th>\n        <th>date</th>\n        <th colspan=\"2\">action</th>\n      </tr>\n      </thead>\n      <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n        <td class=\"w3-padding-tiny\">${item.name}</td>\n        <td class=\"w3-padding-tiny\">${item.date}</td>\n        <td class=\"w3-padding-tiny\">\n          <button class=\"w3-button w3-padding-tiny\" title=\"delete\" click.trigger=\"deleteitem(item)\">x</button>\n        </td>\n\n      </tr>\n    </table>\n    <button class=\"w3-button\" title=\"submit\" click.trigger=\"submitfiles()\">Submit</button>\n  </div>\n\n  <div show.bind=\"!selectingfiles\">\n    <p><b>1.</b>Selected files: ${selectedfiles} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"unsubmitfiles()\">change</button></p>\n    <p><b>2.</b>Select Virtual Folder:</p>\n    <pickerclient mode=\"dir\"></pickerclient>\n  </div>\n\n  <div show.bind=\"selectedUploadDir\">\n    <p><b>3.</b> Press the button to start <button class=\"w3-button w3-pale-green\" click.trigger=\"copy()\">upload all files.</button></p>\n    <p show.bind=\"copyinprogress\">... upload in progress ...</p>\n  </div>\n\n</template>\n"; });
 define('text!staff/dataupload.html', ['module'], function(module) { module.exports = "<template>\n<h4>Visitor Dataset Upload</h4>\n</template>\n"; });
 define('text!staff/repositorystaff.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Repository Staff UI</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  <label>Project input\n    <input class=\"w3-input\">\n  </label>\n  <div show.bind=\"selectinguser\">\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\" click.trigger=\"selectvisitor(visitor)\">\n      <td>(${visitor.Id})</td><td>${visitor.FirstName} ${visitor.LastName}</td>\n    </tr>\n  </table>\n  </div>\n  <div show.bind=\"!selectinguser\">\n    <p><b>1.</b>Selected user: (${selectedvisitor.Id})${selectedvisitor.FirstName} ${selectedvisitor.LastName} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"deselectvisitor()\">change</button></p>\n    <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>\n    <div class=\"w3-container\">\n      <div class=\"w3-half\">\n        <h4>Local files</h4>\n        <form>\n          <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n            <thead>\n            <tr>\n              <th>drag & drop files/directories here or browse</th>\n            </tr>\n            </thead>\n            <tbody>\n            <tr>\n              <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                         change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n                <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                       change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n              </td>\n              <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n            </tr>\n            <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n              <td class=\"w3-padding-0\">${item.name}</td>\n              <td class=\"w3-padding-0\">\n                <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n              </td>\n            </tr>\n            </tbody>\n          </table>\n        </form>\n      </div>\n      <div class=\"w3-half\">\n\n        <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n        <table class=\"w3-table-all w3-small\">\n          <thead>\n          <tr>\n            <th>filename</th>\n            <th>date</th>\n            <th colspan=\"2\">action</th>\n          </tr>\n          </thead>\n          <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">${item.date}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n            </td>\n\n          </tr>\n        </table>\n      </div>\n    </div>\n    <div>\n      <p><b>3.</b><button class=\"w3-button w3-green\" disabled.bind=\"items.length == 0\">Enable user access. Generate WebDAV endpoint.</button></p>\n    </div>\n  </div>\n\n</template>\n"; });
-define('text!resources/ispincog.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-cog fa-spin fa-fw\"></i>\n  <span class=\"sr-only\">Loading...</span>\n</template>\n"; });
 //# sourceMappingURL=app-bundle.js.map

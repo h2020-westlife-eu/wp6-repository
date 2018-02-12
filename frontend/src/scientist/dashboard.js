@@ -33,6 +33,7 @@ export class Dashboard {
     if (this.code && this.state) {
       //code and state are in url => button (import ARIA proposals) was clicked and redirected back from ARIA - thus
       //importing the data now
+      this.ariaapi.getAccessToken(this.code,this.state);
     }
   }
 }
