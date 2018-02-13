@@ -21,6 +21,7 @@ export class Dashboarddetail {
     this.selectedProjectId=0;
     this.selectedDatasetId=0;
     this.selectedProject={};
+    this.emptyDatasets=true;
   }
 
   /* it is triggered in first click on project - url is generated
@@ -58,6 +59,7 @@ export class Dashboarddetail {
   selectProposal(id) {
     this.showProposals=false;
     this.showDatasets=true;
+    //this.filterSelectedProposal(id);
     return true;
   }
 
@@ -103,16 +105,20 @@ export class Dashboarddetail {
   filterProject(){
     console.log("filterProject()");
     console.log(this.projects);
+    console.log(this.selectedProjectId);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == this.selectedProjectId)[0];
+      //this.filterDataset();
       this.showProposals = false;
     }
-    console.log(this.selectedProject.summary);
   }
 
   //filters dataset based on selectedProjectId
   filterDataset(){
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId === this.selectedProjectId);
+    console.log("filterDataset()");
+    console.log(this.alldatasets);
+    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
+    this.emptyDatasets = this.datasets.length == 0;
     console.log(this.datasets);
   }
 

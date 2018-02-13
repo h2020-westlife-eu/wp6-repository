@@ -39,8 +39,9 @@
     </tr>
     </thead>
     <tbody>
+    <tr if.bind="emptyDatasets"><td colspan="3">No datasets available for this project</td></tr>
     <tr show.bind="showDatasets" class="w3-hover-green" repeat.for="item of datasets">
-      <td>${item.date}</td>
+      <td>${item.creation_date}</td>
       <td>
         <idata></idata>
         <a class="w3-hover-green"
@@ -51,8 +52,9 @@
         <icopy href.bind="item.webdavurl"></icopy>
       </td>
     </tr>
+    </div>
     <tr if.bind="! showDatasets" class="w3-hover-green">
-      <td click.trigger="deselectDataset()">${selectedDataset.date}</td>
+      <td click.trigger="deselectDataset()">${selectedDataset.creation_date}</td>
       <td click.trigger="deselectDataset()">
         <idata></idata>
         ${selectedDataset.summary}
@@ -77,6 +79,5 @@
       <fileeditor></fileeditor>
     </div>
   </div>
-
   <p>&nbsp;</p>
 </template>

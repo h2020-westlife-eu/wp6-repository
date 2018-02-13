@@ -95,7 +95,7 @@ public class RestCon {
         return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(projects)), HttpStatus.OK);
     }
 
-
+//TODO remove - duplicates /dataset
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {
 
