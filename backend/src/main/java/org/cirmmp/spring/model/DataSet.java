@@ -13,10 +13,10 @@ public class DataSet {
     private Long id;
 
 
-    @Column(name="DATASET_NAME")
+    @Column(name="NAME")
     private String dataName;
 
-    @Column(name="DATASET_INFO")
+    @Column(name="INFO")
     private String dataInfo;
 
     @Column(name="TYPE", length=100)
@@ -24,6 +24,9 @@ public class DataSet {
 
     @Column(name="SUMMARY")
     private String summary;
+
+    @Column(name="URI")
+    private String uri;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="CREATION_DATE")
@@ -79,6 +82,12 @@ public class DataSet {
     public void setSummary(String summary) {
         this.summary = summary;
     }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {       this.uri = uri;    }
 
     public Date getCreation_date() {
         return creation_date;

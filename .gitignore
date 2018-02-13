@@ -34,4 +34,6 @@ sp-metadata.pem
 sp-metadata.xml
 idp-metadata.xml
 index.php
-/backend/src/main/resources/application.properties
+frontend/ariademo/refreshToken.php
+frontend/ariademo/accessToken.php
+backend/wp6-backend.iml

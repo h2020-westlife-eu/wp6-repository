@@ -11,7 +11,8 @@ export function configure(config) {
     './ifolder.html',
     './idata.html',
     './iproject.html',
-    './itable.html'
+    './itable.html',
+    './ispincog.html'
   ]);
 
 }
