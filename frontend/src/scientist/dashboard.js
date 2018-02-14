@@ -22,6 +22,9 @@ export class Dashboard {
   static inject = [Ariaapi];
   constructor(ariaapi) {
     this.ariaapi = ariaapi;
+    this.importingaria=false;
+    this.importariastatus="";
+    this.importariaerror=false;
   }
 
   attached(){
@@ -31,9 +34,18 @@ export class Dashboard {
     this.code=this.params.code;
     this.state=this.params.state;
     if (this.code && this.state) {
-      //code and state are in url => button (import ARIA proposals) was clicked and redirected back from ARIA - thus
+      this.importingaria=true;
+      //code and state are in url => button (import ARIA proposals) was clicked before and redirected back from ARIA - thus
       //importing the data now
-      this.ariaapi.getAccessToken(this.code,this.state);
+      this.ariaapi.getAccessToken(this.code,this.state).then(accessToken =>{
+        console.log("Dashboard.attached() accestoken:");
+        console.log(accessToken);
+        this.importingaria=false;
+        if (accessToken.error_description) {
+          this.importariastatus=accessToken.error_description
+          this.importariaerror=true;
+        }
+      });
     }
   }
 }

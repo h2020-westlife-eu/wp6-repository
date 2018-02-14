@@ -69,10 +69,11 @@ export class Ariaapi {
   }
 
   getAccessToken(code,state){
+    console.log("Ariaapi.getAccessToken()");
     return this.httpclient.fetch(this.accesstokenserviceurl+"?code="+code+"&state="+state)
       .then(response => response.json())
       .then(data => {
-        console.log("ariaapi.getaccesstoken()");
+        console.log("ariaapi.getaccesstoken() returned:");
         console.log(data);
         return data;
       })
