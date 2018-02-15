@@ -37,38 +37,6 @@ import java.util.Locale;
 @RequestMapping("/")
 @SessionAttributes("roles")
 
-/*TODO 1. refactor the class - extract methods handling userService to new controller class
-  - change all the api endpoints (/list, /newuser, /edit-user,/delete-user) to /user, avoid using  verb in endpoints
-  - distinguish operation by the HTTP methods: GET (without id =current '/list' users, with id=current '/newuser' user details) ,
-   PUT (=update),
-   POST (=create,or update - if id is presented),
-   DELETE (delete)
-  TODO 2. refactor the class - extract methods handling projectService operation to new controller class
-  - change all the endpoints (/listPro,/listData-{projid}, to /project
-  - distinguish operations, HTTP methods
-  - GET on /project = current /listPro
-  - GET on /project/{id} = project detail = current /list-data-{} with list of data
-  - POST on /project/{id} = adds new dataset, current /add-dataset-{projectid},
-  - POST on /project = create new project,
-  TODO 3. extract authentication methods to new controller class
-  - /login
-  - /logout
-  - remove Access_Denied - access denied is HTTP 403?
-  TODO 4.Review: doesn't make sense to have /add-file GET and /add-file POST /new-dataset GET - /new-dataset POST
-  - per the analysis the relation between [dataset] and [fileset] is 1:1-
-  - fileset is either the zip,tar.gz or webdav entrypoint to folder containing the files so dataset=file
-  - so I suggest to keep this semantics in api endpoints - everything is under /dataset (HTTP methods GET,POST,PUT,DELETE)
-  - new method /dataset - returns all datasets belonging to user,
-  - BTW. /project/{id} - from TODO 2. already return project deteails including list of dataset ids belonging to the project.
-  - "/download-file-{prId}-{fileId}" - refactor to /dataset/{datasetId}, method==RequestMethod.GET - datasetId=fileId?
-  - "/create-tar-{prId}" - ??? I suggest to remove it, I suggest to create zip on the fly per my email
-  - refactor @RequestMapping(value = { "/delete-project-{Id}" }, method = RequestMethod.GET)
-    to  @RequestMapping(value = { "/project/{Id}" }, method = RequestMethod.DELETE)
-  -  refactor @RequestMapping(value = { "/delete-dataset-{proId}-{dataId}" }, method = RequestMethod.GET)
-    to @RequestMapping(value = { "/dataset/{dataId}" }, method = RequestMethod.DELETE)
-  - think of removing "/delete-file-{prId}-{fileId}", file = dataset, if dataset is deleted - then should the file- fileset be deleted???
-  - refactor or remove other methods with the same semantics as above.
-*/
 public class AppController {
 
 	@Autowired
@@ -249,10 +217,27 @@ public class AppController {
 	 * If users is already logged-in and tries to goto login page again, will be redirected to list page.
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String loginPage() {
+	public String loginPage(HttpServletRequest request, @RequestParam(name="next",defaultValue="") String redirecturl) {
+		//LOG.info("loginPage(), redirect next "+redirecturl);
 		if (isCurrentAuthenticationAnonymous()) {
+			if (redirecturl.length()>0 ) {
+				//sets redirection attribute if not logged
+				logger.info("loginPage() branch1 redirecturl:"+redirecturl);
+				logger.info("reguesturl:"+request.getRequestURL());
+				logger.info("requestreferrer:"+request.getHeader("referer"));
+				if (redirecturl.startsWith("..")) redirecturl=request.getHeader("referer")+redirecturl.substring(3);
+				logger.info("loginPage() branch1 redirecturl2:"+redirecturl);
+				request.getSession().setAttribute("url_prior_login", redirecturl);
+				//return "login";
+				//return "redirect:" + redirecturl;
+			}
 			return "login";
-	    } else {
+	    } else {//redirect if already logged
+			if (redirecturl.length()>0 ) {
+				logger.info("loginPage() branch2 redirecturl:"+redirecturl);
+				return "redirect:" + redirecturl;
+			}
+			else
 	    	return "redirect:/list";  
 	    }
 	}
