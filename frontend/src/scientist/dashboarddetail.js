@@ -44,12 +44,14 @@ export class Dashboarddetail {
     this.pa.getProjects().then(data => {
           this.projects = data;//this.proposalsall.slice(0,3);
           if (this.selectedProjectId>0) {this.filterProject()}
-      });
+
+    });
     this.pa.getDatasets().then(data => {
           this.alldatasets = data;       
           if (this.selectedDatasetId>0) {this.filterMyDataset()} //triggered when accessed by url dashboard/dataset/1
           else 
           if (this.selectedProjectId>0) {this.filterDataset()}  //triggered when accessed by url dashboard/project/1
+          this.emptyDatasets=this.datasets.length==0;
           //  this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
     });
   }

@@ -4,7 +4,7 @@
   <require from="../components/fileeditor"></require>
   <h3>Project/Dataset Detail</h3>
   <b>Select<span show.bind="! showProposals">ed</span> project visit/proposal:</b>
-  <table class="w3-table-all">
+   <table class="w3-table-all">
     <tr show.bind="showProposals">
       <th>id</th>
       <th>name</th>
@@ -29,6 +29,8 @@
       <td>${selectedProject.summary}</td>
     </tr>
   </table>
+<!--  <projecttable></projecttable>-->
+
   <b>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</b>
   <table class="w3-table-all">
     <thead show.bind="showDatasets">
@@ -67,9 +69,13 @@
       <td>
         <ilink href.bind="selectedDataset.zip"></ilink>
       </td>
+      <td>
+        <iupload href.bind="selectedDataset.webdavurl"></iupload>
+      </td>
     </tr>
     </tbody>
   </table>
+<!--  <datasettable></datasettable>-->
   <div show.bind="! showDatasets" class="w3-half">
     <b>Files:</b>
     <webdavfilepanel></webdavfilepanel>
