@@ -33,3 +33,7 @@ gen
 wp6-backend.iml
 target
 !/pom.xml
+/build/
+.classpath
+.ject
+.settings
