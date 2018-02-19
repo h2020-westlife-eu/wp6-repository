@@ -33,7 +33,7 @@
                     <tr>
                         <td>${proid}</td>
                         <td>${dataset.dataName}</td>
-                        <tf>${dataset.summary}</tf>
+                        <td>${dataset.summary}</td>
                         <td><a href="<c:url value='/add-file-${dataset.id}' />" class="btn btn-success custom-width">Add File</a></td>
                         <%--<td><a href="<c:url value='/edit-dataset-${dataset.id}' />" class="btn btn-success custom-width">edit</a></td>--%>
                         <td><a href="<c:url value='/delete-dataset-${proid}-${dataset.id}' />" class="btn btn-danger custom-width">delete</a></td>

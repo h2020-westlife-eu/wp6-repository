@@ -29,7 +29,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <c:forEach items="${dataset}" var="dataset" ">
+                <c:forEach items="${dataset}" var="dataset" >
                     <tr>
                         <td>${dataset.dataName}</td>
                         <td>${dataset.summary}</td>
