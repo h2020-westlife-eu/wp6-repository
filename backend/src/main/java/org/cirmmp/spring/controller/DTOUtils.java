@@ -23,7 +23,7 @@ public class DTOUtils {
         pdto.hashId=project.getHashId();
         pdto.id=project.getId();
         pdto.projectName=project.getProjectName();
-        pdto.shearable=project.getShearable();
+        pdto.shareable =project.getShearable();
         pdto.summary=project.getSummary();
         pdto.userId=project.getUserId();
         return pdto;

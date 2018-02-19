@@ -22,6 +22,24 @@ import java.util.List;
 import java.security.SecureRandom;
 import java.util.*;
 
+/*TODO 1. consider refactoring the class - extract methods handling /user /project /dataset /[others] to controller service class
+   GET (=read)
+   PUT (=update),
+   POST (=create,or update - if id is presented),
+   DELETE (delete)
+  TODO 2. refactor the class - extract methods handling projectService operation to new controller class
+  - GET on /project = current /listPro
+  - GET on /project/{id} = project detail = current /list-data-{} with list of data
+  - POST on /project/{id} = adds new dataset, current /add-dataset-{projectid},
+  - POST on /project = create new project,
+  TODO 3. analogy for /dataset
+  - everything is under /dataset (HTTP methods GET,POST,PUT,DELETE)
+  - new method /dataset - returns all datasets belonging to user,
+  TODO 4.extract authorization checks  methods to new controller class
+  TODO 5.new services for utils
+  - get tar.gz or zip stream of the dataset
+  - stream selected dataset/folder as PUT request to webdav endpoint
+*/
 @RestController
 @RequestMapping("/restcon")
 public class RestCon {

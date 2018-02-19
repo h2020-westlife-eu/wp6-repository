@@ -8,7 +8,7 @@ public class ProjectDTO {
     Integer userId;
     String projectName;
     String summary;
-    String shearable;
+    String shareable;
     String hashId;
     Date creation_date;
 }
