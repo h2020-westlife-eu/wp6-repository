@@ -28,6 +28,6 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder ".", "/vagrant", nfs: false  
   config.vm.provision "shell",  path: "bootstrap.sh"
 
-  config.vm.synced_folder "c:/Users/ras23654/Projects-local/Tools/", "/opt/shared"
-  config.vm.synced_folder "c:/Users/ras23654/", "/vagrant_data"  
+  config.vm.synced_folder "Projects-local/Tools/", "/opt/shared"
+  config.vm.synced_folder ".", "/vagrant_data"  
 end
