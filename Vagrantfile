@@ -1,5 +1,5 @@
 Vagrant.configure(2) do |config|
-#  config.vm.box = "westlife-eu/wp6-cernvm"
+#  config.vm.box = "westlife-eu/cernvm4"
   config.vm.box = "westlife-eu/scientific_7_x86_64_minimal_gui"
 
   if Vagrant::VERSION =~ /^1.9.3/
@@ -20,14 +20,14 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |vb|
   #   Display the VirtualBox GUI when booting the machine
     vb.gui = false
-  #   Customize the amount of memory on the VM:
-    vb.memory = "6196"
+  #   Customize the amount of memory on the VM, 2GB enough for deployment, 4GB recommended for development:
+    vb.memory = "2048"
     vb.cpus = "2"
     vb.customize ["modifyvm", :id, "--vram", "16"]
   end
   config.vm.synced_folder ".", "/vagrant", nfs: false  
   config.vm.provision "shell",  path: "bootstrap.sh"
 
-  config.vm.synced_folder "c:/Users/ras23654/Projects-local/Tools/", "/opt/shared"
-  config.vm.synced_folder "c:/Users/ras23654/", "/vagrant_data"  
+  #config.vm.synced_folder ".", "/opt/shared"
+  config.vm.synced_folder "../../", "/vagrant_data"
 end
