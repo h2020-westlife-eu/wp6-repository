@@ -19,7 +19,7 @@
 			<a href="<c:url value='/add-file-${project.id}' />">Click here to upload/manage your files</a>
 		</span>--%>
     <span class="well pull-right">
-			Go to <a href="<c:url value='/listPro' />">Pooject List</a>
+			Go to <a href="<c:url value='/listPro' />">Project List</a>
 		</span>
 </div>
 </body>
