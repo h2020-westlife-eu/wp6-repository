@@ -2,7 +2,9 @@
 
 # controlproxy.sh [-a/-r] [directory] [randomproxy]
 function help {
- echo Usage: controlproxy.sh [-a/-r] [directory] [randomproxy]
+ echo "Usage: controlproxy.sh [-a/-r] [directory] [randomproxysuffix]
+             -a [directory] [randomproxysuffix] adds a new proxy configuration
+             -r [directory] [randomproxysuffix] removes existing proxy configuration"
 }
 
 function addproxy {
@@ -26,7 +28,7 @@ echo "Alias '/files/${PROXY}' '$1/'
   Require all granted
   Options +Indexes
 </Directory>" > $APACHEFILE
-service httpd reload
+service httpd reload 1>/dev/null 2&>1
 }
 
 function removeproxy {

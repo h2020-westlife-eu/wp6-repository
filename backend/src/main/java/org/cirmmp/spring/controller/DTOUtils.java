@@ -3,6 +3,7 @@ package org.cirmmp.spring.controller;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 public class DTOUtils {
@@ -33,5 +34,15 @@ public class DTOUtils {
         for (Project p: projects) mylist.add(getProjectDTO(p));
         return mylist;
     }
+    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static SecureRandom rnd = new SecureRandom();
+
+    public static String randomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
 
 }

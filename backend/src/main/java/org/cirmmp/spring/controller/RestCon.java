@@ -91,7 +91,6 @@ public class RestCon {
     @RequestMapping(value = {"/project"}, method=RequestMethod.POST,consumes = {"application/json"},produces = {"application/json"})
     public ResponseEntity createProject(@RequestBody JProject jProject, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
-
         //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         Date now = new Date();
         Project project = new Project();
@@ -116,7 +115,6 @@ public class RestCon {
 //TODO remove - duplicates /dataset
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {
-
         List<FileList> files = fileListService.findAllFiles();
         ArrayList<JFileList> nfiles = new ArrayList<>();
         for(FileList ifile :files){
@@ -132,71 +130,9 @@ public class RestCon {
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
-//    @RequestMapping(value = { "/dataset" }, method = RequestMethod.GET)
-    @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
-    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId) {
-        List<DataSet> files;
-        if (projectId.isPresent()) {
-            //TODO implement it in DB layer dataSetService.findByProjectId(projectId.get())
-            files = dataSetService.findAllDataset();
-            for (Iterator<DataSet> iter = files.iterator(); iter.hasNext(); ) {
-                 DataSet a= iter.next();
-                if (a.getProject().getId()!=projectId.get()) {
-                    iter.remove();
-                }
-            }
-
-        } else {
-            files = dataSetService.findAllDataset();
-        }
-
-        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
-
-        for(DataSet ds :files){
-            DatasetDTO dto = new DatasetDTO();
-            dto.name=ds.getDataName();
-            dto.info=ds.getDataInfo();
-            //infiles.setProjectId(ifile.getProjectId());
-            dto.creation_date=ds.getCreation_date();
-            dto.summary=ds.getSummary();
-            dto.webdavurl=ds.getUri();
-            dto.projectId=ds.getProject().getId();
-            dto.id=ds.getId();
-            nfiles.add(dto);
-        }
-        return new ResponseEntity(nfiles, HttpStatus.OK);
-    }
-    //TODO demo replace by filelist
-/*
-    @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method=RequestMethod.GET)
-    public ResponseEntity listAllDataset(@PathVariable Optional<Integer> projectId){
-        if (projectId.isPresent()){
-            //with projectid
-            return new ResponseEntity("[{\"id\":\"1\",\"projectId\":\""+projectId.get()+"\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
-                    "      {\"id\":\"2\",\"projectId\":\""+projectId.get()+"\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"}\n" +
-                    "    ]\n", HttpStatus.OK);
-        }else{
-            //without projectid - list all
-            return new ResponseEntity("[{\"id\":\"1\",\"projectId\":\"1\",\"date\":\"06/09/2017\",\"summary\":\"spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)\", \"info\":\"1.6 Mb\",\"webdavurl\":\"/files/XufWqKa1/\"},\n" +
-                    "      {\"id\":\"2\",\"projectId\":\"1\",\"date\":\"07/09/2017\",\"summary\":\" spectrum of sucrose (1.3 Mbytes); process with v_ghsqc_pro.mac (NUTS-Pro) or v_ghsqc.mac (NUTS-2D)\", \"info\":\"1.3 Mb\",\"webdavurl\":\"/files/XufWqKa2/\"},\n" +
-                    "      {\"id\":\"3\",\"projectId\":\"2\",\"date\":\"08/09/2017\",\"summary\":\"spectrum of strychnine (2.1 Mbytes); process with v_hsqc_pro.mac (NUTS-Pro) or v_hsqc.mac (NUTS-2D).\", \"info\":\"2.1 Mb\",\"webdavurl\":\"/files/XufWqKa3/\"}\n" +
-                    "    ]\n", HttpStatus.OK);
-        }
-    }
-*/
-
     /** utils to create user in database if it is logged using SSO and not in DB yet
      *
      */
-    static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    static SecureRandom rnd = new SecureRandom();
-
-    private String randomString( int len ){
-        StringBuilder sb = new StringBuilder( len );
-        for( int i = 0; i < len; i++ )
-            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
-        return sb.toString();
-    }
 
     private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId, @RequestHeader(name = "X-GROUPS", defaultValue = "")String xgroups) {
         User user;//user doesn't exist in local system yet, create it from SSO West-Life information
@@ -207,7 +143,7 @@ public class RestCon {
         user.setLastName(names[names.length-1]); //last name or last names "Maria Carazo" or "Carazo"
         user.setEmail(xemail);
         //TODO: disable password - or generate random
-        user.setPassword(randomString(30));
+        user.setPassword(DTOUtils.randomString(30));
 
 
         //TODO where to put user groups? issue #10

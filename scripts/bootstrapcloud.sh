@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Bootstrap script preparing environment for H2020 West-Life Repository Instance - D6.2
+# using binaries from cvmfs
 # expecting that the system is clean, minimal, tested on Scientific Linux 7.x and CernVM 4.x
 
 # WP6REPSRC is directory where sources of D6.2 are available, if not set,
