@@ -1,5 +1,6 @@
 package org.cirmmp.spring.controller;
 
+import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
 
@@ -45,4 +46,15 @@ public class DTOUtils {
     }
 
 
+    public static DatasetDTO getDatasetDTO(DataSet dataSet,Long pid) {
+        DatasetDTO dto = new DatasetDTO();
+        dto.creation_date = dataSet.getCreation_date();
+        dto.id=dataSet.getId();
+        dto.info=dataSet.getDataInfo();
+        dto.name=dataSet.getDataName();
+        dto.summary=dataSet.getSummary();
+        dto.projectId=pid;
+        dto.webdavurl=dataSet.getUri();
+        return dto;
+    }
 }

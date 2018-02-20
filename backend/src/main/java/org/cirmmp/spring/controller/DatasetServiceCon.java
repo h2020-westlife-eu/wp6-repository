@@ -2,17 +2,22 @@ package org.cirmmp.spring.controller;
 
 import com.google.gson.Gson;
 import org.cirmmp.spring.model.DataSet;
+import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.service.DataSetService;
+import org.cirmmp.spring.service.ProjectService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -60,12 +65,19 @@ public class DatasetServiceCon {
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
-    @RequestMapping(value = {"/dataset"}, method = RequestMethod.POST)
-    public ResponseEntity createDataset(@PathVariable Optional<Long> projectId) {
-        DataSet ds = new DataSet();
-        ds.setCreation_date(new Date());
-        ds.setDataName("");
-        DatasetDTO dto = new DatasetDTO();
+    @Autowired
+    ProjectService projectService;
+
+
+    @RequestMapping(value = {"/dataset/{projectId}"}, method = RequestMethod.POST)
+    public ResponseEntity addDatasetPost(@PathVariable Long projectId, @Valid DataSet dataSet, BindingResult result,
+                                 ModelMap model){
+        LOG.info("");
+        Project project = projectService.findById(projectId);
+        dataSet.setProject(project);
+        dataSetService.save(dataSet);
+        DatasetDTO dto = DTOUtils.getDatasetDTO(dataSet,projectId);
         return new ResponseEntity(dto,HttpStatus.OK);
     }
+
 }
