@@ -14,17 +14,6 @@ INSERT INTO APP_USER_USER_PROFILE (user_id, user_profile_id)
   SELECT user.id, profile.id FROM APP_USER user, USER_PROFILE profile
   where user.sso_id='user' and profile.type='ADMIN';
 
-/* create demo project */
-INSERT INTO PROJECT(user_id,project_name,summary)
-    VALUES
-    (2,"Strychnin NMR analysis GLY","This project analyses strychnine and binding sites of glycine receptors"),
-    (2,"Strychnin NMR analysis TAS","This project analyses strychnine and binding sites of taste receptors TAS2R10"),
-    (2,"Strychnin NMR analysis ACE","This project analyses strychnine and binding sites of acetylcholine receptors"),
-    (2,"Strychnin NMR analysis Nic","This project analyses strychnine and binding sites of nicotinic acetylcholine receptors"),
-    (2,"Strychnin NMR analysis Mus","This project analyses strychnine and binding sites of muscarinic acetylcholine receptors"),
-    (1,"Strychnin NMR analysis GLY","This project analyses strychnine and binding sites of glycine receptors"),
-    (1,"Strychnin NMR analysis TAS","This project analyses strychnine and binding sites of taste receptors TAS2R10");
-
 
 
 
