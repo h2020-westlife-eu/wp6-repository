@@ -12,10 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -69,14 +66,14 @@ public class DatasetServiceCon {
     ProjectService projectService;
 
 
-    @RequestMapping(value = {"/dataset/{projectId}"}, method = RequestMethod.POST)
-    public ResponseEntity addDatasetPost(@PathVariable Long projectId, @Valid DataSet dataSet, BindingResult result,
-                                 ModelMap model){
-        LOG.info("");
-        Project project = projectService.findById(projectId);
-        dataSet.setProject(project);
-        dataSetService.save(dataSet);
-        DatasetDTO dto = DTOUtils.getDatasetDTO(dataSet,projectId);
+    @RequestMapping(value = {"/dataset2"}, method = RequestMethod.POST )
+    public @ResponseBody ResponseEntity addDataset(@RequestBody DatasetDTO dto){
+        LOG.info("addDataset()");
+        Project project = projectService.findById(dto.projectId);
+        DataSet ds = DTOUtils.getDataset(dto, projectService);
+        dataSetService.save(DTOUtils.getDataset(dto,projectService));
+        // datasetService should return dataSet of newly created persistent resource - getId()
+        dto.id=ds.getId();
         return new ResponseEntity(dto,HttpStatus.OK);
     }
 

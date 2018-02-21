@@ -3,6 +3,8 @@ package org.cirmmp.spring.controller;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
+import org.cirmmp.spring.service.ProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.security.SecureRandom;
 import java.util.*;
@@ -56,5 +58,19 @@ public class DTOUtils {
         dto.projectId=pid;
         dto.webdavurl=dataSet.getUri();
         return dto;
+    }
+
+
+    public static DataSet getDataset(DatasetDTO dto,ProjectService projectService) {
+        DataSet ds = new DataSet();
+        ds.setId(dto.id);
+        ds.setDataName(dto.name);
+        ds.setCreation_date(dto.creation_date);
+        ds.setDataInfo(dto.info);
+        ds.setProject(projectService.findById(dto.projectId));
+        ds.setSummary(dto.summary);
+        //ds.setType(dto.);
+        ds.setUri(dto.webdavurl);
+        return ds;
     }
 }
