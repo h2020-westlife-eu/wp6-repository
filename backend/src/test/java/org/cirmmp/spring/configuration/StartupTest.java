@@ -49,10 +49,12 @@ public class StartupTest {
 		ServletContextEvent event = new MockServletContextEvent(context);
 		try {
 			init.onStartup(classes , context );
-		} catch (ServletException e) {
-			throw new RuntimeException(e);
+			context.contextInitialized(event );
+		} catch (Exception e) {
+			Throwable cause = e;
+			while (null!=cause.getCause()) {cause = cause.getCause();}
+			throw new RuntimeException(cause);
 		}
-		context.contextInitialized(event );
 	}
 
 }
