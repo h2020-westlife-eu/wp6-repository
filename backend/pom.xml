@@ -245,8 +245,8 @@
 
     <build>
 		<finalName>wp6</finalName>
-		<directory>/tmp/repository/target</directory>
-		<outputDirectory>/tmp/repository/target/classes</outputDirectory>
+		<directory>./build/</directory>
+		<outputDirectory>./build/classes</outputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
