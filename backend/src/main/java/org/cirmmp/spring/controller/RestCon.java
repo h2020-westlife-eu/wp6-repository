@@ -6,19 +6,18 @@ import org.cirmmp.spring.model.*;
 import org.cirmmp.spring.model.json.JFileList;
 import org.cirmmp.spring.model.json.JProject;
 import org.cirmmp.spring.service.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -48,6 +47,17 @@ public class RestCon {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    WebDAVCopyUtils webDAVCopyUtils;
+
+    /*try {
+
+        webDAVCopyUtils.copyFromWebDAV("pippo", "pluto");
+    } catch (IOException e){
+        return new ResponseEntity (gson.toJson(userdtos), HttpStatus.OK);
+
+    }*/
 
     @Autowired
     ProjectService projectService;
@@ -102,6 +112,8 @@ public class RestCon {
         return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(project)), HttpStatus.OK);
     }
 
+    // check using method security interceptor if the user have role USER
+    @Secured("USER")
     @RequestMapping(value = "/project", method=RequestMethod.GET)
     public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
@@ -165,6 +177,19 @@ public class RestCon {
         userService.saveUser(user);
         user = userService.findBySSO(ssoId);
         //should have the user.getId() set now
+
+        //AUTO Authententicate USER
+        // Authenticate the user on spring framework after creation
+        AutoUser autoUser =new AutoUser();
+        autoUser.setFirstName(getFirstNames(names));
+        autoUser.setLastName(names[names.length-1]);
+        autoUser.setEmail(xemail);
+        autoUser.setPassword(randomString(30));
+        //chosose from USER ADMIN DBA all role have to be defined defined on SecurityConfiguration
+        autoUser.setRole("USER");
+        Authentication auth = new UsernamePasswordAuthenticationToken(autoUser,
+                autoUser.getPassword(), autoUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
         return user;
     }
 
