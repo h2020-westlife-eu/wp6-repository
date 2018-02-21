@@ -1,4 +1,4 @@
-import {HttpClient} from 'aurelia-fetch-client';
+import {HttpClient,json} from 'aurelia-fetch-client';
 
 /* Provides methods to return promise of data from REST Project api*/
 export class ProjectApi {
@@ -49,15 +49,6 @@ export class ProjectApi {
       });
   }
 
-      /*
-        this.proposalsall = data;
-        this.proposals = this.prop/osalsall.slice(0,3);
-        this.proposalslength= this.proposalsall.length;
-        this.showallbutton = this.proposalsall.length > 3;
-        this.showmorebutton = true;
-
-      })*/
-    //not yet implemented on backend
   getDatasets() {
     if (this.datasets.length>0)
       return new Promise(resolve => resolve(this.datasets))
@@ -72,6 +63,18 @@ export class ProjectApi {
         console.log(error);
       });
 
+  }
+
+  submitDataset(dataset) {
+      return this.httpclient.fetch(this.dataurl, { method:'post', body:json(dataset)})
+        .then(response => response.json())
+        .then(data => {
+          this.datasets=data;
+          return data;
+        })
+        .catch(error => {
+          console.log(error);
+        });
   }
 
   /* getting list of users - available for staff */
