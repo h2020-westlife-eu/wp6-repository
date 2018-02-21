@@ -525,13 +525,9 @@ public class AppController {
     }
 
 	private void saveFile(FileBucket fileBucket, DataSet dataset) throws IOException {
-
 		FileList document = new FileList();
-
         //List<FileList> fileLists = new ArrayList<>();
-
 		MultipartFile multipartFile = fileBucket.getFile();
-
 		document.setFileName(multipartFile.getOriginalFilename());
 		document.setFileInfo(fileBucket.getDescription());
 		document.setType(multipartFile.getContentType());
