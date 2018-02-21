@@ -51,13 +51,6 @@ public class RestCon {
     @Autowired
     WebDAVCopyUtils webDAVCopyUtils;
 
-    /*try {
-
-        webDAVCopyUtils.copyFromWebDAV("pippo", "pluto");
-    } catch (IOException e){
-        return new ResponseEntity (gson.toJson(userdtos), HttpStatus.OK);
-
-    }*/
 
     @Autowired
     ProjectService projectService;
@@ -184,7 +177,7 @@ public class RestCon {
         autoUser.setFirstName(getFirstNames(names));
         autoUser.setLastName(names[names.length-1]);
         autoUser.setEmail(xemail);
-        autoUser.setPassword(randomString(30));
+        autoUser.setPassword(DTOUtils.randomString(30));
         //chosose from USER ADMIN DBA all role have to be defined defined on SecurityConfiguration
         autoUser.setRole("USER");
         Authentication auth = new UsernamePasswordAuthenticationToken(autoUser,
