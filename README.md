@@ -21,6 +21,9 @@ Execute following in your command line:
     vagrant up
 
 If new sp-metadata.xml was generated, send it to westlife-aai@ics.muni.cz in order to enable authentication via West-Life AAI. N.B. For the pilot environment we do not require any paper work. 
+After you're done, you can destroy the VM.
+
+    vagrant destroy
 
 # Development
 To merge backend with git repository
