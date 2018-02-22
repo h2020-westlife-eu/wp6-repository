@@ -78,6 +78,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
+                //.antMatchers("/login","/static/**").permitAll().and().csrf().disable();
                 .antMatchers("/login","/static/**").permitAll().and().csrf();//.disable();
 
     }

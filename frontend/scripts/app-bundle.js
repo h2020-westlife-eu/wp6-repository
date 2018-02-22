@@ -245,6 +245,41 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
     return Ariaapi;
   }(), _class.inject = [_aureliaFetchClient.HttpClient], _temp);
 });
+define('components/csrfheaderinterceptor',['aurelia-fetch-client'], function (_aureliaFetchClient) {
+  'use strict';
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var CsrfHeaderInterceptor = function () {
+    function CsrfHeaderInterceptor() {
+      _classCallCheck(this, CsrfHeaderInterceptor);
+
+      this.TOKEN_HEADER = 'X-CSRF-Token';
+    }
+
+    CsrfHeaderInterceptor.prototype.response = function response(_response) {
+      if (_response.headers.has(this.TOKEN_HEADER)) {
+        this.latestCsrfToken = _response.headers.get(this.TOKEN_HEADER);
+      }
+      return _response;
+    };
+
+    CsrfHeaderInterceptor.prototype.request = function request(_request) {
+      if (this.latestCsrfToken) {
+        if (['POST', 'PUT', 'PATCH'].indexOf(_request.method) >= 0) {
+          _request.headers.add(this.TOKEN_HEADER, this.latestCsrfToken);
+        }
+      }
+      return _request;
+    };
+
+    return CsrfHeaderInterceptor;
+  }();
+});
 define('components/datasettable',['exports', '../components/projectapi'], function (exports, _projectapi) {
   'use strict';
 
@@ -587,7 +622,7 @@ define('components/nmrapi',["exports"], function (exports) {
     return Nmrapi;
   }();
 });
-define('components/projectapi',['exports', 'aurelia-fetch-client'], function (exports, _aureliaFetchClient) {
+define('components/projectapi',['exports', 'aurelia-fetch-client', 'components/csrfheaderinterceptor'], function (exports, _aureliaFetchClient, _csrfheaderinterceptor) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -615,7 +650,7 @@ define('components/projectapi',['exports', 'aurelia-fetch-client'], function (ex
             'Accept': 'application/json',
             'X-Requested-With': 'Fetch'
           }
-        });
+        }).withInterceptor(new _csrfheaderinterceptor.CsrfHeaderInterceptor());
       });
 
       var apiurl = "/restcon";
@@ -2313,6 +2348,27 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     return "string";
   }
 
+  function tokenNestedComment(depth) {
+    return function (stream, state) {
+      var ch
+      while (ch = stream.next()) {
+        if (ch == "*" && stream.eat("/")) {
+          if (depth == 1) {
+            state.tokenize = null
+            break
+          } else {
+            state.tokenize = tokenNestedComment(depth - 1)
+            return state.tokenize(stream, state)
+          }
+        } else if (ch == "/" && stream.eat("*")) {
+          state.tokenize = tokenNestedComment(depth + 1)
+          return state.tokenize(stream, state)
+        }
+      }
+      return "comment"
+    }
+  }
+
   def("text/x-scala", {
     name: "clike",
     keywords: words(
@@ -2368,6 +2424,12 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         } else {
           return false
         }
+      },
+
+      "/": function(stream, state) {
+        if (!stream.eat("*")) return false
+        state.tokenize = tokenNestedComment(1)
+        return state.tokenize(stream, state)
       }
     },
     modeProps: {closeBrackets: {triples: '"'}}
@@ -2402,7 +2464,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       "file import where by get set abstract enum open inner override private public internal " +
       "protected catch finally out final vararg reified dynamic companion constructor init " +
       "sealed field property receiver param sparam lateinit data inline noinline tailrec " +
-      "external annotation crossinline const operator infix suspend"
+      "external annotation crossinline const operator infix suspend actual expect"
     ),
     types: words(
       /* package java.lang */
@@ -2820,6 +2882,7 @@ var xmlConfig = {
   doNotIndent: {},
   allowUnquoted: false,
   allowMissing: false,
+  allowMissingTagName: false,
   caseFold: false
 }
 
@@ -2994,6 +3057,9 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
       state.tagName = stream.current();
       setStyle = "tag";
       return attrState;
+    } else if (config.allowMissingTagName && type == "endTag") {
+      setStyle = "tag bracket";
+      return attrState(type, stream, state);
     } else {
       setStyle = "error";
       return tagNameState;
@@ -3012,6 +3078,9 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
         setStyle = "tag error";
         return closeStateErr;
       }
+    } else if (config.allowMissingTagName && type == "endTag") {
+      setStyle = "tag bracket";
+      return closeState(type, stream, state);
     } else {
       setStyle = "error";
       return closeStateErr;
@@ -3189,7 +3258,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c"), D = kw("keyword d");
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
 
-    var jsKeywords = {
+    return {
       "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
       "return": D, "break": D, "continue": D, "new": kw("new"), "delete": C, "void": C, "throw": C,
       "debugger": kw("debugger"), "var": kw("var"), "const": kw("var"), "let": kw("var"),
@@ -3201,33 +3270,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       "yield": C, "export": kw("export"), "import": kw("import"), "extends": C,
       "await": C
     };
-
-    // Extend the 'normal' keywords with the TypeScript language extensions
-    if (isTS) {
-      var type = {type: "variable", style: "type"};
-      var tsKeywords = {
-        // object-like things
-        "interface": kw("class"),
-        "implements": C,
-        "namespace": C,
-
-        // scope modifiers
-        "public": kw("modifier"),
-        "private": kw("modifier"),
-        "protected": kw("modifier"),
-        "abstract": kw("modifier"),
-        "readonly": kw("modifier"),
-
-        // types
-        "string": type, "number": type, "boolean": type, "any": type
-      };
-
-      for (var attr in tsKeywords) {
-        jsKeywords[attr] = tsKeywords[attr];
-      }
-    }
-
-    return jsKeywords;
   }();
 
   var isOperatorChar = /[+\-*&%=<>!?|~^@]/;
@@ -3473,6 +3515,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
   }
 
+  function isModifier(name) {
+    return name == "public" || name == "private" || name == "protected" || name == "abstract" || name == "readonly"
+  }
+
   // Combinators
 
   var defaultVars = {name: "this", next: {name: "arguments"}};
@@ -3529,6 +3575,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "function") return cont(functiondef);
     if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
+    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), className, poplex); }
     if (type == "variable") {
       if (isTS && value == "type") {
         cx.marked = "keyword"
@@ -3539,6 +3586,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (isTS && (value == "module" || value == "enum") && cx.stream.match(/^\s*\w/, false)) {
         cx.marked = "keyword"
         return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
+      } else if (isTS && value == "namespace") {
+        cx.marked = "keyword"
+        return cont(pushlex("form"), expression, block, poplex)
       } else {
         return cont(pushlex("stat"), maybelabel);
       }
@@ -3549,24 +3599,23 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "default") return cont(expect(":"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                      statement, poplex, popcontext);
-    if (type == "class") return cont(pushlex("form"), className, poplex);
     if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
     if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
     if (type == "async") return cont(statement)
     if (value == "@") return cont(expression, statement)
     return pass(pushlex("stat"), expression, expect(";"), poplex);
   }
-  function expression(type) {
-    return expressionInner(type, false);
+  function expression(type, value) {
+    return expressionInner(type, value, false);
   }
-  function expressionNoComma(type) {
-    return expressionInner(type, true);
+  function expressionNoComma(type, value) {
+    return expressionInner(type, value, true);
   }
   function parenExpr(type) {
     if (type != "(") return pass()
     return cont(pushlex(")"), expression, expect(")"), poplex)
   }
-  function expressionInner(type, noComma) {
+  function expressionInner(type, value, noComma) {
     if (cx.state.fatArrowAt == cx.stream.start) {
       var body = noComma ? arrowBodyNoComma : arrowBody;
       if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, expect("=>"), body, popcontext);
@@ -3576,7 +3625,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
     if (type == "function") return cont(functiondef, maybeop);
-    if (type == "class") return cont(pushlex("form"), classExpression, poplex);
+    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
     if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
     if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
     if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
@@ -3674,10 +3723,11 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(afterprop);
     } else if (type == "jsonld-keyword") {
       return cont(afterprop);
-    } else if (type == "modifier") {
+    } else if (isTS && isModifier(value)) {
+      cx.marked = "keyword"
       return cont(objprop)
     } else if (type == "[") {
-      return cont(expression, expect("]"), afterprop);
+      return cont(expression, maybetype, expect("]"), afterprop);
     } else if (type == "spread") {
       return cont(expressionNoComma, afterprop);
     } else if (value == "*") {
@@ -3779,7 +3829,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
     if (value == "|" || type == ".") return cont(typeexpr)
     if (type == "[") return cont(expect("]"), afterType)
-    if (value == "extends") return cont(typeexpr)
+    if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
   }
   function maybeTypeArgs(_, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
@@ -3794,7 +3844,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     return pass(pattern, maybetype, maybeAssign, vardefCont);
   }
   function pattern(type, value) {
-    if (type == "modifier") return cont(pattern)
+    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(pattern) }
     if (type == "variable") { register(value); return cont(); }
     if (type == "spread") return cont(pattern);
     if (type == "[") return contCommasep(pattern, "]");
@@ -3848,7 +3898,8 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function funarg(type, value) {
     if (value == "@") cont(expression, funarg)
-    if (type == "spread" || type == "modifier") return cont(funarg);
+    if (type == "spread") return cont(funarg);
+    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
     return pass(pattern, maybetype, maybeAssign);
   }
   function classExpression(type, value) {
@@ -3866,9 +3917,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "{") return cont(pushlex("}"), classBody, poplex);
   }
   function classBody(type, value) {
-    if (type == "modifier" || type == "async" ||
+    if (type == "async" ||
         (type == "variable" &&
-         (value == "static" || value == "get" || value == "set") &&
+         (value == "static" || value == "get" || value == "set" || (isTS && isModifier(value))) &&
          cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false))) {
       cx.marked = "keyword";
       return cont(classBody);
@@ -3878,7 +3929,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(isTS ? classfield : functiondef, classBody);
     }
     if (type == "[")
-      return cont(expression, expect("]"), isTS ? classfield : functiondef, classBody)
+      return cont(expression, maybetype, expect("]"), isTS ? classfield : functiondef, classBody)
     if (value == "*") {
       cx.marked = "keyword";
       return cont(classBody);
@@ -4116,9 +4167,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return ret("qualifier", "qualifier");
     } else if (/[:;{}\[\]\(\)]/.test(ch)) {
       return ret(null, ch);
-    } else if ((ch == "u" && stream.match(/rl(-prefix)?\(/)) ||
-               (ch == "d" && stream.match("omain(")) ||
-               (ch == "r" && stream.match("egexp("))) {
+    } else if (((ch == "u" || ch == "U") && stream.match(/rl(-prefix)?\(/i)) ||
+               ((ch == "d" || ch == "D") && stream.match("omain(", true, true)) ||
+               ((ch == "r" || ch == "R") && stream.match("egexp(", true, true))) {
       stream.backUp(1);
       state.tokenize = tokenParenthesized;
       return ret("property", "word");
@@ -4201,16 +4252,16 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return pushContext(state, stream, "block");
     } else if (type == "}" && state.context.prev) {
       return popContext(state);
-    } else if (supportsAtComponent && /@component/.test(type)) {
+    } else if (supportsAtComponent && /@component/i.test(type)) {
       return pushContext(state, stream, "atComponentBlock");
-    } else if (/^@(-moz-)?document$/.test(type)) {
+    } else if (/^@(-moz-)?document$/i.test(type)) {
       return pushContext(state, stream, "documentTypes");
-    } else if (/^@(media|supports|(-moz-)?document|import)$/.test(type)) {
+    } else if (/^@(media|supports|(-moz-)?document|import)$/i.test(type)) {
       return pushContext(state, stream, "atBlock");
-    } else if (/^@(font-face|counter-style)/.test(type)) {
+    } else if (/^@(font-face|counter-style)/i.test(type)) {
       state.stateArg = type;
       return "restricted_atBlock_before";
-    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/.test(type)) {
+    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/i.test(type)) {
       return "keyframes";
     } else if (type && type.charAt(0) == "@") {
       return pushContext(state, stream, "at");
@@ -4832,7 +4883,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       },
       "@": function(stream) {
         if (stream.eat("{")) return [null, "interpolation"];
-        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/, false)) return false;
+        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/i, false)) return false;
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ["variable-2", "variable-definition"];

@@ -1,4 +1,5 @@
 import {HttpClient,json} from 'aurelia-fetch-client';
+import {CsrfHeaderInterceptor} from 'components/csrfheaderinterceptor';
 
 /* Provides methods to return promise of data from REST Project api*/
 export class ProjectApi {
@@ -17,6 +18,7 @@ export class ProjectApi {
             'X-Requested-With': 'Fetch'
           }
         })
+        .withInterceptor(new CsrfHeaderInterceptor());
     });
     //needs SSO credentials
     let apiurl = "/restcon";

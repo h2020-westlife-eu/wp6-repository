@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.*;
 
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
 @RestController
 @RequestMapping("/restcon")
 public class DatasetServiceCon {
@@ -66,7 +68,7 @@ public class DatasetServiceCon {
     ProjectService projectService;
 
 
-    @RequestMapping(value = {"/dataset2"}, method = RequestMethod.POST )
+    @RequestMapping(value = {"/dataset"}, method = POST )
     public @ResponseBody ResponseEntity addDataset(@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
         Project project = projectService.findById(dto.projectId);
@@ -74,6 +76,19 @@ public class DatasetServiceCon {
         dataSetService.save(DTOUtils.getDataset(dto,projectService));
         // datasetService should return dataSet of newly created persistent resource - getId()
         dto.id=ds.getId();
+        return new ResponseEntity(dto,HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/dataset2", method=POST)
+    public @ResponseBody ResponseEntity addDataset(){
+        LOG.info("addDataset()");
+        /*Project project = projectService.findById(dto.projectId);
+        DataSet ds = DTOUtils.getDataset(dto, projectService);
+        dataSetService.save(DTOUtils.getDataset(dto,projectService));
+        // datasetService should return dataSet of newly created persistent resource - getId()
+        dto.id=ds.getId();*/
+        DatasetDTO dto = new DatasetDTO();
+        dto.name="empty dataset";
         return new ResponseEntity(dto,HttpStatus.OK);
     }
 
