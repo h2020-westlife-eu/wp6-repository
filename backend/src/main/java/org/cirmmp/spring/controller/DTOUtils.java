@@ -6,6 +6,9 @@ import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -72,5 +75,18 @@ public class DTOUtils {
         //ds.setType(dto.);
         ds.setUri(dto.webdavurl);
         return ds;
+    }
+
+    public static String ExecuteCommand(String cmdline) throws IOException {
+
+        Process process = Runtime.getRuntime().exec(cmdline);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                process.getInputStream()));
+        String s;
+        String output="";
+        while ((s = reader.readLine()) != null) {
+            output+=s;
+        }
+        return output;
     }
 }

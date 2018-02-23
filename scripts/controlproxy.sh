@@ -9,7 +9,6 @@ function help {
 
 function addproxy {
 #adding proxy
-
 #generate random base64 string if not specified
 if [ -z $2 ]; then
   export PROXY=`openssl rand -base64 6 | tr -d '=' | tr '/+' '_-'`
@@ -21,6 +20,8 @@ fi
 #create apache configuration with proxy
 #moddav to get from specified directory
 APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
+
+mkdir -p $1
 
 echo "Alias '/files/${PROXY}' '$1/'
 <Directory '$1'>

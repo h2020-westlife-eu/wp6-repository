@@ -87,30 +87,28 @@ public class DatasetServiceCon {
 
 
     @RequestMapping(value = {"/dataset"}, method = POST )
-    public @ResponseBody ResponseEntity addDataset(@RequestBody DatasetDTO dto){
+    public @ResponseBody ResponseEntity addDataset(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
         if (dto.projectId!=null) {
-            Project project = projectService.findById(dto.projectId);
-            DataSet ds = DTOUtils.getDataset(dto, projectService);
-            dataSetService.save(ds);
-            // datasetService should return dataSet of newly created persistent resource - getId()
-            dto.id = ds.getId();
-            return new ResponseEntity(dto, HttpStatus.OK);
+            //create webdavurl
+            String proxycontext= DTOUtils.randomString(8);
+            String userdir = "/home/vagrant/work/"+xusername;
+            //TODO check whether webdavurl is unique
+            try {
+                DTOUtils.ExecuteCommand("/home/vagrant/wp6-repository/scripts/controlproxy.sh -a " + userdir+proxycontext);
+                // creating dataset in DB
+                Project project = projectService.findById(dto.projectId);
+                DataSet ds = DTOUtils.getDataset(dto, projectService);
+                dataSetService.save(ds);
+                dto.id = ds.getId();
+
+
+                return new ResponseEntity(dto, HttpStatus.OK);
+            } catch (Exception e){
+                return new ResponseEntity("{\"error\":\""+e.getMessage()+"\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         } else
             return new ResponseEntity("{\"error\":\"projectId needs to be set\"}",HttpStatus.NOT_FOUND);
-    }
-
-    @RequestMapping(value = "/dataset2", method=POST)
-    public @ResponseBody ResponseEntity addDataset(){
-        LOG.info("addDataset()");
-        /*Project project = projectService.findById(dto.projectId);
-        DataSet ds = DTOUtils.getDataset(dto, projectService);
-        dataSetService.save(DTOUtils.getDataset(dto,projectService));
-        // datasetService should return dataSet of newly created persistent resource - getId()
-        dto.id=ds.getId();*/
-        DatasetDTO dto = new DatasetDTO();
-        dto.name="empty dataset";
-        return new ResponseEntity(dto,HttpStatus.OK);
     }
 
 }
