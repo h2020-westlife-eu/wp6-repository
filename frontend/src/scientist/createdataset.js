@@ -1,4 +1,4 @@
-import {Webdavresource} from "../components/messages";
+import {Selectedproject} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {ProjectApi} from '../components/projectapi';
 
@@ -11,12 +11,14 @@ export class Createdataset {
     this.pa = pa;
     this.datasetname="Antidote";
     this.datasetinfo="0 b";
-    this.datasetsummary="spectrum of antidote"
+    this.datasetsummary="spectrum of antidote";
+    this.datasetprojectid=null;
+    this.ea.subscribe(Selectedproject,msg =>this.selectProject(msg.project));
   }
 
   submit(){
     console.log("submitting dataset:"+this.datasetname);
-    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary});
+    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary,projectId:this.datasetprojectid});
     this.datasetname="";
     this.datasetinfo="";
     this.datasetsummary="";
@@ -26,6 +28,12 @@ export class Createdataset {
     this.datasetname="Antidote";
     this.datasetinfo=Math.floor((Math.random() * 100) + 1)+" b";
     this.datasetsummary="spectrum of antidote"
+  }
+
+  selectProject(project){
+    if (project) {
+      this.datasetprojectid = project.id;
+    } else this.datasetprojectid=null;
 
   }
 }

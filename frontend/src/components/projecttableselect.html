@@ -1,0 +1,19 @@
+<template>
+  <table class="w3-table-all">
+    <tr>
+      <th>id</th>
+      <th>name</th>
+      <th>summary</th>
+    </tr>
+    <tr show.bind="!selectedProject" class="w3-hover-green" repeat.for="project of projects" click.delegate="selectProject(project)">
+      <td>${project.id}</td>
+      <td><iproject></iproject>${project.projectName}</td>
+      <td>${project.summary} (${project.datasets})</td>
+    </tr>
+    <tr show.bind="selectedProject" title="click to show all projects" class="w3-hover-green" click.delegate="deselectProject()">
+      <td>${selectedProject.id}</td>
+      <td ><iproject></iproject>${selectedProject.projectName}</td>
+      <td>${selectedProject.summary}</td>
+    </tr>
+  </table>
+</template>

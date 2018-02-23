@@ -19,3 +19,9 @@ export class Uploaddir {
     this.webdavurl = webdavurl;
   }
 }
+
+export class Selectedproject {
+  constructor(project){
+    this.project = project;
+  }
+}

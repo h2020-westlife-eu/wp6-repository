@@ -43,7 +43,7 @@ export class ProjectApi {
       return this.httpclient.fetch(this.projecturl)
       .then(response => response.json())
       .then(data => {
-        this.projects= data
+        this.projects= data;
         return data
       })
       .catch(error => {

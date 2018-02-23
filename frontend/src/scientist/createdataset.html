@@ -1,5 +1,8 @@
 <template>
+  <require from="../components/projecttableselect"></require>
   <h3>Create Empty Dataset</h3>
+  <h4>Select Project</h4>
+  <projecttableselect></projecttableselect>
   <h4>Name</h4>
   <input value.bind="datasetname"/>
   <h4>Info</h4>
@@ -7,6 +10,6 @@
   <h4>Summary</h4>
   <input value.bind="datasetsummary"/>
   <br/>
-  <button class="w3-button" click.delegate="submit()">Submit</button>
+  <button class="w3-button" click.delegate="submit()" disabled.bind="!datasetprojectid">Submit</button>
   <button class="w3-button" click.delegate="generate()">Fill in sample data</button>
 </template>

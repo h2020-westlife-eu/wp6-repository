@@ -89,12 +89,15 @@ public class DatasetServiceCon {
     @RequestMapping(value = {"/dataset"}, method = POST )
     public @ResponseBody ResponseEntity addDataset(@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
-        Project project = projectService.findById(dto.projectId);
-        DataSet ds = DTOUtils.getDataset(dto, projectService);
-        dataSetService.save(DTOUtils.getDataset(dto,projectService));
-        // datasetService should return dataSet of newly created persistent resource - getId()
-        dto.id=ds.getId();
-        return new ResponseEntity(dto,HttpStatus.OK);
+        if (dto.projectId!=null) {
+            Project project = projectService.findById(dto.projectId);
+            DataSet ds = DTOUtils.getDataset(dto, projectService);
+            dataSetService.save(ds);
+            // datasetService should return dataSet of newly created persistent resource - getId()
+            dto.id = ds.getId();
+            return new ResponseEntity(dto, HttpStatus.OK);
+        } else
+            return new ResponseEntity("{\"error\":\"projectId needs to be set\"}",HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(value = "/dataset2", method=POST)
