@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -78,8 +79,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
-                //.antMatchers("/login","/static/**").permitAll().and().csrf().disable();
-                .antMatchers("/login","/static/**").permitAll().and().csrf();//.disable();
+                .antMatchers("/login","/static/**").permitAll().and()
+                .csrf().disable()
+                .addFilterBefore(new StatelessCSRFFilter(), CsrfFilter.class);
+
+                //.antMatchers("/login","/static/**").permitAll().and().csrf();//.disable();
 
     }
 

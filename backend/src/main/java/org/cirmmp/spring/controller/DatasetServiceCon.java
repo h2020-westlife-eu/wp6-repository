@@ -10,10 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 
@@ -28,8 +32,10 @@ public class DatasetServiceCon {
     @Autowired
     DataSetService dataSetService;
 
+    public static final String DEFAULT_CSRF_TOKEN_ATTR_NAME = HttpSessionCsrfTokenRepository.class.getName().concat(".CSRF_TOKEN");
+
     @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method = RequestMethod.GET)
-    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId) {
+    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId, HttpServletRequest request, HttpServletResponse response) {
         LOG.info("listing datasets, projectId is set:"+projectId.isPresent());
         List<DataSet> files;
         if (projectId.isPresent()) {
@@ -61,6 +67,18 @@ public class DatasetServiceCon {
             nfiles.add(dto);
         }
         LOG.info("listing datasets,nfiles:"+files.size());
+/*
+        CsrfToken token = (CsrfToken) request.getSession().getAttribute(DEFAULT_CSRF_TOKEN_ATTR_NAME);
+        //now setting the csrf token as http header, client can use it in subsequent POST call
+        if (token==null) token = (CsrfToken) request.getSession().getAttribute("_csrf");
+        if (token==null) token = (CsrfToken) request.getAttribute("_csrf");
+// Spring Security will allow the Token to be included in this header name
+        //response.setHeader("X-CSRF-HEADER", token.getHeaderName());
+// Spring Security will allow the token to be included in this parameter name
+        //response.setHeader("X-CSRF-PARAM", token.getParameterName());
+// this is the value of the token to be included as either a header or an HTTP parameter
+        response.setHeader("X-CSRF-TOKEN", token.getToken());
+*/
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 

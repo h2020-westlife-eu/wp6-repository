@@ -9,8 +9,6 @@ export class Userinfo {
   }
 
   attached(){
-    console.log("Userinfo atached()")
-    //console.log(this.pa);
     this.pa.getUserInfo().then(data => {
         console.log(data);
         this.userinfo=data;

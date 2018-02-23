@@ -16,10 +16,10 @@ export class Createdataset {
 
   submit(){
     console.log("submitting dataset:"+this.datasetname);
+    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary});
     this.datasetname="";
     this.datasetinfo="";
     this.datasetsummary="";
-    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary});
   }
 
   generate(){

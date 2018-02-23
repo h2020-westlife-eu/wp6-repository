@@ -1,25 +1,13 @@
 import {HttpClient,json} from 'aurelia-fetch-client';
-import {CsrfHeaderInterceptor} from 'components/csrfheaderinterceptor';
-
+//import {Csrfheaderinterceptor} from '../components/csrfheaderinterceptor';
 /* Provides methods to return promise of data from REST Project api*/
 export class ProjectApi {
   static inject = [HttpClient];
 
+
   constructor(httpclient) {
     this.httpclient=httpclient;
-    this.httpclient.configure(config => {
-      config
-        .rejectErrorResponses()
-        .withBaseUrl('')
-        .withDefaults({
-          credentials: 'same-origin',
-          headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'Fetch'
-          }
-        })
-        .withInterceptor(new CsrfHeaderInterceptor());
-    });
+
     //needs SSO credentials
     let apiurl = "/restcon";
     //test fronted calls test backend uri - which has test authentication - test credentials added
@@ -32,6 +20,19 @@ export class ProjectApi {
     this.usersurl="/admin/restcon/users";
     this.projects=[];
     this.datasets=[];
+    console.log("projectapi");
+    this.httpclient.configure(config => {
+      config
+        .rejectErrorResponses()
+        .withBaseUrl('')
+        .withDefaults({
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'Fetch'
+          }
+        })
+    });
   }
 
   getProjects() {
