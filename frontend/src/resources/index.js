@@ -13,7 +13,8 @@ export function configure(config) {
     './iproject.html',
     './itable.html',
     './ispincog.html',
-    './iupload'
+    './iupload',
+    './idelete.html'
   ]);
 
 }

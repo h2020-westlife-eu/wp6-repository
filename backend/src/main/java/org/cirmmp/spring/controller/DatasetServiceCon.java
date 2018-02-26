@@ -27,6 +27,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RequestMapping("/restcon")
 public class DatasetServiceCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
+    //REP_USER_DIR environment variable sets directory where new dataset may resist
+    private static final String USER_DIR=Optional.ofNullable(System.getenv("REP_USER_DIR")).orElse("/home/vagrant/work/");
+    private static final String SCRIPT_DIR=Optional.ofNullable(System.getenv("REP_SCRIPT_DIR")).orElse("/home/vagrant/wp6-repository/scripts/");
     private static Gson gson = new Gson();
 
     @Autowired
@@ -86,26 +89,31 @@ public class DatasetServiceCon {
     ProjectService projectService;
 
 
+
     @RequestMapping(value = {"/dataset"}, method = POST )
     public @ResponseBody ResponseEntity addDataset(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
         if (dto.projectId!=null) {
             //create webdavurl
             String proxycontext= DTOUtils.randomString(8);
-            String userdir = "/home/vagrant/work/"+xusername;
+            String userdir = USER_DIR+xusername.hashCode()+"/"+proxycontext;
             //TODO check whether webdavurl is unique
             try {
-                DTOUtils.ExecuteCommand("/home/vagrant/wp6-repository/scripts/controlproxy.sh -a " + userdir+proxycontext);
+                DTOUtils.ExecuteCommand("sudo "+SCRIPT_DIR+"controlproxy.sh -a " + userdir+" "+proxycontext);
+                dto.setCreation_date(new Date());
+                //proxy is created in /files/[proxycontext]
+                dto.setWebdavurl("/files/"+proxycontext+"/");
+
                 // creating dataset in DB
                 Project project = projectService.findById(dto.projectId);
                 DataSet ds = DTOUtils.getDataset(dto, projectService);
                 dataSetService.save(ds);
                 dto.id = ds.getId();
-
-
                 return new ResponseEntity(dto, HttpStatus.OK);
             } catch (Exception e){
+                LOG.error(e.getMessage(),e);
                 return new ResponseEntity("{\"error\":\""+e.getMessage()+"\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+
             }
         } else
             return new ResponseEntity("{\"error\":\"projectId needs to be set\"}",HttpStatus.NOT_FOUND);

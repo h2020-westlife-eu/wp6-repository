@@ -157,4 +157,15 @@ export class Dashboarddetail {
     console.log("SelectFile()");
     console.log(file);
   }
+
+  deleteDataset() {
+    this.pa.deleteDataset(this.selectedDataset)
+    then(data => {
+      this.deselectDataset();
+      let i=this.datasets.map(function(e) {return e.id;}).indexOf(data.id);
+      this.datasets.splice(i,1);
+      i=this.alldatasets.map(function(e) {return e.id;}).indexOf(data.id);
+      this.alldatasets.splice(i,1);
+    })
+  }
 }

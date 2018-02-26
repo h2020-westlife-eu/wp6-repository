@@ -74,9 +74,6 @@ export class ProjectApi {
         .then(data => {
           this.datasets=data;
           return data;
-        })
-        .catch(error => {
-          console.log(error);
         });
   }
 

@@ -13,12 +13,21 @@ export class Createdataset {
     this.datasetinfo="0 b";
     this.datasetsummary="spectrum of antidote";
     this.datasetprojectid=null;
+    this. submitted=false;
     this.ea.subscribe(Selectedproject,msg =>this.selectProject(msg.project));
   }
 
   submit(){
     console.log("submitting dataset:"+this.datasetname);
-    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary,projectId:this.datasetprojectid});
+    this.pa.submitDataset({name:this.datasetname,info:this.datasetinfo,summary:this.datasetsummary,projectId:this.datasetprojectid})
+      .then(dataset =>{
+        this.submitted=true;
+        this.submitteditem=dataset;
+      })
+      .catch(error => {
+        console.log(error);
+        alert("Error when submitting new dataset:"+error);
+      });
     this.datasetname="";
     this.datasetinfo="";
     this.datasetsummary="";

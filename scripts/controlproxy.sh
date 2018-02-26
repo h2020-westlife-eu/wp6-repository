@@ -22,6 +22,8 @@ fi
 APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
 
 mkdir -p $1
+#change owner to vagrant
+chown -R vagrant:vagrant $1
 
 echo "Alias '/files/${PROXY}' '$1/'
 <Directory '$1'>

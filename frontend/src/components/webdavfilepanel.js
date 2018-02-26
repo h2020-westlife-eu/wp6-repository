@@ -45,6 +45,7 @@ export class Webdavfilepanel {
           let filedate = this.getFirstElementByTagName(fileitem, "lp1:creationdate");
           let filesize = this.getFirstElementByTagName(fileitem, "lp1:getcontentlength");
           let filetype = this.getFirstElementByTagName(fileitem, "D:getcontenttype");
+          //console.log(this.webdavpath+" x "+filename);
           if (filename != this.webdavpath) //do not include current dir
           {
             let item = {};
