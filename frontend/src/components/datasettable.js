@@ -1,6 +1,6 @@
 import {ProjectApi} from '../components/projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Selecteddataset,Preselecteddataset,Preselectedproject,Preselectdatasets} from "./messages";
+import {Selecteddataset,Preselecteddataset,Preselectedproject,Preselecteddatasets} from "./messages";
 
 export class Datasettable {
   static inject = [ProjectApi,EventAggregator];
@@ -12,7 +12,6 @@ export class Datasettable {
     this.ea=ea;
     this.ea.subscribe(Preselecteddataset,msg =>this.filterSelectedDataset(msg.datasetid));
     this.ea.subscribe(Preselecteddatasets,msg =>this.filterProjectDatasets(msg));
-
   }
 
   attached() {
@@ -45,7 +44,7 @@ export class Datasettable {
   }
 
 
-  filterSelectedDataset(id) {
+  filterProjectDatasets2(id) {
     //this.selectedProposal=item;
     //this.selectedDatasetId=id;
     //this.filterMyProject();
@@ -70,6 +69,6 @@ export class Datasettable {
   }
 
   filterProjectDatasets(msg){
-    this.pa.getSelectedProject();
+    this.filterProjectDatasets2(this.pa.getSelectedProject());
   }
 }

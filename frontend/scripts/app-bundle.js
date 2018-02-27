@@ -321,7 +321,7 @@ define('components/datasettable',['exports', '../components/projectapi', 'aureli
       this.ea.subscribe(_messages.Preselecteddataset, function (msg) {
         return _this.filterSelectedDataset(msg.datasetid);
       });
-      this.ea.subscribe(Preselecteddatasets, function (msg) {
+      this.ea.subscribe(_messages.Preselecteddatasets, function (msg) {
         return _this.filterProjectDatasets(msg);
       });
     }
@@ -349,7 +349,7 @@ define('components/datasettable',['exports', '../components/projectapi', 'aureli
       return true;
     };
 
-    Datasettable.prototype.filterSelectedDataset = function filterSelectedDataset(id) {
+    Datasettable.prototype.filterProjectDatasets2 = function filterProjectDatasets2(id) {
       var _this3 = this;
 
       console.log("filterMyDataset()");
@@ -374,7 +374,7 @@ define('components/datasettable',['exports', '../components/projectapi', 'aureli
     };
 
     Datasettable.prototype.filterProjectDatasets = function filterProjectDatasets(msg) {
-      this.pa.getSelectedProject();
+      this.filterProjectDatasets2(this.pa.getSelectedProject());
     };
 
     return Datasettable;
@@ -898,6 +898,8 @@ define('components/projecttable',['exports', '../components/messages', './projec
         this.selectedProject = this.projects.filter(function (i) {
           return i.id == id;
         })[0];
+        this.pa.setSelectedProject(id);
+        this.ea.publish(new _messages2.Preselecteddatasets(id));
       } else {
         console.log("projects are not yet retrieved");
       }
@@ -1478,6 +1480,71 @@ define('resources/iupload',["exports", "aurelia-framework"], function (exports, 
     initializer: null
   })), _class);
 });
+define('scientist/createdataset',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Createdataset = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Createdataset = exports.Createdataset = (_temp = _class = function () {
+    function Createdataset(ea, pa) {
+      var _this = this;
+
+      _classCallCheck(this, Createdataset);
+
+      this.ea = ea;
+      this.pa = pa;
+      this.datasetname = "Antidote";
+      this.datasetinfo = "0 b";
+      this.datasetsummary = "spectrum of antidote";
+      this.datasetprojectid = null;
+      this.submitted = false;
+      this.ea.subscribe(_messages.Selectedproject, function (msg) {
+        return _this.selectProject(msg.project);
+      });
+    }
+
+    Createdataset.prototype.submit = function submit() {
+      var _this2 = this;
+
+      console.log("submitting dataset:" + this.datasetname);
+      this.pa.submitDataset({ name: this.datasetname, info: this.datasetinfo, summary: this.datasetsummary, projectId: this.datasetprojectid }).then(function (dataset) {
+        _this2.submitted = true;
+        _this2.submitteditem = dataset;
+      }).catch(function (error) {
+        console.log(error);
+        alert("Error when submitting new dataset:" + error);
+      });
+      this.datasetname = "";
+      this.datasetinfo = "";
+      this.datasetsummary = "";
+    };
+
+    Createdataset.prototype.generate = function generate() {
+      this.datasetname = "Antidote";
+      this.datasetinfo = Math.floor(Math.random() * 100 + 1) + " b";
+      this.datasetsummary = "spectrum of antidote";
+    };
+
+    Createdataset.prototype.selectProject = function selectProject(project) {
+      if (project) {
+        this.datasetprojectid = project.id;
+      } else this.datasetprojectid = null;
+    };
+
+    return Createdataset;
+  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
+});
 define('scientist/dashboard',['exports', '../components/ariaapi'], function (exports, _ariaapi) {
   'use strict';
 
@@ -1544,6 +1611,415 @@ define('scientist/dashboard',['exports', '../components/ariaapi'], function (exp
 
     return Dashboard;
   }(), _class.inject = [_ariaapi.Ariaapi], _temp);
+});
+define('scientist/dashboarddetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Dashboarddetail = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Dashboarddetail = exports.Dashboarddetail = (_temp = _class = function () {
+    function Dashboarddetail(ea, pa) {
+      var _this = this;
+
+      _classCallCheck(this, Dashboarddetail);
+
+      this.ea = ea;
+      this.pa = pa;
+
+      this.ea.subscribe(_messages.Selectedproject, function (msg) {
+        return _this.selectProject(msg.project);
+      });
+      this.ea.subscribe(_messages.Selecteddataset, function (msg) {
+        return _this.selectDataset(msg.dataset);
+      });
+    }
+
+    Dashboarddetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      console.log("dashboarddetail.activate()");
+      if (params && params.projectid) {
+        console.log("dashboarddetail projectid:" + params.projectid);
+        this.filterProject(params.projectid);
+      }
+      if (params && params.datasetid) {
+        console.log("dashboarddetail datasetid:" + params.datasetid);
+        this.filterDataset(params.datasetid);
+      }
+    };
+
+    Dashboarddetail.prototype.attached = function attached() {
+      console.log("Dashboard.attached()");
+    };
+
+    Dashboarddetail.prototype.selectProject = function selectProject(project) {
+      this.showProposals = false;
+      this.showDatasets = true;
+      this.filterSelectedProposal(project.id);
+      return true;
+    };
+
+    Dashboarddetail.prototype.filterSelectedProposal = function filterSelectedProposal(id) {
+      this.selectedProjectId = id;
+      this.filterProject();
+      this.filterDataset();
+    };
+
+    Dashboarddetail.prototype.filterSelectedDataset = function filterSelectedDataset(id) {
+      this.selectedDatasetId = id;
+
+      this.filterMyDataset();
+    };
+
+    Dashboarddetail.prototype.filterMyDataset = function filterMyDataset() {
+      var _this2 = this;
+
+      console.log("filterMyDataset()");
+      console.log(this.alldatasets);
+      var mydataset = this.alldatasets.filter(function (i) {
+        return i.id == _this2.selectedDatasetId;
+      });
+      console.log(mydataset);
+      if (mydataset.length > 0) {
+        this.selectedProjectId = mydataset[0].projectId;
+        console.log(this.selectedProjectId);
+
+        this.datasets = this.alldatasets.filter(function (i) {
+          return i.projectId == _this2.selectedProjectId;
+        });
+        console.log("datasets:");
+        console.log(this.datasets);
+        this.showProposals = false;
+        this.filterProject();
+        this.selectDataset(mydataset[0]);
+      }
+    };
+
+    Dashboarddetail.prototype.filterProject = function filterProject(projectid) {
+      console.log("dashboarddetail.filterProject()");
+      this.pa.setSelectedProject(projectid);
+      this.ea.publish(new _messages.Preselectedproject(projectid));
+    };
+
+    Dashboarddetail.prototype.filterDataset = function filterDataset(datasetid) {
+      console.log("dashboarddetail.filterDataset()");
+      this.pa.setSelectedDataset(datasetid);
+      this.ea.publish(new _messages.Preselecteddataset(datasetid));
+    };
+
+    Dashboarddetail.prototype.deselectProposal = function deselectProposal() {
+      this.datasets = this.alldatasets;
+      this.showProposals = true;
+      this.showDatasets = true;
+    };
+
+    Dashboarddetail.prototype.selectDataset = function selectDataset(item) {
+      if (!item) {
+        deselectDataset();return true;
+      }
+      console.log("selectDataset");
+      console.log(item);
+      this.showDatasets = false;
+      this.selectedDataset = item;
+
+      this.dataseturl = item.webdavurl;
+      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
+      return true;
+    };
+
+    Dashboarddetail.prototype.deselectDataset = function deselectDataset() {
+      console.log("deselectDataset()");
+      console.log(this.datasets);
+      console.log(this.alldatasets);
+      this.showDatasets = true;
+    };
+
+    Dashboarddetail.prototype.selectFile = function selectFile(file) {
+      console.log("SelectFile()");
+      console.log(file);
+    };
+
+    Dashboarddetail.prototype.deleteDataset = function deleteDataset() {
+      var _this3 = this;
+
+      this.pa.deleteDataset(this.selectedDataset);
+      then(function (data) {
+        _this3.deselectDataset();
+        var i = _this3.datasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this3.datasets.splice(i, 1);
+        i = _this3.alldatasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this3.alldatasets.splice(i, 1);
+      });
+    };
+
+    return Dashboarddetail;
+  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
+});
+define('scientist/repositorytovf',['exports', 'aurelia-event-aggregator', '../components/messages'], function (exports, _aureliaEventAggregator, _messages) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Repositorytovf = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Repositorytovf = exports.Repositorytovf = (_temp = _class = function () {
+    function Repositorytovf(ea) {
+      var _this = this;
+
+      _classCallCheck(this, Repositorytovf);
+
+      this.ea = ea;
+      console.log("Repositorytovf()");
+
+      this.datasets = [{ name: "sucrose.t1", size: 133511, date: "18/06/2001" }, { name: "hetcor.2d", size: 525832, date: "18/06/2001" }, { name: "menth.c13", size: 132108, date: "18/06/2001" }, { name: "noesy.fid", size: 1640436, date: "18/06/2001" }, { name: "hsqc.fid", size: 2098448, date: "18/06/2001" }, { name: "hmbc.fid", size: 2098448, date: "18/06/2001" }];
+      this.filestoupload = [];
+      this.uploadfiles = [];
+      this.uploaddir = "";
+      this.selectingfiles = true;
+      this.ea.subscribe(_messages.Uploaddir, function (msg) {
+        return _this.setuploaddir(msg.webdavurl);
+      });
+      this.copyinprogress = false;
+    }
+
+    Repositorytovf.prototype.attached = function attached() {};
+
+    Repositorytovf.prototype.setuploaddir = function setuploaddir(url) {
+      console.log("setuploaddir()");
+      console.log(url);
+      this.uploaddir = url;
+      this.selectedUploadDir = true;
+    };
+
+    Repositorytovf.prototype.selectitem = function selectitem(item) {
+      console.log("Selected", item);
+    };
+
+    Repositorytovf.prototype.submitfiles = function submitfiles() {
+      this.selectingfiles = false;
+    };
+
+    Repositorytovf.prototype.unsubmitfiles = function unsubmitfiles() {
+      this.selectingfiles = true;
+    };
+
+    Repositorytovf.prototype.deleteitem = function deleteitem(item) {
+      var indexremoved = this.datasets.indexOf(item);
+      if (indexremoved >= 0) this.datasets.splice(indexremoved, 1);
+    };
+
+    Repositorytovf.prototype.selectItemToUpload = function selectItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+    };
+
+    Repositorytovf.prototype.removeItemToUpload = function removeItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+      var i = this.filestoupload.indexOf(item);
+      this.filestoupload.splice(i, 1);
+    };
+
+    Repositorytovf.prototype.dropped = function dropped(event) {
+      var _filestoupload;
+
+      console.log("Dropped");
+      console.log(event.dataTransfer.files);
+      event.stopPropagation();
+      event.preventDefault();
+      (_filestoupload = this.filestoupload).unshift.apply(_filestoupload, event.dataTransfer.files);
+      return true;
+    };
+
+    Repositorytovf.prototype.dragged = function dragged(event) {
+      return true;
+    };
+
+    Repositorytovf.prototype.appendFiles = function appendFiles(event) {
+      var _filestoupload2;
+
+      console.log("appendFiles()");
+      console.log(event.target.files);
+
+      (_filestoupload2 = this.filestoupload).unshift.apply(_filestoupload2, event.target.files);
+    };
+
+    Repositorytovf.prototype.appendDir = function appendDir(event) {
+      var _filestoupload3;
+
+      console.log("appendDir");
+      console.log(event.target.files);
+      (_filestoupload3 = this.filestoupload).unshift.apply(_filestoupload3, event.target.files);
+    };
+
+    Repositorytovf.prototype.submitUpload = function submitUpload() {
+      var _datasets;
+
+      (_datasets = this.datasets).unshift.apply(_datasets, this.filestoupload);
+      this.filestoupload = [];
+    };
+
+    Repositorytovf.prototype.copy = function copy() {
+      this.copyinprogress = true;
+    };
+
+    return Repositorytovf;
+  }(), _class.inject = [_aureliaEventAggregator.EventAggregator], _temp);
+});
+define('staff/dataupload',['exports', '../components/projectapi'], function (exports, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Dataupload = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Dataupload = exports.Dataupload = (_temp = _class = function Dataupload(pa) {
+    _classCallCheck(this, Dataupload);
+
+    this.pa = pa;
+  }, _class.inject = [_projectapi.ProjectApi], _temp);
+});
+define('staff/repositorystaff',["exports", "../components/projectapi"], function (exports, _projectapi) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Repositorystaff = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Repositorystaff = exports.Repositorystaff = (_temp = _class = function () {
+    function Repositorystaff(pa) {
+      _classCallCheck(this, Repositorystaff);
+
+      console.log("Repositorystaff()");
+      this.visitors = [];
+      this.datasets = [];
+      this.filestoupload = [];
+      this.uploadfiles = [];
+      this.uploaddir = "";
+      this.selectinguser = true;
+      this.selectedvisitor = "";
+      this.pa = pa;
+    }
+
+    Repositorystaff.prototype.attached = function attached() {
+      var _this = this;
+
+      this.pa.getUsers().then(function (data) {
+        _this.visitors = data;
+      });
+    };
+
+    Repositorystaff.prototype.selectitem = function selectitem(item) {
+      console.log("Selected", item);
+    };
+
+    Repositorystaff.prototype.selectvisitor = function selectvisitor(visitor) {
+      this.selectinguser = false;
+      this.selectedvisitor = visitor;
+    };
+
+    Repositorystaff.prototype.deselectvisitor = function deselectvisitor() {
+      this.selectinguser = true;
+    };
+
+    Repositorystaff.prototype.deleteitem = function deleteitem(item) {
+      var indexremoved = this.datasets.indexOf(item);
+      if (indexremoved >= 0) this.datasets.splice(indexremoved, 1);
+    };
+
+    Repositorystaff.prototype.selectItemToUpload = function selectItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+    };
+
+    Repositorystaff.prototype.removeItemToUpload = function removeItemToUpload(item) {
+      console.log("selected item");
+      console.log(item);
+      var i = this.filestoupload.indexOf(item);
+      this.filestoupload.splice(i, 1);
+    };
+
+    Repositorystaff.prototype.dropped = function dropped(event) {
+      var _filestoupload;
+
+      console.log("Dropped");
+      console.log(event.dataTransfer.files);
+      event.stopPropagation();
+      event.preventDefault();
+      (_filestoupload = this.filestoupload).unshift.apply(_filestoupload, event.dataTransfer.files);
+      return true;
+    };
+
+    Repositorystaff.prototype.dragged = function dragged(event) {
+      return true;
+    };
+
+    Repositorystaff.prototype.appendFiles = function appendFiles(event) {
+      var _filestoupload2;
+
+      console.log("appendFiles()");
+      console.log(event.target.files);
+
+      (_filestoupload2 = this.filestoupload).unshift.apply(_filestoupload2, event.target.files);
+    };
+
+    Repositorystaff.prototype.appendDir = function appendDir(event) {
+      var _filestoupload3;
+
+      console.log("appendDir");
+      console.log(event.target.files);
+      (_filestoupload3 = this.filestoupload).unshift.apply(_filestoupload3, event.target.files);
+    };
+
+    Repositorystaff.prototype.submitUpload = function submitUpload() {
+      var _datasets;
+
+      (_datasets = this.datasets).unshift.apply(_datasets, this.filestoupload);
+      this.filestoupload = [];
+    };
+
+    return Repositorystaff;
+  }(), _class.inject = [_projectapi.ProjectApi], _temp);
 });
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
@@ -4609,227 +5085,6 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
 
 });
 
-define('scientist/createdataset',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Createdataset = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Createdataset = exports.Createdataset = (_temp = _class = function () {
-    function Createdataset(ea, pa) {
-      var _this = this;
-
-      _classCallCheck(this, Createdataset);
-
-      this.ea = ea;
-      this.pa = pa;
-      this.datasetname = "Antidote";
-      this.datasetinfo = "0 b";
-      this.datasetsummary = "spectrum of antidote";
-      this.datasetprojectid = null;
-      this.submitted = false;
-      this.ea.subscribe(_messages.Selectedproject, function (msg) {
-        return _this.selectProject(msg.project);
-      });
-    }
-
-    Createdataset.prototype.submit = function submit() {
-      var _this2 = this;
-
-      console.log("submitting dataset:" + this.datasetname);
-      this.pa.submitDataset({ name: this.datasetname, info: this.datasetinfo, summary: this.datasetsummary, projectId: this.datasetprojectid }).then(function (dataset) {
-        _this2.submitted = true;
-        _this2.submitteditem = dataset;
-      }).catch(function (error) {
-        console.log(error);
-        alert("Error when submitting new dataset:" + error);
-      });
-      this.datasetname = "";
-      this.datasetinfo = "";
-      this.datasetsummary = "";
-    };
-
-    Createdataset.prototype.generate = function generate() {
-      this.datasetname = "Antidote";
-      this.datasetinfo = Math.floor(Math.random() * 100 + 1) + " b";
-      this.datasetsummary = "spectrum of antidote";
-    };
-
-    Createdataset.prototype.selectProject = function selectProject(project) {
-      if (project) {
-        this.datasetprojectid = project.id;
-      } else this.datasetprojectid = null;
-    };
-
-    return Createdataset;
-  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
-});
-define('scientist/dashboarddetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Dashboarddetail = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Dashboarddetail = exports.Dashboarddetail = (_temp = _class = function () {
-    function Dashboarddetail(ea, pa) {
-      var _this = this;
-
-      _classCallCheck(this, Dashboarddetail);
-
-      this.ea = ea;
-      this.pa = pa;
-
-      this.ea.subscribe(_messages.Selectedproject, function (msg) {
-        return _this.selectProject(msg.project);
-      });
-      this.ea.subscribe(_messages.Selecteddataset, function (msg) {
-        return _this.selectDataset(msg.dataset);
-      });
-    }
-
-    Dashboarddetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      console.log("dashboarddetail.activate()");
-      if (params && params.projectid) {
-        console.log("dashboarddetail projectid:" + params.projectid);
-        this.filterProject(params.projectid);
-      }
-      if (params && params.datasetid) {
-        console.log("dashboarddetail datasetid:" + params.datasetid);
-        this.filterDataset(params.datasetid);
-      }
-    };
-
-    Dashboarddetail.prototype.attached = function attached() {
-      console.log("Dashboard.attached()");
-    };
-
-    Dashboarddetail.prototype.selectProject = function selectProject(project) {
-      this.showProposals = false;
-      this.showDatasets = true;
-      this.filterSelectedProposal(project.id);
-      return true;
-    };
-
-    Dashboarddetail.prototype.filterSelectedProposal = function filterSelectedProposal(id) {
-      this.selectedProjectId = id;
-      this.filterProject();
-      this.filterDataset();
-    };
-
-    Dashboarddetail.prototype.filterSelectedDataset = function filterSelectedDataset(id) {
-      this.selectedDatasetId = id;
-
-      this.filterMyDataset();
-    };
-
-    Dashboarddetail.prototype.filterMyDataset = function filterMyDataset() {
-      var _this2 = this;
-
-      console.log("filterMyDataset()");
-      console.log(this.alldatasets);
-      var mydataset = this.alldatasets.filter(function (i) {
-        return i.id == _this2.selectedDatasetId;
-      });
-      console.log(mydataset);
-      if (mydataset.length > 0) {
-        this.selectedProjectId = mydataset[0].projectId;
-        console.log(this.selectedProjectId);
-
-        this.datasets = this.alldatasets.filter(function (i) {
-          return i.projectId == _this2.selectedProjectId;
-        });
-        console.log("datasets:");
-        console.log(this.datasets);
-        this.showProposals = false;
-        this.filterProject();
-        this.selectDataset(mydataset[0]);
-      }
-    };
-
-    Dashboarddetail.prototype.filterProject = function filterProject(projectid) {
-      console.log("dashboarddetail.filterProject()");
-      this.pa.setSelectedProject(projectid);
-      this.ea.publish(new _messages.Preselectedproject(projectid));
-    };
-
-    Dashboarddetail.prototype.filterDataset = function filterDataset(datasetid) {
-      console.log("dashboarddetail.filterDataset()");
-      this.pa.setSelectedDataset(datasetid);
-      this.ea.publish(new _messages.Preselecteddataset(datasetid));
-    };
-
-    Dashboarddetail.prototype.deselectProposal = function deselectProposal() {
-      this.datasets = this.alldatasets;
-      this.showProposals = true;
-      this.showDatasets = true;
-    };
-
-    Dashboarddetail.prototype.selectDataset = function selectDataset(item) {
-      if (!item) {
-        deselectDataset();return true;
-      }
-      console.log("selectDataset");
-      console.log(item);
-      this.showDatasets = false;
-      this.selectedDataset = item;
-
-      this.dataseturl = item.webdavurl;
-      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
-      return true;
-    };
-
-    Dashboarddetail.prototype.deselectDataset = function deselectDataset() {
-      console.log("deselectDataset()");
-      console.log(this.datasets);
-      console.log(this.alldatasets);
-      this.showDatasets = true;
-    };
-
-    Dashboarddetail.prototype.selectFile = function selectFile(file) {
-      console.log("SelectFile()");
-      console.log(file);
-    };
-
-    Dashboarddetail.prototype.deleteDataset = function deleteDataset() {
-      var _this3 = this;
-
-      this.pa.deleteDataset(this.selectedDataset);
-      then(function (data) {
-        _this3.deselectDataset();
-        var i = _this3.datasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this3.datasets.splice(i, 1);
-        i = _this3.alldatasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this3.alldatasets.splice(i, 1);
-      });
-    };
-
-    return Dashboarddetail;
-  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
-});
 define('text!app.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-card-2 w3-margin w3-padding\">\n    <p>\n      West-life Repository is standalone web application for experimental facilities that are newly embarking on data\n      management.\n    </p>\n    <p>\n      This is reference implementation of a repository that supplies\n    </p>\n    <ul>\n      <li> suitable metadata to the portal (D6.2) matching the metadata standards to be devised in WP7.</li>\n      <li> registering a new project,</li>\n      <li> adding files to a project.</li>\n    </ul>\n    <p>\n      Continue as: <a href=\"repository/index.html\" class=\"w3-button w3-pale-green\"><irep></irep>\n       Visiting scientist - requires login via West-Life SSO</a>\n    </p>\n    <p>\n      Or try: <a href=\"repositorytest/index.html\" class=\"w3-button w3-pale-green\"><irepdemo></irepdemo> Demo 1</a> - no login required.\n      <a href=\"repositorytest2/index.html\" class=\"w3-button w3-pale-green\"><irepdemo></irepdemo> Demo 2</a> - no login required.\n    </p>\n    <p>\n      Features in development, not yet implemented:\n    </p>\n    <ul>\n      <li>The implementation use the CERIF standard.</li>\n      <li>It will be compatible with existing CRIS repositories,</li>\n      <li>and also be capable of assigning an URI to a project if it is not yet recorded in a CRIS repository.</li>\n\n    </ul>\n\n    <p>\n      Support links:\n    </p>\n    <ul>\n      <li><a href=\"/admin/login?next=../staff/index.html\" class=\"w3-button w3-pale-green\"><iadmin></iadmin> Staff access</a> - available\n        only from local workstation\n      </li>\n      <li><a href=\"/admin/login\" class=\"w3-button w3-pale-green\"><iadmin></iadmin> Admin access</a> - available only from local\n        workstation\n      </li>\n    </ul>\n  </div>\n  <sharedfooter></sharedfooter>\n</template>\n"; });
 define('text!icons.css', ['module'], function(module) { module.exports = ".fa {\n  display: inline-block;\n  font-size: inherit;\n  text-rendering: auto;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  width: 16px;\n}\n.fa-remove:before,\n.fa-close:before,\n.fa-times:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20width%3D%27100%25%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2021.9%2021.9%27%20enable-background%3D%27new%200%200%2021.9%2021.9%27%3E%20%3Cg%3E%20%3Cg%3E%20%3Cpath%20d%3D%27M14.1%2C11.3c-0.2-0.2-0.2-0.5%2C0-0.7l7.5-7.5c0.2-0.2%2C0.3-0.5%2C0.3-0.7s-0.1-0.5-0.3-0.7l-1.4-1.4C20%2C0.1%2C19.7%2C0%2C19.5%2C0%20%20c-0.3%2C0-0.5%2C0.1-0.7%2C0.3l-7.5%2C7.5c-0.2%2C0.2-0.5%2C0.2-0.7%2C0L3.1%2C0.3C2.9%2C0.1%2C2.6%2C0%2C2.4%2C0S1.9%2C0.1%2C1.7%2C0.3L0.3%2C1.7C0.1%2C1.9%2C0%2C2.2%2C0%2C2.4%20%20s0.1%2C0.5%2C0.3%2C0.7l7.5%2C7.5c0.2%2C0.2%2C0.2%2C0.5%2C0%2C0.7l-7.5%2C7.5C0.1%2C19%2C0%2C19.3%2C0%2C19.5s0.1%2C0.5%2C0.3%2C0.7l1.4%2C1.4c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3%20%20s0.5-0.1%2C0.7-0.3l7.5-7.5c0.2-0.2%2C0.5-0.2%2C0.7%2C0l7.5%2C7.5c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3s0.5-0.1%2C0.7-0.3l1.4-1.4c0.2-0.2%2C0.3-0.5%2C0.3-0.7%20%20s-0.1-0.5-0.3-0.7L14.1%2C11.3z%27%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3C%2Fsvg%3E \");\n}\n.fa-cog:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.7%20489.7%27%20style%3D%27enable-background%3Anew%200%200%20489.7%20489.7%3B%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M60.6%2C461.95c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3s12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73%20%20s-73%2C32.7-73%2C73c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6H60.6z%20M24.3%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5s48.5%2C21.8%2C48.5%2C48.5%20%20s-21.8%2C48.5-48.5%2C48.5S24.3%2C115.25%2C24.3%2C88.45z%27%2F%3E%20%20%3Cpath%20d%3D%27M317.1%2C401.25c0-36.1-26.3-66-60.8-71.9V27.75c0-6.8-5.5-12.3-12.3-12.3s-12.3%2C5.5-12.3%2C12.3v301.6%20%20c-34.4%2C5.9-60.8%2C35.8-60.8%2C71.9c0%2C40.3%2C32.8%2C73%2C73%2C73S317.1%2C441.45%2C317.1%2C401.25z%20M195.6%2C401.25c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5S195.6%2C427.95%2C195.6%2C401.25z%27%2F%3E%20%20%3Cpath%20d%3D%27M416.6%2C474.25c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73s-73%2C32.7-73%2C73%20%20c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6C404.3%2C468.75%2C409.8%2C474.25%2C416.6%2C474.25z%20M368.1%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5C389.8%2C136.95%2C368.1%2C115.25%2C368.1%2C88.45z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E  \");\n}\n.fa-window-minimize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.3%20489.3%27%20style%3D%27enable-background%3Anew%200%200%20489.3%20489.3%3B%27%3E%3Cg%3E%09%3Cg%3E%09%09%3Cpath%20d%3D%27M0%2C12.251v464.7c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h224c6.8%2C0%2C12.3-5.5%2C12.3-12.3s-5.5-12.3-12.3-12.3H24.5v-440.2h440.2v210.5%09%09%09c0%2C6.8%2C5.5%2C12.2%2C12.3%2C12.2s12.3-5.5%2C12.3-12.2v-222.7c0-6.8-5.5-12.2-12.3-12.2H12.3C5.5-0.049%2C0%2C5.451%2C0%2C12.251z%27%2F%3E%09%09%3Cpath%20d%3D%27M476.9%2C489.151c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-170.3c0-6.8-5.5-12.3-12.3-12.3H306.6c-6.8%2C0-12.3%2C5.5-12.3%2C12.3v170.4%09%09%09c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h170.3V489.151z%20M318.8%2C318.751h145.9v145.9H318.8V318.751z%27%2F%3E%09%09%3Cpath%20d%3D%27M135.9%2C257.651c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h109.5c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-109.5c0-6.8-5.5-12.3-12.3-12.3%09%09%09s-12.3%2C5.5-12.3%2C12.3v79.9l-138.7-138.7c-4.8-4.8-12.5-4.8-17.3%2C0c-4.8%2C4.8-4.8%2C12.5%2C0%2C17.3l138.7%2C138.7h-79.9%09%09%09C141.4%2C245.351%2C135.9%2C250.851%2C135.9%2C257.651z%27%2F%3E%09%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n}\n.fa-window-maximize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20258.008%20258.008%27%20style%3D%27enable-background%3Anew%200%200%20258.008%20258.008%3B%27%20%20xml%3Aspace%3D%27preserve%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M125.609%2C122.35H10.049C4.5%2C122.35%2C0%2C126.85%2C0%2C132.399v115.56c0%2C5.549%2C4.5%2C10.048%2C10.049%2C10.048H125.61%20%20c5.548%2C0%2C10.046-4.499%2C10.046-10.048v-115.56C135.656%2C126.85%2C131.158%2C122.35%2C125.609%2C122.35z%20M115.559%2C237.909H20.098v-95.463%20%20h95.461V237.909z%27%2F%3E%20%20%3Cpath%20d%3D%27M247.958%2C0.001H10.049C4.5%2C0.001%2C0%2C4.5%2C0%2C10.049v93.312c0%2C5.55%2C4.5%2C10.05%2C10.049%2C10.05c5.55%2C0%2C10.049-4.5%2C10.049-10.05%20%20V20.098h217.812v217.812h-82.915c-5.55%2C0-10.05%2C4.5-10.05%2C10.05c0%2C5.549%2C4.5%2C10.048%2C10.05%2C10.048h92.964%20%20c5.55%2C0%2C10.05-4.499%2C10.05-10.048V10.049C258.008%2C4.5%2C253.508%2C0.001%2C247.958%2C0.001z%27%2F%3E%20%20%3Cpath%20d%3D%27M154.35%2C106.876c1.965%2C1.961%2C4.534%2C2.942%2C7.105%2C2.942c2.57%2C0%2C5.142-0.981%2C7.104-2.942l31.755-31.757V89.57%20%20c0%2C5.549%2C4.499%2C10.047%2C10.05%2C10.047c5.549%2C0%2C10.048-4.498%2C10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068%20%20c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513%20%20c-5.551%2C0-10.051%2C4.5-10.051%2C10.05c0%2C5.549%2C4.5%2C10.049%2C10.051%2C10.049h13.679L154.35%2C92.665%20%20C150.426%2C96.589%2C150.426%2C102.952%2C154.35%2C106.876z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E\");\n/*  content: url(\"data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 258.008 258.008' style='enable-background:new 0 0 258.008 258.008;'  xml:space='preserve'>  <g>  <g>  <path d='M125.609,122.35H10.049C4.5,122.35,0,126.85,0,132.399v115.56c0,5.549,4.5,10.048,10.049,10.048H125.61  c5.548,0,10.046-4.499,10.046-10.048v-115.56C135.656,126.85,131.158,122.35,125.609,122.35z M115.559,237.909H20.098v-95.463  h95.461V237.909z'/>  <path d='M247.958,0.001H10.049C4.5,0.001,0,4.5,0,10.049v93.312c0,5.55,4.5,10.05,10.049,10.05c5.55,0,10.049-4.5,10.049-10.05  V20.098h217.812v217.812h-82.915c-5.55,0-10.05,4.5-10.05,10.05c0,5.549,4.5,10.048,10.05,10.048h92.964  c5.55,0,10.05-4.499,10.05-10.048V10.049C258.008,4.5,253.508,0.001,247.958,0.001z'/>  <path d='M154.35,106.876c1.965,1.961,4.534,2.942,7.105,2.942c2.57,0,5.142-0.981,7.104-2.942l31.755-31.757V89.57  c0,5.549,4.499,10.047,10.05,10.047c5.549,0,10.048-4.498,10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068  c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513  c-5.551,0-10.051,4.5-10.051,10.05c0,5.549,4.5,10.049,10.051,10.049h13.679L154.35,92.665  C150.426,96.589,150.426,102.952,154.35,106.876z'/>  </g>  </g>  </svg>  \");*/\n}\n\n.fa-caret-down:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 292.362 292.362\" style=\"enable-background:new 0 0 292.362 292.362;\"  xml:space=\"preserve\">  <g>  <path d=\"M286.935,69.377c-3.614-3.617-7.898-5.424-12.848-5.424H18.274c-4.952,0-9.233,1.807-12.85,5.424  C1.807,72.998,0,77.279,0,82.228c0,4.948,1.807,9.229,5.424,12.847l127.907,127.907c3.621,3.617,7.902,5.428,12.85,5.428  s9.233-1.811,12.847-5.428L286.935,95.074c3.613-3.617,5.427-7.898,5.427-12.847C292.362,77.279,290.548,72.998,286.935,69.377z\"/>  </g> </svg>');\n}\n.fa-start:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 16 16\" style=\"enable-background:new 0 0 16 16;\" xml:space=\"preserve\">  <g>  <path d=\"M8,0C3.5,0,0,3.5,0,8s3.5,8,8,8s8-3.5,8-8S12.5,0,8,0z M8,14c-3.5,0-6-2.5-6-6s2.5-6,6-6s6,2.5,6,6  S11.5,14,8,14z\"/>  <polygon points=\"6,12 11,8 6,4\"/></g></svg>');\n}\n.fa-stop:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 508.52 508.52\" style=\"enable-background:new 0 0 508.52 508.52;\" xml:space=\"preserve\"><g><path d=\"M254.26,0C113.845,0,0,113.845,0,254.26s113.845,254.26,254.26,254.26s254.26-113.845,254.26-254.26S394.675,0,254.26,0z M254.26,476.737c-122.68,0-222.477-99.829-222.477-222.477c0-122.68,99.797-222.477,222.477-222.477c122.649,0,222.477,99.797,222.477,222.477C476.737,376.908,376.908,476.737,254.26,476.737z\"/><path d=\"M317.825,158.912h-127.13c-17.544,0-31.782,14.239-31.782,31.782v127.13c0,17.544,14.239,31.783,31.782,31.783h127.13c17.544,0,31.783-14.239,31.783-31.783v-127.13C349.607,173.151,335.369,158.912,317.825,158.912z\"/></g></svg>');\n}\n\n/* most icons derived from http://www.flaticon.com/free-icon/caret-down_25243, needs to attribute*/\n\n.vf-transition{\n  -webkit-transition: all 0.5s ease-in-out;\n  -moz-transition: all 0.5s ease-in-out;\n  -ms-transition: all 0.5s ease-in-out;\n  transition: visibility 0.5s, height 0.5s ease-in-out;\n}\n.vf-code-2{line-height:1;font-size:10px}\n\n.CodeMirror {\n  height: 75%!important;\n}\n\n"; });
 define('text!repositoryapp.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <require from=\"components/navigation.html\"></require>\n  <require from=\"components/userinfo\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-row\">\n  <div class=\"w3-col m3 l2\">\n    <navigation router.bind=\"router\"></navigation>\n  </div>\n  <div class=\"w3-col m9 l10\">\n    <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n      <router-view></router-view>\n    </div>\n\n\n  </div>\n  </div>\n  <sharedfooter></sharedfooter>\n\n</template>\n"; });

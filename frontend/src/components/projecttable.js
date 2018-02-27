@@ -1,7 +1,7 @@
 import {Webdavresource} from "../components/messages";
 import {ProjectApi} from './projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Selectedproject,Preselectedproject} from "./messages";
+import {Selectedproject,Preselectedproject,Preselecteddatasets} from "./messages";
 
 export class Projecttable {
   static inject = [ProjectApi,EventAggregator];
@@ -45,6 +45,8 @@ export class Projecttable {
     console.log(id);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == id)[0];
+      this.pa.setSelectedProject(id);
+      this.ea.publish(new Preselecteddatasets(id));
     } else {
       console.log("projects are not yet retrieved");
     }
