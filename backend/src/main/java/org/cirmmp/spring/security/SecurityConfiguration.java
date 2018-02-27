@@ -80,8 +80,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/login","/static/**").permitAll().and()
-                .csrf().disable()
-                .addFilterBefore(new StatelessCSRFFilter(), CsrfFilter.class);
+                //enabling csrf for all except for restcon endpoints
+                .csrf().ignoringAntMatchers("/restcon/**").and()
+                // custom csrf filter for restcon endpoint
+                .antMatcher("/restcon/**").addFilterBefore(new StatelessCSRFFilter(), CsrfFilter.class);
 
                 //.antMatchers("/login","/static/**").permitAll().and().csrf();//.disable();
 
