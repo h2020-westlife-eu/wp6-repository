@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -32,6 +35,17 @@ public class IntegrationTest  {
 
     @Autowired
     private ApplicationContext applicationContext;
+    
+    @Autowired
+    private MockServletContext servletContext; // cached
+    
+
+    @Autowired
+    MockHttpServletRequest request;
+
+    @Autowired
+    MockHttpServletResponse response;
+
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -53,6 +67,9 @@ public class IntegrationTest  {
 	public void test() {
 		assertNotNull(this.applicationContext);
 		assertNotNull(this.wac);
+		assertNotNull(this.servletContext);
+		assertNotNull(this.request);
+		assertNotNull(this.response);
 	}
 
 
