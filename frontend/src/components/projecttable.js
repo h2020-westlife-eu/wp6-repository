@@ -1,58 +1,68 @@
 import {Webdavresource} from "../components/messages";
 import {ProjectApi} from './projectapi';
+import {EventAggregator} from 'aurelia-event-aggregator';
+import {Selectedproject,Preselectedproject} from "./messages";
 
 export class Projecttable {
-  static inject = [ProjectApi];
+  static inject = [ProjectApi,EventAggregator];
 
-  constructor(pa) {
+  constructor(pa,ea) {
+    console.log("Projecttable()");
     this.pa = pa;
+    this.ea=ea;
     this.projects = [];
-    this.showProposals = true;
+    this.selectedProject=null;
+    this.selectedProjectId=0;
+    console.log("Projecttable() subscribe");
+    this.ea.subscribe(Preselectedproject,msg =>this.filterSelectedProposal(msg.projectid));
   }
 
   attached() {
     console.log("projecttableattached()")
     this.pa.getProjects().then(data => {
       this.projects = data;
+      //data retrieved and selectedProject already set e.g. by activate, call filter again
+      this.selectedProjectId=this.pa.getSelectedProject();
+      if (this.selectedProjectId>0) this.filterSelectedProposal(this.selectedProjectId);
     });
   }
 
   /* it is triggered in first click on project - url is generated
-* or when url is submitted directly to browser */
+* or when url is submitted directly to browser
   activate(params, routeConfig, navigationInstruction) {
     console.log("Visitingscientist activate()")
     if (params && params.projectid) {
       this.filterSelectedProposal(params.projectid);
     }
   }
-
+*/
   /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
   filterSelectedProposal(id) {
     //this.selectedProposal=item;
     this.selectedProjectId=id;
-    this.filterProject();
-    this.filterDataset();
-  }
-  /* helper class called from filterSelecterProposal - or when attached() so activate() call before didn't have
-  * the projects and datasets sets from REST api*/
-  filterProject(){
-    console.log("filterProject()");
+    console.log("projecttable.filterProject()");
     console.log(this.projects);
-    console.log(this.selectedProjectId);
+    console.log(id);
     if (this.projects.length>0) {
-      this.selectedProject = this.projects.filter(i => i.id == this.selectedProjectId)[0];
-      //this.filterDataset();
-      this.showProposals = false;
+      this.selectedProject = this.projects.filter(i => i.id == id)[0];
+    } else {
+      console.log("projects are not yet retrieved");
     }
   }
 
-  //filters dataset based on selectedProjectId
-  filterDataset(){
-    console.log("filterDataset()");
-    console.log(this.alldatasets);
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
-    this.emptyDatasets = this.datasets.length == 0;
-    console.log(this.datasets);
+  selectProject(project){
+    console.log("selectProject()");
+    this.selectedProject=project;
+    this.ea.publish(new Selectedproject(project))
+    return true;
   }
+
+  deselectProject(){
+    console.log("deselectProject()");
+    this.selectedProject=null;
+    this.ea.publish(new Selectedproject(null))
+    return true;
+  }
+
 
 }

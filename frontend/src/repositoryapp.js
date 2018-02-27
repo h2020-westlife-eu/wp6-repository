@@ -8,7 +8,7 @@ export class Repositoryapp {
       {route: 'dashboard/project/:projectid/', name: 'projectdetail', moduleId: 'scientist/dashboarddetail'},
       {route: 'dashboard/dataset/:datasetid/', name: 'datasetdetail', moduleId: 'scientist/dashboarddetail'},
       {route: 'createdataset', name: 'createdataset', moduleId: 'scientist/createdataset', nav: true, title: 'Create Empty Dataset'},
-      {route: 'repositorytovf', name: 'repositorytovf', moduleId: 'scientist/repositorytovf', nav: true, title: 'Upload to Virtual Folder'},
+      {route: 'repositorytovf', name: 'repositorytovf', moduleId: 'scientist/repositorytovf', nav: true, title: 'Upload to Virtual Folder'}
     ]);
     this.router = router;
   }

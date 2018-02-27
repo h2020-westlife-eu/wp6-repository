@@ -1,4 +1,4 @@
-import {Webdavresource} from "../components/messages";
+import {Selectedproject, Selecteddataset, Webdavresource, Preselectedproject,Preselecteddataset} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {ProjectApi} from '../components/projectapi';
 
@@ -10,8 +10,8 @@ export class Dashboarddetail {
     this.ea = ea;
     this.pa=pa;
 
-    this.projects = [];
-
+//    this.projects = [];
+/*
     this.files=[];
     this.datasets = [];
     this.alldatasets = [];
@@ -22,46 +22,38 @@ export class Dashboarddetail {
     this.selectedDatasetId=0;
     this.selectedProject={};
     this.emptyDatasets=true;
+    */
+    this.ea.subscribe(Selectedproject,msg =>this.selectProject(msg.project));
+    this.ea.subscribe(Selecteddataset,msg => this.selectDataset(msg.dataset));
   }
 
   /* it is triggered in first click on project - url is generated
   * or when url is submitted directly to browser */
   activate(params, routeConfig, navigationInstruction){
-    console.log("Visitingscientist activate()")
+    console.log("dashboarddetail.activate()")
     if (params && params.projectid) {
-      this.filterSelectedProposal(params.projectid);
+      console.log("dashboarddetail projectid:"+params.projectid);
+      this.filterProject(params.projectid);
     }
     if (params && params.datasetid) {
-      this.filterSelectedDataset(params.datasetid);
+      console.log("dashboarddetail datasetid:"+params.datasetid);
+      this.filterDataset(params.datasetid);
     }
   }
 
   /* triggered when the view is shown to user - it requests projects and dataset
   * available for user from REST api*/
   attached() {
-    console.log("Dashboard.attached(): pa:")
-    console.log(this.pa);
-    this.pa.getProjects().then(data => {
-          this.projects = data;//this.proposalsall.slice(0,3);
-          if (this.selectedProjectId>0) {this.filterProject()}
-
-    });
-    this.pa.getDatasets().then(data => {
-          this.alldatasets = data;       
-          if (this.selectedDatasetId>0) {this.filterMyDataset()} //triggered when accessed by url dashboard/dataset/1
-          else 
-          if (this.selectedProjectId>0) {this.filterDataset()}  //triggered when accessed by url dashboard/project/1
-          this.emptyDatasets=this.datasets.length==0;
-          //  this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
-    });
+    console.log("Dashboard.attached()")
+    //console.log(this.pa);
   }
 
   //triggered when a project is clicked -
   // if the same project is selected activate() is not launched - enough to hide all other projects
-  selectProposal(id) {
+  selectProject(project) {
     this.showProposals=false;
     this.showDatasets=true;
-    //this.filterSelectedProposal(id);
+    this.filterSelectedProposal(project.id);
     return true;
   }
 
@@ -104,24 +96,25 @@ export class Dashboarddetail {
 
   /* helper class called from filterSelecterProposal - or when attached() so activate() call before didn't have
   * the projects and datasets sets from REST api*/
-  filterProject(){
-    console.log("filterProject()");
+  filterProject(projectid){
+    console.log("dashboarddetail.filterProject()");
+    this.pa.setSelectedProject(projectid);
+    this.ea.publish(new Preselectedproject(projectid))
+    /*
     console.log(this.projects);
     console.log(this.selectedProjectId);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == this.selectedProjectId)[0];
       //this.filterDataset();
       this.showProposals = false;
-    }
+    }*/
   }
 
   //filters dataset based on selectedProjectId
-  filterDataset(){
-    console.log("filterDataset()");
-    console.log(this.alldatasets);
-    this.datasets = this.alldatasets.filter(filtereditem => filtereditem.projectId == this.selectedProjectId);
-    this.emptyDatasets = this.datasets.length == 0;
-    console.log(this.datasets);
+  filterDataset(datasetid){
+    console.log("dashboarddetail.filterDataset()");
+    this.pa.setSelectedDataset(datasetid);
+    this.ea.publish(new Preselecteddataset(datasetid));
   }
 
   //deselect project proposal, shows all proposals and datasets
@@ -135,6 +128,7 @@ export class Dashboarddetail {
 
   //shows only one dataset and publish webdavresource with dataset's url
   selectDataset(item) {
+    if (!item) {deselectDataset(); return true;}
     console.log("selectDataset");
     console.log(item);
     this.showDatasets=false;

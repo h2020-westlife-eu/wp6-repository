@@ -26,7 +26,11 @@ export class Dashboard {
     this.importariastatus="";
     this.importariaerror=false;
   }
-
+/*
+  activate(){
+    console.log("dashboard.activated()");
+  }
+*/
   attached(){
     console.log("dashboard.attached()");
     this.params=getParams(window.location.search.substring(1));

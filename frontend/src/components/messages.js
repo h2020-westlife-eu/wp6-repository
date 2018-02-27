@@ -25,3 +25,25 @@ export class Selectedproject {
     this.project = project;
   }
 }
+
+export class Preselectedproject {
+  constructor(projectid){
+    this.projectid = projectid;
+  }
+}
+
+export class Selecteddataset {
+  constructor(dataset){
+    this.dataset = dataset;
+  }
+}
+export class Preselecteddataset {
+  constructor(datasetid){
+    this.datasetid = datasetid;
+  }
+}
+
+export class Preselecteddatasets {
+  constructor(){
+  }
+}

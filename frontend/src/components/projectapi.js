@@ -5,7 +5,7 @@ export class ProjectApi {
   static inject = [HttpClient];
 
 
-  constructor(httpclient) {
+  constructor(httpclient,ea) {
     this.httpclient=httpclient;
 
     //needs SSO credentials
@@ -33,6 +33,8 @@ export class ProjectApi {
           }
         })
     });
+    this.selectedProjectId=0;
+    this.selectedDatasetId=0;
   }
 
   getProjects() {
@@ -52,6 +54,13 @@ export class ProjectApi {
       });
   }
 
+  setSelectedProject(id){
+    this.selectedProjectId=id;
+  }
+  getSelectedProject(){
+    return this.selectedProjectId;
+  }
+
   getDatasets() {
     if (this.datasets.length>0)
       return new Promise(resolve => resolve(this.datasets))
@@ -67,7 +76,12 @@ export class ProjectApi {
       });
 
   }
-
+  setSelectedDataset(id){
+    this.selectedDatasetId=id;
+  }
+  getSelectedDataset(){
+    return this.selectedDatasetId;
+  }
   submitDataset(dataset) {
       return this.httpclient.fetch(this.dataurl, { method:'post', body:json(dataset)})
         .then(response => response.json())
