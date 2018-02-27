@@ -18,6 +18,7 @@ export class Datasettable {
     console.log("datasettable attached()");
     this.pa.getDatasets().then(data => {
       this.alldatasets = data;
+      this.datasets=this.alldatasets;
       this.selectedDatasetId=this.pa.getSelectedDataset();
       if (this.selectedDatasetId>0) this.filterSelectedDataset(this.selectedDatasetId);
     });
@@ -49,23 +50,14 @@ export class Datasettable {
     //this.selectedDatasetId=id;
     //this.filterMyProject();
     //get the selected dataset
-    console.log("filterMyDataset()");
-    console.log(this.alldatasets);
-    let mydataset= this.alldatasets.filter(i=> i.id == id);
-    console.log(mydataset);
-    if (mydataset.length>0){
-      //get project related to dataset
-      this.selectedProjectId=mydataset[0].projectId;
-      console.log(this.selectedProjectId);
-      //filter datasets of the project
-      this.datasets=this.alldatasets.filter(i => i.projectId == this.selectedProjectId);
-      console.log("datasets:");
-      console.log(this.datasets);
-      //this.showProposals=false;
-      this.ea.publish(new Preselectedproject(this.selectedProjectId));//this.filterProject();
-      //this.selectDataset(mydataset[0]);
-      this.selectedDataset=mydataset[0];
+    if (id==0) {
+      this.datasets=this.alldatasets;
+      return;
     }
+    console.log("datasettable.filterProjectDatasets()");
+    console.log(this.alldatasets);
+    this.datasets=this.alldatasets.filter(i => i.projectId == id);
+    console.log(this.datasets)
   }
 
   filterProjectDatasets(msg){
