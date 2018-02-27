@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -64,12 +65,17 @@ public class IntegrationTest  {
 	}
 
 	@Test
-	public void test() {
+	public void testWiring() {
 		assertNotNull(this.applicationContext);
 		assertNotNull(this.wac);
 		assertNotNull(this.servletContext);
 		assertNotNull(this.request);
 		assertNotNull(this.response);
+	}
+	
+	@Test
+	public void testSecurity() {
+		assertNull( SecurityContextHolder.getContext().getAuthentication() );
 	}
 
 

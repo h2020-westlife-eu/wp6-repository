@@ -4,8 +4,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.cirmmp.spring.configuration.AppConfig;
-import org.cirmmp.spring.configuration.StartupTest;
-import org.cirmmp.spring.dao.ProjectDao;
 import org.cirmmp.spring.model.DataSet;
 import org.junit.After;
 import org.junit.AfterClass;
