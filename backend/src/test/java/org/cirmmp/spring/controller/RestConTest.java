@@ -2,8 +2,9 @@ package org.cirmmp.spring.controller;
 
 import static org.junit.Assert.*;
 
+import java.util.Collections;
+
 import org.cirmmp.spring.configuration.AppConfig;
-import org.cirmmp.spring.service.DataSetService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -12,23 +13,32 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+/**
+ * @author cm65
+ * 
+ * Test the intended use cases of the REST Controller
+ * 
+ * A separate set of security tests are also needed.
+ *
+ */
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
-
-// Or the @TestPropertySource annotation can be declared on a test class to declare resource locations for test properties files or inlined properties.
-//  Alternatively, you can implement and configure your own custom SmartContextLoader for advanced use cases.
 @ContextConfiguration(
 		classes={ AppConfig.class }
-		//,loader = AnnotationConfigWebContextLoader.class
 )
 public class RestConTest {
 	
 
-    @Autowired
+    private static final String EMAIL = "jd@nowhere.no";
+	private static final String USERNAME = "username";
+	@Autowired
     private ApplicationContext applicationContext;
 
 	@BeforeClass
@@ -43,18 +53,36 @@ public class RestConTest {
 
 	@Before
 	public void setUp() throws Exception {
-		this.restCon = (RestCon) this.applicationContext.getBean(
+		this.restCon = this.applicationContext.getBean(
 				RestCon.class
 		);
+
+		org.springframework.security.core.userdetails.User user = 
+			new org.springframework.security.core.userdetails.User(USERNAME, "password", 
+				true, true, true, true, 
+				Collections.emptySet()
+		);
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(user,null);
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
 
+	/* 
+	 * Not that this only tests the positive path, 
+	 * so we can test the intended use cases of RestCon.
+	 * This is not a security test 
+	 * - it does not test the misuse cases. 
+	 * */
 	@Test
-	public void testListOrder() {
-		fail("Not yet implemented");
+	public void testCheckAuthentication() {
+		org.cirmmp.spring.model.User u = 
+				this.restCon.checkAuthentication(USERNAME, "John Doe", EMAIL, "");
+		assertEquals(EMAIL, u.getEmail());
 	}
 
 	@Test
@@ -82,9 +110,9 @@ public class RestConTest {
 		fail("Not yet implemented");
 	}
 
+
 	@Test
-	public void testCheckAuthentication() {
+	public void testListOrder() {
 		fail("Not yet implemented");
 	}
-
 }
