@@ -12,6 +12,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.orm.hibernate4.HibernateTemplate;
 import org.springframework.orm.hibernate4.HibernateTransactionManager;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -81,6 +82,14 @@ public class HibernateConfiguration {
         populator.addScript(resourceLoader.getResource("classpath:batchSchema.sql"));
         populator.setContinueOnError(true);
         return populator;
+    }
+
+    @Bean
+    @Autowired
+    public HibernateTemplate hibernateTemplate(SessionFactory sessionFactory)
+    {
+        HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
+        return hibernateTemplate;
     }
 }
 
