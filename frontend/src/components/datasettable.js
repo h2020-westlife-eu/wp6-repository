@@ -1,6 +1,9 @@
 import {ProjectApi} from '../components/projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Selecteddataset,Preselecteddataset,Preselectedproject,Preselecteddatasets} from "./messages";
+import {
+  Selecteddataset, FilterDataset, FilterDatasetByProject, FilterProjectByDataset,
+  Webdavresource
+} from "./messages";
 
 export class Datasettable {
   static inject = [ProjectApi,EventAggregator];
@@ -10,8 +13,10 @@ export class Datasettable {
     this.alldatasets = [];
     //this.showDatasets =true;
     this.ea=ea;
-    this.ea.subscribe(Preselecteddataset,msg =>this.filterSelectedDataset(msg.datasetid));
-    this.ea.subscribe(Preselecteddatasets,msg =>this.filterProjectDatasets(msg));
+    this.ea.subscribe(FilterDataset,msg =>this.filterSelectedDataset(msg.id));
+    this.ea.subscribe(FilterDatasetByProject,msg =>this.filterProjectDatasets(msg.id));
+    this.selectedDatasetId=0;
+    this.selectedProjectId=0;
   }
 
   attached() {
@@ -21,6 +26,7 @@ export class Datasettable {
       this.datasets=this.alldatasets;
       this.selectedDatasetId=this.pa.getSelectedDataset();
       if (this.selectedDatasetId>0) this.filterSelectedDataset(this.selectedDatasetId);
+      if (this.selectedProjectId>0) this.filterProjectDatasets2(this.selectedProjectId);
     });
   }
 /*
@@ -50,17 +56,46 @@ export class Datasettable {
     //this.selectedDatasetId=id;
     //this.filterMyProject();
     //get the selected dataset
+    this.selectedDataset=null;
+    this.selectedDatasetId=0;
+    this.selectedProjectId=id;
     if (id==0) {
       this.datasets=this.alldatasets;
       return;
     }
     console.log("datasettable.filterProjectDatasets()");
+    console.log(id);
     console.log(this.alldatasets);
     this.datasets=this.alldatasets.filter(i => i.projectId == id);
     console.log(this.datasets)
   }
 
-  filterProjectDatasets(msg){
-    this.filterProjectDatasets2(this.pa.getSelectedProject());
+  filterProjectDatasets(id){
+    this.filterProjectDatasets2(id);
   }
+
+  filterSelectedDataset(id){
+    this.selectedDatasetId=id;
+    if (id==0){
+      this.selectedDataset=null;
+      this.datasets=this.alldatasets;
+      return;
+    }
+    this.datasets=this.alldatasets.filter(i => i.id == id);
+    if (this.datasets.length>0){
+      this.selectedDataset=this.datasets[0];
+      this.pa.setSelectedProject(this.datasets[0].projectId);
+      this.ea.publish(new FilterProjectByDataset(this.datasets[0].projectId));
+      this.pa.dataseturl=this.datasets[0].webdavurl;
+      this.ea.publish(new Webdavresource(this.pa.dataseturl));
+    }
+  }
+
+  deselectDataset() {
+    console.log("deselectDataset()");
+    this.selectedDataset=null;
+    this.selectedDatasetId=0;
+
+  }
+
 }

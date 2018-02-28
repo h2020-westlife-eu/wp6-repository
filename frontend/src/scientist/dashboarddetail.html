@@ -5,7 +5,7 @@
   <require from="../components/projecttable"></require>
   <require from="../components/datasettable"></require>
   <h3>Project/Dataset Detail</h3>
-  <b>Select<span show.bind="! showProposals">ed</span> project visit/proposal:</b>
+  <b>Select<span show.bind="selectedProject">ed</span> project visit/proposal:</b>
    <!--table class="w3-table-all">
     <tr show.bind="showProposals">
       <th>id</th>
@@ -33,7 +33,7 @@
   </table-->
   <projecttable></projecttable>
 
-  <b>Select<span show.bind="! showDatasets">ed</span> dataset to narrow files:</b>
+  <b>Select<span show.bind="selectedDataset">ed</span> dataset to narrow files:</b>
   <!--table class="w3-table-all">
     <thead show.bind="showDatasets">
     <tr>
@@ -81,11 +81,11 @@
     </tbody>
   </table-->
   <datasettable></datasettable>
-  <div show.bind="! showDatasets" class="w3-half">
+  <div show.bind="selectedDataset" class="w3-half">
     <b>Files:</b>
     <webdavfilepanel></webdavfilepanel>
   </div>
-  <div show.bind="! showDatasets" class="w3-half">
+  <div show.bind="selectedDataset" class="w3-half">
     <div class="w3-margin-left">
       <fileeditor></fileeditor>
     </div>

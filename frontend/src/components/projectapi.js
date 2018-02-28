@@ -118,4 +118,9 @@ export class ProjectApi {
           //          alert("Sorry, error:"+error.statusCode+" "+error.message);
         });
     }
+
+    deleteDataset(id){
+    console.log('not implemented');
+    return id;
+    }
 }

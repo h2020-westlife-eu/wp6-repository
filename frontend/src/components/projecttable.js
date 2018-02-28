@@ -1,7 +1,6 @@
-import {Webdavresource} from "../components/messages";
 import {ProjectApi} from './projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Selectedproject,Preselectedproject,Preselecteddatasets} from "./messages";
+import {Selectedproject,FilterProject,FilterProjectByDataset} from "./messages";
 
 export class Projecttable {
   static inject = [ProjectApi,EventAggregator];
@@ -14,7 +13,8 @@ export class Projecttable {
     this.selectedProject=null;
     this.selectedProjectId=0;
     console.log("Projecttable() subscribe");
-    this.ea.subscribe(Preselectedproject,msg =>this.filterSelectedProposal(msg.projectid));
+    this.ea.subscribe(FilterProject,msg =>this.filterSelectedProposal(msg.id));
+    this.ea.subscribe(FilterProjectByDataset,msg =>this.filterSelectedProposal(msg.id));
   }
 
   attached() {
@@ -23,6 +23,7 @@ export class Projecttable {
       this.projects = data;
       //data retrieved and selectedProject already set e.g. by activate, call filter again
       this.selectedProjectId=this.pa.getSelectedProject();
+      console.log(this.selectedProjectId);
       if (this.selectedProjectId>0) this.filterSelectedProposal(this.selectedProjectId);
     });
   }
@@ -45,8 +46,6 @@ export class Projecttable {
     console.log(id);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == id)[0];
-      this.pa.setSelectedProject(id);
-      this.ea.publish(new Preselecteddatasets(id));
     } else {
       console.log("projects are not yet retrieved");
     }

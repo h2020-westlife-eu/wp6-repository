@@ -28,6 +28,12 @@ export class Webdavfilepanel {
     this.dirs=[];
   }
 
+  atached(){
+    if (this.pa.dataseturl){
+      setwebdav(webdavurl);
+    }
+  }
+
   setwebdav(webdavurl) {
     this.webdavpath = webdavurl;
     //query the directory content

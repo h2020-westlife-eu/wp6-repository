@@ -26,9 +26,27 @@ export class Selectedproject {
   }
 }
 
-export class Preselectedproject {
-  constructor(projectid){
-    this.projectid = projectid;
+export class FilterProject {
+  constructor(id){
+    this.id = id;
+  }
+}
+
+export class FilterDatasetByProject {
+  constructor(id){
+    this.id = id;
+  }
+}
+
+export class FilterDataset {
+  constructor(id){
+    this.id = id;
+  }
+}
+
+export class FilterProjectByDataset {
+  constructor(id){
+    this.id = id;
   }
 }
 
