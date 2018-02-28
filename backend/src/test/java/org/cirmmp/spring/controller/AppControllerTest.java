@@ -166,6 +166,9 @@ public class AppControllerTest {
 			}
 		}
 		// TODO why not? assertTrue(found);
+		
+		page = this.controller.updateUser(user, result, model, "nonesuch");
+		assertEquals("registrationsuccess", page);
 
 		
 		this.controller.deleteUser(ssoId);
@@ -187,9 +190,52 @@ public class AppControllerTest {
 
 
 	@Test
-	public void testUpdateUserUserBindingResultModelMapString() {
-		fail("Not yet implemented");
+	public void testUpdateUserUserBindingResultModelMapStringNonesuchUser() {
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		try {
+			this.controller.updateUser(new org.cirmmp.spring.model.User(), result, model, "nonesuch");
+		} catch (NullPointerException e) {
+			// probably OK, if response code is Invalid Request
+		}
 	}
+
+
+	@Test
+	public void testUpdateUserProjectBindingResultModelMapLongNonesuchProject() {
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		try {
+			this.controller.updateUser(new Project(), result, model, -1L);
+		} catch (IllegalArgumentException e) {
+			// OK if response code is Invalid Request
+		}
+	}
+
+
+	@Test
+	public void testUpdateUserProjectBindingResultModelMapLongNonesuchUser() {
+
+		// get a project bean
+		String page = this.controller.newProject(this.model);
+		assertEquals("newproject", page);
+		Project project = (Project) model.get("project");
+		assertNull(project.getId());
+		assertFalse((Boolean)model.get("edit"));
+
+		// save it
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		this.controller.saveProject(project, result , this.model);
+		assertNotNull(project.getId());		
+
+		result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		page = this.controller.updateUser(project, result, model, -1L);
+		assertEquals("registrationsuccess", page);
+		
+		this.controller.deleteProject(project.getId());
+
+		// TODO delete user
+	}
+	
+	
 
 
 	@Test
@@ -374,15 +420,23 @@ public class AppControllerTest {
 
 	@Test
 	public void testNewProject() {
+		
+		// get a project bean
 		String page = this.controller.newProject(this.model);
 		assertEquals("newproject", page);
 		Project project = (Project) model.get("project");
 		assertNull(project.getId());
 		assertFalse((Boolean)model.get("edit"));
 
+		// save it
 		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
 		this.controller.saveProject(project, result , this.model);
 		assertNotNull(project.getId());		
+		
+		// what does this do? 
+		page = this.controller.editProject(project.getId(), model);
+		assertEquals("newproject", page); // back to same page?
+		assertTrue((Boolean)model.get("edit"));		
 		
 		// look for the new project
 		this.controller.listPro(this.model );
@@ -396,11 +450,8 @@ public class AppControllerTest {
 			}
 		}
 		// TODO why not? assertTrue(found);
-
-		page = this.controller.editProject(project.getId(), model);
-		assertEquals("newproject", page); // back to same page?
-		assertTrue((Boolean)model.get("edit"));
 		
+		// tidy up
 		this.controller.deleteProject(project.getId());
 		
 		// now check it has been deleted
@@ -417,14 +468,5 @@ public class AppControllerTest {
 		assertFalse(found);
 
 	}
-
-
-	@Test
-	public void testUpdateUserProjectBindingResultModelMapLong() {
-		fail("Not yet implemented");
-	}
-
-
-
 
 }
