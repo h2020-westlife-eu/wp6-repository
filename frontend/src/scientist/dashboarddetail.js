@@ -40,7 +40,10 @@ export class Dashboarddetail {
   // if the same project is selected activate() is not launched - enough to hide all other projects
   selectProject(project) {
     this.selectedProject=project;
-    this.filterSelectedProposal(project.id);
+    this.selectedProjectId=project.id;
+    this.pa.setSelectedProject(projectid);
+    //this.filterSelectedProposal(project.id);
+    this.ea.publish(new FilterDatasetByProject(project.id));
     return true;
   }
 

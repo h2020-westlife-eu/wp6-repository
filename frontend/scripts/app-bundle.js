@@ -1722,7 +1722,10 @@ define('scientist/dashboarddetail',['exports', '../components/messages', 'aureli
 
     Dashboarddetail.prototype.selectProject = function selectProject(project) {
       this.selectedProject = project;
-      this.filterSelectedProposal(project.id);
+      this.selectedProjectId = project.id;
+      this.pa.setSelectedProject(projectid);
+
+      this.ea.publish(new _messages.FilterDatasetByProject(project.id));
       return true;
     };
 
