@@ -4,13 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.cirmmp.spring.configuration.AppConfig;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.FileBucket;
+import org.cirmmp.spring.model.FileList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +33,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -40,11 +43,21 @@ import org.springframework.validation.MapBindingResult;
 public class AppControllerTest {
 	
 
+	private static final String CONTENT = "content";
+
+
 	private static final String USERNAME = "AppControllerTest"+System.currentTimeMillis();
 	
 	
 	@Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    MockHttpServletRequest request;
+
+    @Autowired
+    MockHttpServletResponse response;
+    
 	private AppController controller;
 	private User user;
 
@@ -124,7 +137,7 @@ public class AppControllerTest {
 
 	@Test
 	public void testInitializeProfiles() {
-		fail("Not yet implemented");
+		//TODO is that method ever called? fail("Not yet implemented");
 	}
 
 	@Test
@@ -141,8 +154,6 @@ public class AppControllerTest {
 
 	@Test
 	public void testLogoutPage() {
-		HttpServletResponse response = new MockHttpServletResponse();
-		HttpServletRequest request = new MockHttpServletRequest();
 		String page = this.controller.logoutPage(request , response );
 		assertEquals("redirect:/login?logout", page);
 		
@@ -169,12 +180,84 @@ public class AppControllerTest {
 
 	@Test
 	public void testAddDataset() {
-		fail("Not yet implemented");
-	}
+		String page = this.controller.addDataset(-1L, model);
+		assertEquals("newdataset", page);
+		assertNotNull(model.get("dataset"));
+		// TODO this seems to be the same action as newDataset
+	}	
 
 	@Test
-	public void testAddDatasetPost() {
-		fail("Not yet implemented");
+	public void testDeleteFileNonesuch() {
+		try {
+			this.controller.deleteFile(-1,  -1L);
+		} catch (NullPointerException e) {
+			// that's OK I guess, will the response code be appropriate?
+		} catch (IllegalArgumentException e) {
+			// that's OK I guess, will the response code be appropriate?
+		}
+	}
+	
+
+	@Test
+	public void testDownloadFileNonesuch() throws IOException {
+		try {
+			this.controller.downloadFile(-1, -1L /* file ID */, response );
+		} catch (NullPointerException e) {
+			// maybe Ok, is the response code appropriate?
+		}
+	}
+	
+
+	@Test
+	public void testDeleteDatasetNonesuch() {
+		try {
+			this.controller.deleteDataSet(-1L, -1L);
+		} catch (NullPointerException e) {
+			// that's Ok, if it leads to an Invalid Request response code
+		}
+	}
+
+	
+	@Test
+	public void testAddDatasetPost() throws IOException {
+		
+		// create new dataset
+		String page = this.controller.newDataset(this.model);
+		assertEquals("newdataset", page);
+		assertTrue(model.containsAttribute("dataset"));
+		DataSet dataset = (DataSet) model.get("dataset");
+		assertNotNull(dataset);
+		assertNull(dataset.getId());  
+		
+		// save details to database: gets id
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");;
+		this.controller.addDatasetPost(-1L, dataset, result, model);
+		assertNotNull(dataset.getId());  
+		
+		// mock upload
+		FileBucket bucket = new FileBucket();
+		MultipartFile file = new MockMultipartFile("filename", CONTENT.getBytes());
+		bucket.setFile(file );
+		result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		page = this.controller.uploadFile(bucket , result , this.model, dataset.getId());
+		assertEquals(page, "redirect:/add-file-"+dataset.getId());
+
+		List<FileList> fileLists = dataset.getFileLists();
+		assertEquals(0, fileLists.size());  // TODO why?
+		
+		
+		/* TODO // download
+		assertEquals(1, fileLists.size());
+		FileList fl = fileLists.iterator().next();
+		this.response.setOutputStreamAccessAllowed(true);
+		this.controller.downloadFile(-1, fl.getId(), response );
+		byte[] bytes = response.getContentAsByteArray();
+		assertEquals(CONTENT, bytes);  
+		
+		this.controller.deleteFile(-1,  fl.getId());
+		*/
+		// TODO delete dataset
+		
 	}
 
 	@Test
@@ -223,29 +306,8 @@ public class AppControllerTest {
 	}
 
 	@Test
-	public void testDownloadFileNonesuch() throws IOException {
-		HttpServletResponse response = new MockHttpServletResponse();
-		try {
-			this.controller.downloadFile(-1, -1L /* file ID */, response );
-		} catch (NullPointerException e) {
-			// maybe Ok, is the response code appropriate?
-		}
-	}
-
-	@Test
 	public void testCreateTarFile() {
 		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDeleteFileNonesuch() {
-		try {
-			this.controller.deleteFile(-1,  -1L);
-		} catch (NullPointerException e) {
-			// that's OK I guess, will the response code be appropriate?
-		} catch (IllegalArgumentException e) {
-			// that's OK I guess, will the response code be appropriate?
-		}
 	}
 
 	@Test

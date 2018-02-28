@@ -22,6 +22,8 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 
+// TODO see also https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/integration-testing.html
+
 // Or the @TestPropertySource annotation can be declared on a test class to declare resource locations for test properties files or inlined properties.
 //  Alternatively, you can implement and configure your own custom SmartContextLoader for advanced use cases.
 @ContextConfiguration(
