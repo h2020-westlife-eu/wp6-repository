@@ -13,6 +13,7 @@ import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.FileBucket;
 import org.cirmmp.spring.model.FileList;
 import org.cirmmp.spring.model.Project;
+import org.cirmmp.spring.model.rest.RestFileList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -315,6 +316,38 @@ public class AppControllerTest {
 		}
 	}
 
+
+	@Test
+	public void testUploadFileNonesuch() throws IOException {
+		FileBucket fileBucket = new FileBucket();
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		try {
+			this.controller.uploadFile(fileBucket , result , this.model, -1L);
+		} catch (NullPointerException e) {
+			// maybe OK, is the response code appropriate?
+		}
+		
+	}
+
+
+	@Test
+	public void testCreateTarFileNoesuch() throws IOException {
+		try {
+			this.controller.createTarFile(-1L, this.response);
+		} catch (Exception e) {
+			// Ok if the response code is Invalid Request
+		}
+	}
+	
+
+	@Test
+	public void testAddFilessNonesuch() {
+		try {
+			this.controller.addFiless(-1L, this.model);
+		} catch (Exception e) {
+			// OK if the response code is Invalid Request
+		}
+	}
 	
 	@Test
 	public void testAddDatasetPost() throws IOException {
@@ -332,8 +365,15 @@ public class AppControllerTest {
 		this.controller.addDatasetPost(-1L, dataset, result, model);
 		assertNotNull(dataset.getId());  
 		
+
+		// get a file bucket
+		page = this.controller.addFiless(dataset.getId(), this.model);
+		assertEquals("managefiles", page);
+		List<RestFileList> restFiles = (List<RestFileList>) model.get("resfiles");
+		FileBucket bucket = (FileBucket) model.get("fileBucket");
+		assertNotNull(restFiles);
+		
 		// mock upload
-		FileBucket bucket = new FileBucket();
 		MultipartFile file = new MockMultipartFile("filename", CONTENT.getBytes());
 		bucket.setFile(file );
 		result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
@@ -346,61 +386,28 @@ public class AppControllerTest {
 				0 == fileLists.size()				
 		);  // TODO why?
 		
+
+		// get as tar
+		page = this.controller.createTarFile(dataset.getId(), this.response);
+		assertEquals("redirect:/add-file-"+dataset.getId(), page);
+		byte[] bytes = response.getContentAsByteArray();
+		// TODO untar and test contents with http://mvnrepository.com/artifact/org.apache.commons/commons-compress/1.16.1
 		
-		/* TODO // download
+		/* TODO  download
 		assertEquals(1, fileLists.size());
 		FileList fl = fileLists.iterator().next();
 		this.response.setOutputStreamAccessAllowed(true);
 		this.controller.downloadFile(-1, fl.getId(), response );
-		byte[] bytes = response.getContentAsByteArray();
-		assertEquals(CONTENT, bytes);  
+		bytes = response.getContentAsByteArray();
+		assertEquals(CONTENT, bytes);  */
 		
-		this.controller.deleteFile(-1,  fl.getId());
-		*/
+		
 		// TODO delete dataset
 		
-	}
-
-	@Test
-	public void testAddFiless() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUploadFileNonesuch() throws IOException {
-		FileBucket fileBucket = new FileBucket();
-		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
-		try {
-			this.controller.uploadFile(fileBucket , result , this.model, -1L);
-		} catch (NullPointerException e) {
-			// maybe OK, is the response code appropriate?
-		}
+		// TODO this.controller.deleteFile(-1,  fileLists.iterator().next().getId());
 		
 	}
 
-	@Test
-	public void testNewDataset() throws IOException {
-		String page = this.controller.newDataset(this.model);
-		assertEquals("newdataset", page);
-		assertTrue(model.containsAttribute("dataset"));
-		DataSet dataset = (DataSet) model.get("dataset");
-		assertNotNull(dataset);
-		assertNull(dataset.getId()); // TODO huh?
-		
-		// now upload a file
-		FileBucket fileBucket = new FileBucket();
-		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
-		//TODO this.controller.uploadFile(fileBucket , result , this.model, dataset.getId());
-		
-		//TODO now download the file
-	}
-	
-
-	@Test
-	public void testCreateTarFile() {
-		fail("Not yet implemented");
-	}
-	
 
 	@Test
 	public void testDeleteProjectNonesuch() {
