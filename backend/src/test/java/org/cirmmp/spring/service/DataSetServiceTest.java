@@ -1,10 +1,18 @@
 package org.cirmmp.spring.service;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.cirmmp.spring.configuration.AppConfig;
 import org.cirmmp.spring.model.DataSet;
+import org.cirmmp.spring.model.FileList;
+import org.cirmmp.spring.model.rest.RestFileList;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -57,34 +65,97 @@ public class DataSetServiceTest {
 	}
 
 	@Test
-	public void testFindById() {
-		DataSet found = service.findById(1L);
+	public void testFindByIdNonesuch() {
+		DataSet found = service.findById(-1L);
 		assertNull(found);
 	}
 
 	@Test
-	public void testRestFileFindById() {
-		fail("Not yet implemented");
+	public void testRestFileFindByIdNonesuch() {
+		try {
+			List<RestFileList> found = service.restFileFindById(-1L);
+			assertEquals(0, found.size());
+		} catch (NullPointerException e) {
+			// TODO this doesn't really seem like the right behaviour
+		}
 	}
 
 	@Test
 	public void testFileFindById() {
-		fail("Not yet implemented");
+		try {
+			List<FileList> found = service.FileFindById(-1L);
+			assertEquals(0, found.size());
+		} catch (NullPointerException e) {
+			// TODO this doesn't really seem like the right behaviour
+		}
 	}
 
 	@Test
-	public void testSave() {
-		fail("Not yet implemented");
+	public void testSaveNoFiles() {
+		DataSet dataSet = new DataSet();
+		this.service.save(dataSet );
+		
+		// check it can be found
+		Long id = dataSet.getId();
+		DataSet found = service.findById(id);
+		assertNotNull(found);
+		
+		// now try to find its files
+		List<FileList> files = service.FileFindById(id);
+		assertTrue(
+		    null==files || // TODO this does not seem right		
+		    files.isEmpty() // the preferred behaviour
+		);
+
+		try {
+			assertNotNull(this.service.restFileFindById(id));
+		} catch (NullPointerException e) {
+			// TODO this behaviour does not seem right
+		}
+		
+		// now delete it
+		service.deleteById(id);
+		assertNull(service.findById(id));
+	}
+	
+
+	@Test
+	public void testSaveOneFile() {
+		DataSet dataSet = new DataSet();
+		FileList list = new FileList();
+		List<FileList> lists = Collections.singletonList(list);
+		dataSet.setFileLists(lists );
+		
+		this.service.save(dataSet );
+		
+		// check it can be found
+		Long id = dataSet.getId();
+		DataSet found = service.findById(id);
+		assertNotNull(found);
+		
+		// now try to find its files
+		List<FileList> files = service.FileFindById(id);
+		assertEquals(1, files.size() );
+		List<RestFileList> restFiles = this.service.restFileFindById(id);
+		assertEquals(1, restFiles.size() );
+		
+		// now delete it
+		service.deleteById(id);
+		assertNull(service.findById(id));
 	}
 
 	@Test
-	public void testDeleteById() {
-		fail("Not yet implemented");
+	public void testDeleteByIdNonesuch() {
+		try {
+			service.deleteById(-1L);
+		} catch (IllegalArgumentException e) {
+			// that's fine
+		}
 	}
 
 	@Test
 	public void testFindAllDataset() {
-		fail("Not yet implemented");
+		List<DataSet> found = service.findAllDataset();
 	}
 
 }
