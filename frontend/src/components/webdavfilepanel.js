@@ -26,6 +26,7 @@ export class Webdavfilepanel {
     this.webdavpath = '/files/XufWqKau/';
     //hold depth of directory structure if cd into them
     this.dirs=[];
+    this.files=[];
   }
 
   atached(){
@@ -35,7 +36,9 @@ export class Webdavfilepanel {
   }
 
   setwebdav(webdavurl) {
+    console.log("setwebdav() obtained url:"+webdavurl);
     this.webdavpath = webdavurl;
+    if (!webdavurl) {this.files = [];return;}
     //query the directory content
     this.httpclient.fetch(this.webdavpath, {
       method: 'PROPFIND',
@@ -73,7 +76,8 @@ export class Webdavfilepanel {
         //adds first row with '..' to cd to parent directory
         if (this.dirs.length>0) this.files.unshift({name:'..',isdir:true,size:'DIR',date:''});
       }).catch(error => {
-      console.log("selectDataset() error");
+        this.files=[];
+      console.log("setwebdav() error");
       console.log(error);
     });
   }

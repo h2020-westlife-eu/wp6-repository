@@ -35,8 +35,8 @@
     <tr if.bind="datasets.length == 0"><td colspan="3">No datasets available for this project</td></tr>
     <tr show.bind="! selectedDataset" class="w3-hover-green" repeat.for="item of datasets">
       <td>${item.creation_date}</td>
-      <td><idata></idata><a class="w3-hover-green" click.trigger="selectDataset()" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.name}</a></td>
-      <td><a class="w3-hover-green" click.trigger="selectDataset()" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.summary}</a></td>
+      <td><idata></idata><a class="w3-hover-green" click.trigger="selectDataset(item)" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.name}</a></td>
+      <td><a class="w3-hover-green" click.trigger="selectDataset(item)" route-href="route: datasetdetail; params.bind: {datasetid:item.id}">${item.summary}</a></td>
       <td>${item.info}</td>
       <td>${item.projectId}</td>
       <td>

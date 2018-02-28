@@ -39,13 +39,18 @@ export class Datasettable {
   */
 
   selectDataset(dataset){
+    console.log("selectDataset() sending signal");
+    console.log(dataset)
     this.selectedDataset=dataset;
-    this.ea.publish(new Selecteddataset(dataset))
+    this.ea.publish(new Selecteddataset(dataset));
+    //if (dataset) this.ea.publish(new Webdavresource(dataset.webdavurl));
     return true;
 
   }
-  deselectProject(){
-    this.selectedDataset=null;
+  deselectDataset(){
+
+    console.log("deselectDataset()");
+    this.filterProjectDatasets(this.selectedDataset.projectId);
     this.ea.publish(new Selecteddataset(null))
     return true;
   }
@@ -91,11 +96,6 @@ export class Datasettable {
     }
   }
 
-  deselectDataset() {
-    console.log("deselectDataset()");
-    this.selectedDataset=null;
-    this.selectedDatasetId=0;
 
-  }
 
 }

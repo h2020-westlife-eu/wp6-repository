@@ -8,7 +8,7 @@
       <tr show.bind="!selectedProject" class="w3-hover-green" repeat.for="project of projects" >
         <td>${project.id}</td>
         <td><iproject></iproject><a class="w3-hover-green" route-href="route: projectdetail; params.bind: {projectid:project.id}"
-                                    click.nodelegate="selectProject(project)">${project.projectName}</a></td>
+                                    click.delegate="selectProject(project)">${project.projectName}</a></td>
         <td>${project.summary} (${project.datasets})</td>
       </tr>
       <tr show.bind="selectedProject" title="click to show all projects" class="w3-hover-green" click.delegate="deselectProject()">

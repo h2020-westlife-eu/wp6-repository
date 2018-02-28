@@ -9,7 +9,7 @@ export class Dashboarddetail {
   constructor(ea,pa) {
     this.ea = ea;
     this.pa=pa;
-
+    console.log("subscribe()");
     this.ea.subscribe(Selectedproject,msg =>this.selectProject(msg.project));
     this.ea.subscribe(Selecteddataset,msg => this.selectDataset(msg.dataset));
   }
@@ -79,6 +79,8 @@ export class Dashboarddetail {
 
   //shows only one dataset and publish webdavresource with dataset's url
   selectDataset(item) {
+    console.log("received selectDataset signal");
+    console.log(item);
     this.selectedDataset=item;
     if (!item) {deselectDataset(); return true;}
     this.selectedDatasetId=item.id;
