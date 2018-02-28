@@ -269,7 +269,7 @@ public class AppControllerTest {
 
 
 	@Test
-	public void testListData() {
+	public void testListDataNonesuch() {
 		try {
 			this.controller.listData(-1L, this.model);
 		} catch (NullPointerException e) {
@@ -331,7 +331,7 @@ public class AppControllerTest {
 
 
 	@Test
-	public void testCreateTarFileNoesuch() throws IOException {
+	public void testCreateTarFileNonesuch() throws IOException {
 		try {
 			this.controller.createTarFile(-1L, this.response);
 		} catch (Exception e) {
@@ -347,6 +347,40 @@ public class AppControllerTest {
 		} catch (Exception e) {
 			// OK if the response code is Invalid Request
 		}
+	}
+	
+	@Test 
+	public void testListData() {
+		// get a project bean
+		String page = this.controller.newProject(this.model);
+		assertEquals("newproject", page);
+		Project project = (Project) model.get("project");
+		assertNull(project.getId());
+		assertFalse((Boolean)model.get("edit"));
+
+		// save it
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		this.controller.saveProject(project, result , this.model);
+		assertNotNull(project.getId());		
+
+		// create new dataset
+		page = this.controller.newDataset(this.model);
+		assertEquals("newdataset", page);
+		assertTrue(model.containsAttribute("dataset"));
+		DataSet dataset = (DataSet) model.get("dataset");
+		assertNotNull(dataset);
+		assertNull(dataset.getId());  
+		
+		// save details to database: gets id
+		dataset.setProject(project);
+		result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		this.controller.addDatasetPost(-1L, dataset, result, model);
+		assertNotNull(dataset.getId());  
+		
+		
+		page = this.controller.listData(project.getId(), model);
+		// TODO assertEquals("datasetlist", page);
+		//TODO assertEquals(dataset, model.get("dataset"));
 	}
 	
 	@Test
@@ -457,6 +491,9 @@ public class AppControllerTest {
 			}
 		}
 		// TODO why not? assertTrue(found);
+		
+		page = this.controller.listData(project.getId(), model);
+		assertEquals("redirect:/listPro", page);
 		
 		// tidy up
 		this.controller.deleteProject(project.getId());
