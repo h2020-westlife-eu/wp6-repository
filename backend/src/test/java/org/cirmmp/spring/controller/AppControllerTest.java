@@ -2,12 +2,15 @@ package org.cirmmp.spring.controller;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.cirmmp.spring.configuration.AppConfig;
+import org.cirmmp.spring.model.DataSet;
+import org.cirmmp.spring.model.FileBucket;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,6 +29,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.MapBindingResult;
 
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -110,7 +115,11 @@ public class AppControllerTest {
 
 	@Test
 	public void testDeleteUser() {
-		fail("Not yet implemented");
+		try {
+			this.controller.deleteUser("nonesuch");
+		} catch (IllegalArgumentException e) {
+			// that's Ok, if it leads to an Invalid Request response code
+		}
 	}
 
 	@Test
@@ -120,14 +129,14 @@ public class AppControllerTest {
 
 	@Test
 	public void testAccessDeniedPage() {
-		this.controller.accessDeniedPage(model);
+		String page = this.controller.accessDeniedPage(model);
+		assertEquals("accessDenied", page);
 	}
 
 	@Test
-	public void testLoginPage() {
+	public void testLoginPageLoggedIn() {
 		String loginPage = this.controller.loginPage();
 		assertEquals("redirect:/list", loginPage);
-		// TODO also test not logged in
 	}
 
 	@Test
@@ -138,7 +147,9 @@ public class AppControllerTest {
 		assertEquals("redirect:/login?logout", page);
 		
 		//TODO now check can't edit
-		//TODO now log in
+
+		String loginPage = this.controller.loginPage();
+		// TODO assertEquals("login", loginPage);
 	}
 
 	@Test
@@ -172,13 +183,32 @@ public class AppControllerTest {
 	}
 
 	@Test
-	public void testUploadFile() {
-		fail("Not yet implemented");
+	public void testUploadFileNonesuch() throws IOException {
+		FileBucket fileBucket = new FileBucket();
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		try {
+			this.controller.uploadFile(fileBucket , result , this.model, -1L);
+		} catch (NullPointerException e) {
+			// maybe OK, is the response code appropriate?
+		}
+		
 	}
 
 	@Test
-	public void testNewDataset() {
-		fail("Not yet implemented");
+	public void testNewDataset() throws IOException {
+		String page = this.controller.newDataset(this.model);
+		assertEquals("newdataset", page);
+		assertTrue(model.containsAttribute("dataset"));
+		DataSet dataset = (DataSet) model.get("dataset");
+		assertNotNull(dataset);
+		assertNull(dataset.getId()); // TODO huh?
+		
+		// now upload a file
+		FileBucket fileBucket = new FileBucket();
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		//TODO this.controller.uploadFile(fileBucket , result , this.model, dataset.getId());
+		
+		//TODO now downlod the file
 	}
 
 	@Test
@@ -193,8 +223,13 @@ public class AppControllerTest {
 	}
 
 	@Test
-	public void testDownloadFile() {
-		fail("Not yet implemented");
+	public void testDownloadFileNonesuch() throws IOException {
+		HttpServletResponse response = new MockHttpServletResponse();
+		try {
+			this.controller.downloadFile(-1, -1L /* file ID */, response );
+		} catch (NullPointerException e) {
+			// maybe Ok, is the response code appropriate?
+		}
 	}
 
 	@Test
@@ -206,6 +241,8 @@ public class AppControllerTest {
 	public void testDeleteFileNonesuch() {
 		try {
 			this.controller.deleteFile(-1,  -1L);
+		} catch (NullPointerException e) {
+			// that's OK I guess, will the response code be appropriate?
 		} catch (IllegalArgumentException e) {
 			// that's OK I guess, will the response code be appropriate?
 		}
