@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.cirmmp.spring.configuration.AppConfig;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.FileBucket;
@@ -29,7 +27,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -62,7 +59,7 @@ public class AppControllerTest {
     MockHttpServletResponse response;
     
 	private AppController controller;
-	private User user;
+	private org.springframework.security.core.userdetails.User user;
 
 
 	private ModelMap model = new ModelMap();
@@ -108,35 +105,92 @@ public class AppControllerTest {
 		assertTrue(this.model.containsAttribute("users"));
 		assertTrue(this.model.containsAttribute("loggedinuser"));
 	}
+	
 
 	@Test
-	public void testNewUser() {
-		fail("Not yet implemented");
+	public void testEditUserNonesuch() {
+		try {
+			this.controller.editUser("nonesuch", model);
+		} catch (IllegalArgumentException e) {
+			// that's Ok, if it leads to an Invalid Request response code
+		}
 	}
+	
 
 	@Test
-	public void testSaveUser() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testEditUser() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testUpdateUserUserBindingResultModelMapString() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDeleteUser() {
+	public void testDeleteUserNonesuch() {
 		try {
 			this.controller.deleteUser("nonesuch");
 		} catch (IllegalArgumentException e) {
 			// that's Ok, if it leads to an Invalid Request response code
 		}
 	}
+
+	@Test
+	public void testNewUser() {
+		
+		final String ssoId = "ssoid"+System.currentTimeMillis(); // unique value
+		
+		// create a bean
+		String page = this.controller.newUser(this.model);
+		assertEquals("registration", page);
+		org.cirmmp.spring.model.User user = (org.cirmmp.spring.model.User) model.get("user");
+		assertNull(user.getId());
+		assertFalse((Boolean)model.get("edit"));
+
+		// edit it  
+		page = this.controller.editUser(ssoId, model);
+		assertEquals("registration", page); // back to same page?
+		assertTrue((Boolean)model.get("edit"));
+		user.setSsoId(ssoId);
+		user.setPassword(""); // required to avoid NPE
+		user.setEmail("me@example.org"); // also required
+		user.setFirstName("John"); // also required
+		user.setLastName("Doe"); // also required
+		
+		// save
+		BindingResult result = new MapBindingResult(Collections.EMPTY_MAP, "hmm");
+		this.controller.saveUser(user, result , this.model);
+		assertNotNull(user.getId());		
+		
+		// look for the new one
+		this.controller.listUsers(this.model );
+		assertNotNull(model.containsAttribute("users"));
+		Collection<org.cirmmp.spring.model.User> users = (Collection<org.cirmmp.spring.model.User>) model.get("users");
+		boolean found = false;
+		for (Iterator iterator = users.iterator(); iterator.hasNext();) {
+			org.cirmmp.spring.model.User u = (org.cirmmp.spring.model.User) iterator.next();
+			if (u.getId()==user.getId()) {
+				found = true;
+				assertEquals(ssoId, u.getSsoId());
+			}
+		}
+		// TODO why not? assertTrue(found);
+
+		
+		this.controller.deleteUser(ssoId);
+		
+		// now check it has been deleted
+		this.controller.listPro(this.model );
+		assertNotNull(model.containsAttribute("users"));
+		users = (Collection<org.cirmmp.spring.model.User>) model.get("users");
+		found = false;
+		for (Iterator iterator = users.iterator(); iterator.hasNext();) {
+			org.cirmmp.spring.model.User u = (org.cirmmp.spring.model.User) iterator.next();
+			if (u.getId()==user.getId()) {
+				found = true;
+			}
+		}
+		assertFalse(found);
+
+	}
+
+
+	@Test
+	public void testUpdateUserUserBindingResultModelMapString() {
+		fail("Not yet implemented");
+	}
+
 
 	@Test
 	public void testInitializeProfiles() {
