@@ -28,22 +28,13 @@ export class Projecttable {
     });
   }
 
-  /* it is triggered in first click on project - url is generated
-* or when url is submitted directly to browser
-  activate(params, routeConfig, navigationInstruction) {
-    console.log("Visitingscientist activate()")
-    if (params && params.projectid) {
-      this.filterSelectedProposal(params.projectid);
-    }
-  }
-*/
   /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
   filterSelectedProposal(id) {
     //this.selectedProposal=item;
     this.selectedProjectId=id;
-    console.log("projecttable.filterProject()");
-    console.log(this.projects);
-    console.log(id);
+    //console.log("projecttable.filterProject()");
+    //console.log(this.projects);
+    //console.log(id);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == id)[0];
     } else {

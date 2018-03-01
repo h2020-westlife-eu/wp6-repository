@@ -116,7 +116,7 @@ public class RestCon {
         LOG.info("list projects size:"+projects.size()+" first: "+ ((projects.size()>0) ? (projects.get(0).getProjectName()) : "NA"));
         return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(projects)), HttpStatus.OK);
     }
-
+//Dataset moved to DatasetServiceCon
 //TODO remove - duplicates /dataset
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
     public ResponseEntity listFiles() {

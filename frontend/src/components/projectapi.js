@@ -120,6 +120,10 @@ export class ProjectApi {
     }
 
     deleteDataset(id){
+    return this.httpclient.fetch(this.dataurl+"/"+id,{method:"delete"})
+      .then(response=> response.json())
+      .then(data=> {return data;});
+
     console.log('not implemented');
     return id;
     }

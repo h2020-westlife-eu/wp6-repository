@@ -1,4 +1,4 @@
-import {Selectedproject, Selecteddataset, Webdavresource, FilterDataset,FilterProject,FilterDatasetByProject,FilterProjectByDataset} from "../components/messages";
+import {Selectedproject, Selecteddataset, Webdavresource, FilterDataset,FilterProject,FilterDatasetByProject} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {ProjectApi} from '../components/projectapi';
 
@@ -42,19 +42,9 @@ export class Dashboarddetail {
     this.selectedProject=project;
     this.selectedProjectId=project.id;
     this.pa.setSelectedProject(projectid);
-    //this.filterSelectedProposal(project.id);
     this.ea.publish(new FilterDatasetByProject(project.id));
     return true;
   }
-
-  /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
-  filterSelectedProposal(id) {
-    //this.selectedProposal=item;
-    this.selectedProjectId=id;
-    this.filterProject();
-    this.filterDataset();
-  }
-
 
   /* helper class called from filterSelecterProposal - or when attached() so activate() call before didn't have
   * the projects and datasets sets from REST api*/
@@ -70,14 +60,6 @@ export class Dashboarddetail {
     console.log("dashboarddetail.filterDataset()");
     this.pa.setSelectedDataset(datasetid);
     this.ea.publish(new FilterDataset(datasetid));
-    //this.ea.publish(new FilterProjectByDataset()) -- call from filterDataset -
-  }
-
-  //deselect project proposal, shows all proposals and datasets
-  deselectProposal() {
-    //this.selectedProposal=item;
-    //this.datasets = this.alldatasets;
-    //return true; //continues to process <a href>
   }
 
   //shows only one dataset and publish webdavresource with dataset's url
@@ -90,25 +72,10 @@ export class Dashboarddetail {
     console.log("selectDataset");
     console.log(item);
 
-    //TODO replace URL by the one obtained from API
     this.pa.dataseturl=item.webdavurl;
     this.ea.publish(new Webdavresource(item.webdavurl))
     return true; //continues to process <a href>
   }
 
-  selectFile(file){
-    console.log("SelectFile()");
-    console.log(file);
-  }
 
-  deleteDataset() {
-    this.pa.deleteDataset(this.selectedDatasetId)
-    then(data => {
-      this.deselectDataset();
-      let i=this.datasets.map(function(e) {return e.id;}).indexOf(data.id);
-      this.datasets.splice(i,1);
-      i=this.alldatasets.map(function(e) {return e.id;}).indexOf(data.id);
-      this.alldatasets.splice(i,1);
-    })
-  }
 }

@@ -96,6 +96,16 @@ export class Datasettable {
     }
   }
 
-
+  deleteDataset() {
+    this.pa.deleteDataset(this.selectedDatasetId)
+      .then(data => {
+      this.deselectDataset();
+      //remove it from local arrays datasets and alldatasets
+      let i=this.datasets.map(function(e) {return e.id;}).indexOf(data);
+      this.datasets.splice(i,1);
+      i=this.alldatasets.map(function(e) {return e.id;}).indexOf(data);
+      this.alldatasets.splice(i,1);
+    })
+  }
 
 }

@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
@@ -117,6 +118,20 @@ public class DatasetServiceCon {
             }
         } else
             return new ResponseEntity("{\"error\":\"projectId needs to be set\"}",HttpStatus.NOT_FOUND);
+    }
+
+    //TODO may check authorization - some table with relationship user:dataset
+    @RequestMapping(value = {"/dataset/{id}"}, method = DELETE )
+    public @ResponseBody ResponseEntity deleteDataset(@PathVariable Long id,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        LOG.info("deleteDataset()");
+        try {
+            dataSetService.deleteById(id);
+            return new ResponseEntity(id, HttpStatus.OK);
+        } catch (Exception e){
+            LOG.error(e.getMessage(),e);
+            return new ResponseEntity("{\"error\":\""+e.getMessage()+"\"}",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 }
