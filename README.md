@@ -5,13 +5,16 @@ Reference implementation of a repository that supplies suitable metadata to the 
 If you don't have vagrant and/or virtualbox, download and install [vagrant tool](https://www.vagrantup.com/downloads.html) and [Virtualbox](https://www.virtualbox.org/wiki/Downloads).
 Tested on Vagrant (1.9.6) and VirtualBox (5.1.30)
 
+{% hint style='info' %}
+(Optionally) In order to integrate with West-Life SSO, you need  your sp-metadata,idp-metadata,sp_key and sp_cert files.
+These are newly generated for each installation. If you have it from previous installation, then put it next to the VagrantFile - these will be reused instead of generating new one
 
-* (Optionally) Edit the bootstrap.sh file and change values of variables
-    SP_IDENTIFICATION=http://local.west-life.eu
+Edit the bootstrap.sh file and change values of variables to your hostname and registered identification with West-Life SSO.
 
-    SP_ENDPOINT=http://localhost:8080/mellon 
+     SP_IDENTIFICATION=http://local.west-life.eu
+     SP_ENDPOINT=http://localhost:8080/mellon 
 
-* (Optionally) if you have your sp-metadata,idp-metadata,sp_key and sp_cert file from previous installation, put it next to the VagrantFile - these will be reused instead of generating new one
+{% endhint %}
 
 Execute following in your command line:
 
@@ -20,12 +23,19 @@ Execute following in your command line:
     cd wp6-repository
     vagrant up
 
-If new sp-metadata.xml was generated, send it to westlife-aai@ics.muni.cz in order to enable authentication via West-Life AAI. N.B. For the pilot environment we do not require any paper work. 
-After you're done, you can destroy the VM.
+If new sp-metadata.xml was generated, send it to westlife-aai@ics.muni.cz in order to enable authentication via West-Life AAI. 
 
-    vagrant destroy
+After successful finish. The VM is prepared, the port 8080 is automatically forwarded to VM's port 80. 
+To connect to VM using SSH
+    vagrant ssh
+The backend DB is using randomly generated access credentials at  `/etc/westlife/repository.key`
+    
+You may source this file by using
 
-# Development
-To merge backend with git repository
+    source /etc/westlife/repository.key
+    
+You may restart the backend service by
 
-    git subtree pull --prefix=backend https://github.com/andreagia/spring-wp6
+    sudo service westlife-repository restart
+    
+ See further details in the project documentation https://h2020-westlife-eu.gitbooks.io/virtual-folder-docs/content/repository/

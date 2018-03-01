@@ -47,7 +47,8 @@ public class DatasetServiceCon {
             files = dataSetService.findAllDataset();
             for (Iterator<DataSet> iter = files.iterator(); iter.hasNext(); ) {
                 DataSet a = iter.next();
-                if (a.getProject().getId() != projectId.get()) {
+                //remove datasets that belongs to other project, or that doesn't belong to project
+                if ((a.getProject()==null) || (a.getProject().getId() != projectId.get())) {
                     iter.remove();
                 }
             }
@@ -66,7 +67,8 @@ public class DatasetServiceCon {
             dto.creation_date = ds.getCreation_date();
             dto.summary = ds.getSummary();
             dto.webdavurl = ds.getUri();
-            dto.projectId = ds.getProject().getId();
+            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
+            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
             dto.id = ds.getId();
             nfiles.add(dto);
         }
