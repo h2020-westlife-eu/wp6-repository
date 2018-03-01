@@ -79,14 +79,27 @@ public class DTOUtils {
 
     public static String ExecuteCommand(String cmdline) throws IOException {
 
+
         Process process = Runtime.getRuntime().exec(cmdline);
         BufferedReader reader = new BufferedReader(new InputStreamReader(
                 process.getInputStream()));
+        BufferedReader reader2 = new BufferedReader(new InputStreamReader(
+                process.getErrorStream()));
         String s;
         String output="";
+        String error="";
         while ((s = reader.readLine()) != null) {
             output+=s;
         }
+        while ((s = reader2.readLine()) != null) {
+            error+=s;
+        }
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(output);
+        }
+        if (process.exitValue()!=0) throw new RuntimeException(error+"\nOutput:\n"+output);
         return output;
     }
 }

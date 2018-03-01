@@ -17,11 +17,11 @@ else
   export PROXY=$2
 fi
 
+#create directory
+mkdir -p $1
 #create apache configuration with proxy
 #moddav to get from specified directory
 APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
-
-mkdir -p $1
 #change owner to vagrant
 chown -R vagrant:vagrant $1
 
@@ -37,25 +37,28 @@ service httpd reload 1>/dev/null 2&>1
 function removeproxy {
 #generate random base64 string if not specified
 if [ -z $2 ]; then
-  echo proxy not specified;
+  echo proxy not specified >&2
   help
-  exit
+  exit 1
 else
   export PROXY=$2
 fi
   APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
+  # remove apache configuration
   rm -rf ${APACHEFILE}
   service httpd reload
+  # remove directory and all it's content
+  rm -rf $1
 }
 
 if [ $1 == '-a' ]; then
  addproxy $2 $3
- exit
+ exit 0
 fi
 
 if [ $1 == '-r' ]; then
   removeproxy $2 $3
-  exit
+  exit 0
 fi
 
 help

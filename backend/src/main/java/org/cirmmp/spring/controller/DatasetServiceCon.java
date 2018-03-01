@@ -100,10 +100,11 @@ public class DatasetServiceCon {
             String userdir = USER_DIR+xusername.hashCode()+"/"+proxycontext;
             //TODO check whether webdavurl is unique
             try {
-                DTOUtils.ExecuteCommand("sudo "+SCRIPT_DIR+"controlproxy.sh -a " + userdir+" "+proxycontext);
+                String output=DTOUtils.ExecuteCommand("sudo "+SCRIPT_DIR+"controlproxy.sh -a " + userdir+" "+proxycontext);
+                LOG.debug("controlproxy.sh:\n"+output);
                 dto.setCreation_date(new Date());
                 //proxy is created in /files/[proxycontext]
-                dto.setWebdavurl("/files/"+proxycontext+"/");
+                dto.setWebdavurl(getUriFromContext(proxycontext));
 
                 // creating dataset in DB
                 Project project = projectService.findById(dto.projectId);
@@ -120,11 +121,30 @@ public class DatasetServiceCon {
             return new ResponseEntity("{\"error\":\"projectId needs to be set\"}",HttpStatus.NOT_FOUND);
     }
 
+    private String getUriFromContext(String proxycontext) {
+        return "/files/"+proxycontext+"/";
+    }
+    private String getContextFromUri(String uri){
+        // uri = "/files/X54uf094rsfi34/" -> context="X54uf094rsfi34"
+        // some datasets may have null uri - return null for context
+        String context = uri!=null?uri.substring(uri.indexOf('/',1),uri.lastIndexOf('/')):null;
+        LOG.debug(context);
+        return context;
+
+    }
+
     //TODO may check authorization - some table with relationship user:dataset
     @RequestMapping(value = {"/dataset/{id}"}, method = DELETE )
     public @ResponseBody ResponseEntity deleteDataset(@PathVariable Long id,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         LOG.info("deleteDataset()");
         try {
+            //delete from filesystem - checks whether user has such dataset mapped, if not dataset won't be deleted
+            DataSet ds = dataSetService.findById(id);
+            String proxycontext = getContextFromUri(ds.getUri());
+            String userdir = USER_DIR+xusername.hashCode()+"/"+proxycontext;
+            String output =DTOUtils.ExecuteCommand("sudo "+SCRIPT_DIR+"controlproxy.sh -r " + userdir+" "+proxycontext);
+            LOG.debug("controlproxy.sh:\n"+output);
+            //delete from DB
             dataSetService.deleteById(id);
             return new ResponseEntity(id, HttpStatus.OK);
         } catch (Exception e){
