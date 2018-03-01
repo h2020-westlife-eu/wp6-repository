@@ -46,6 +46,7 @@ public class IntegrationTest  {
     @Autowired
     MockHttpServletRequest request;
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     MockHttpServletResponse response;
 

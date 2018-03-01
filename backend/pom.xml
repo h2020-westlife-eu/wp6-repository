@@ -15,6 +15,7 @@
 		<org.slf4j-version>1.7.5</org.slf4j-version>
 		<hibernate.version>4.3.5.Final</hibernate.version>
 		<mysql.connector.version>5.1.31</mysql.connector.version>
+		<targetdir>./build</targetdir>
 	</properties>
 	<dependencies>
 		<!-- Spring -->
@@ -217,12 +218,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
+		<!--dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${org.springframework-version}</version>
 			<scope>test</scope>
-		</dependency>
+		</dependency-->
 		<dependency>
 		<groupId>org.mockito</groupId>
 		<artifactId>mockito-core</artifactId>
@@ -290,8 +291,8 @@
 
     <build>
 		<finalName>wp6</finalName>
-		<directory>/tmp/repository/target</directory>
-		<outputDirectory>/tmp/repository/target/classes</outputDirectory>
+		<directory>${targetdir}</directory>
+		<outputDirectory>${targetdir}/classes</outputDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>

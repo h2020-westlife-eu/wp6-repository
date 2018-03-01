@@ -36,6 +36,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
@@ -252,7 +253,7 @@ public class AppControllerTest {
 
 	@Test
 	public void testLoginPageLoggedIn() {
-		String loginPage = this.controller.loginPage();
+		String loginPage = this.controller.loginPage(request,"");//(request,response);
 		assertEquals("redirect:/list", loginPage);
 	}
 
@@ -263,7 +264,7 @@ public class AppControllerTest {
 		
 		//TODO now check can't edit
 
-		String loginPage = this.controller.loginPage();
+		String loginPage = this.controller.loginPage(request,"");
 		// TODO assertEquals("login", loginPage);
 	}
 

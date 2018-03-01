@@ -57,6 +57,7 @@ public class RestConTest {
 	}
 
 	private RestCon restCon;
+	private DatasetServiceCon datasetCon;
 	private org.springframework.security.core.userdetails.User  user;
 
 	@Before
@@ -64,6 +65,10 @@ public class RestConTest {
 		this.restCon = this.applicationContext.getBean(
 				RestCon.class
 		);
+		this.datasetCon = this.applicationContext.getBean(
+				DatasetServiceCon.class
+		);
+
 
 		this.user = 
 			new org.springframework.security.core.userdetails.User(USERNAME, "password", 
@@ -132,7 +137,7 @@ public class RestConTest {
 		assertTrue( ((String)response.getBody()).contains(id) );
 		
 		// list its files
-		response = this.restCon.listDataset(Optional.of( Long.parseLong(id) ));
+		response = this.datasetCon.listDataset(Optional.of(Long.parseLong(id)));//(Optional.of( Long.parseLong(id) ));
 		List datasets = (List) response.getBody();
 		assertEquals(0, datasets.size());
 		
@@ -152,13 +157,13 @@ public class RestConTest {
 		
 		// all projects
 		Optional<Long> nonesuch = Optional.empty();
-		ResponseEntity<?> response = this.restCon.listDataset(nonesuch );
+		ResponseEntity<?> response = this.datasetCon.listDataset(nonesuch );
 		assertEquals(HttpStatus.OK, response.getStatusCode() );
 		List datasets = (List) response.getBody();
 		// TODO check response
 		
 		// non-existent project 
-		response = this.restCon.listDataset(Optional.of(-1L));
+		response = this.datasetCon.listDataset(Optional.of(-1L));
 		// TODO shouldn't that be 404?
 		datasets = (List) response.getBody();
 		assertEquals(0, datasets.size());

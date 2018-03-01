@@ -11,12 +11,11 @@ Environment=VF_ALLOW_MODULES=true
 Environment=VF_ALLOW_JUPYTER=true
 PIDFile=/var/run/westlife-repository.pid
 User=vagrant
-ExecStart=/bin/mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120
+ExecStart=/bin/mvn jetty:run -Dorg.eclipse.jetty.annotations.maxWait=120 -Dtargetdir=/tmp/westliferepository/target
 WorkingDirectory=/cvmfs/west-life.egi.eu/software/repository/latest/backend
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=westlife-repository
-
 
 [Install]
 WantedBy=multi-user.target

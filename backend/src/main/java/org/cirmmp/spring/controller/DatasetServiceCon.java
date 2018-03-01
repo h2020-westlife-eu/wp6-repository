@@ -39,7 +39,7 @@ public class DatasetServiceCon {
     public static final String DEFAULT_CSRF_TOKEN_ATTR_NAME = HttpSessionCsrfTokenRepository.class.getName().concat(".CSRF_TOKEN");
 
     @RequestMapping(value = {"/dataset", "/dataset/{projectId}"}, method = RequestMethod.GET)
-    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId) {
         LOG.info("listing datasets, projectId is set:"+projectId.isPresent());
         List<DataSet> files;
         if (projectId.isPresent()) {
