@@ -99,7 +99,7 @@ public class DTOUtils {
         } catch (InterruptedException e) {
             throw new RuntimeException(output);
         }
-        if (process.exitValue()!=0) throw new RuntimeException(error+"\nOutput:\n"+output);
+        if (process.exitValue()!=0) throw new RuntimeException(error+"."+output);
         return output;
     }
 }

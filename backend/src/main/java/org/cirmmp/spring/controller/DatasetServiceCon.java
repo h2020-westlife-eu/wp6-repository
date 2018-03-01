@@ -127,7 +127,7 @@ public class DatasetServiceCon {
     private String getContextFromUri(String uri){
         // uri = "/files/X54uf094rsfi34/" -> context="X54uf094rsfi34"
         // some datasets may have null uri - return null for context
-        String context = uri!=null?uri.substring(uri.indexOf('/',1),uri.lastIndexOf('/')):null;
+        String context = uri!=null?uri.substring(uri.indexOf('/',1)+1,uri.lastIndexOf('/')):null;
         LOG.debug(context);
         return context;
 

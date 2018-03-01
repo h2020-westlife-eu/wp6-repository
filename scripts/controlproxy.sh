@@ -38,10 +38,14 @@ function removeproxy {
 #generate random base64 string if not specified
 if [ -z $2 ]; then
   echo proxy not specified >&2
-  help
   exit 1
 else
   export PROXY=$2
+fi
+
+if [ ! -d $1 ]; then
+  echo directory \'$1\' not exists >&2
+  exit 1
 fi
   APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
   # remove apache configuration
