@@ -14,7 +14,8 @@ export function configure(config) {
     './itable.html',
     './ispincog.html',
     './iupload',
-    './idelete.html'
+    './idelete.html',
+    './inext.html'
   ]);
 
 }
