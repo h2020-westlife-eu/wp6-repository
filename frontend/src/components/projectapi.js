@@ -9,15 +9,15 @@ export class ProjectApi {
     this.httpclient=httpclient;
 
     //needs SSO credentials
-    let apiurl = "/restcon";
+    let apiurl = "restcon";
     //test fronted calls test backend uri - which has test authentication - test credentials added
-    if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
-    else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
+    //if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
+    //else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
     this.projecturl=apiurl+"/project";
     this.dataurl=apiurl+"/dataset";
     this.userinfourl=apiurl+"/user";
     //needs admin/staff credentials
-    this.usersurl="/admin/restcon/users";
+    this.usersurl=apiurl+"/users";//"/admin/restcon/users";
     this.projects=[];
     this.datasets=[];
     console.log("projectapi");

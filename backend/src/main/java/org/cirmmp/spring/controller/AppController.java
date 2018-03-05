@@ -1,5 +1,6 @@
 package org.cirmmp.spring.controller;
 
+import org.apache.http.util.TextUtils;
 import org.cirmmp.spring.model.*;
 import org.cirmmp.spring.model.rest.RestFileList;
 import org.cirmmp.spring.service.*;
@@ -222,30 +223,17 @@ public class AppController {
 	 * This method handles login GET requests.
 	 * If users is already logged-in and tries to goto login page again, will be redirected to list page.
 	 */
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = {RequestMethod.GET})
 	public String loginPage(HttpServletRequest request, @RequestParam(name="next",defaultValue="") String redirecturl) {
-		//LOG.info("loginPage(), redirect next "+redirecturl);
-		if (isCurrentAuthenticationAnonymous()) {
-			if (redirecturl.length()>0 ) {
-				//sets redirection attribute if not logged
-				logger.info("loginPage() branch1 redirecturl:"+redirecturl);
-				logger.info("reguesturl:"+request.getRequestURL());
-				logger.info("requestreferrer:"+request.getHeader("referer"));
-				if (redirecturl.startsWith("..")) redirecturl=request.getHeader("referer")+redirecturl.substring(3);
-				logger.info("loginPage() branch1 redirecturl2:"+redirecturl);
-				request.getSession().setAttribute("url_prior_login", redirecturl);
-				//return "login";
-				//return "redirect:" + redirecturl;
-			}
+		//redirect url to .. will add hostname to the redirecturl
+		if (redirecturl.startsWith("..") && (! TextUtils.isEmpty(request.getHeader("referer"))))
+			redirecturl= request.getHeader("referer")+redirecturl.substring(3);
+		//setting the attribute, url_prior_login - it'll be redirected later
+		request.getSession().setAttribute("url_prior_login", redirecturl);
+		if (!isAuthenticated() || isCurrentAuthenticationAnonymous() )
 			return "login";
-	    } else {//redirect if already logged
-			if (redirecturl.length()>0 ) {
-				logger.info("loginPage() branch2 redirecturl:"+redirecturl);
-				return "redirect:" + redirecturl;
-			}
-			else
-	    	return "redirect:/list";  
-	    }
+		else
+			return "redirect:" + ((redirecturl.length()>0)?redirecturl:"/list");
 	}
 
 	/**
@@ -255,7 +243,7 @@ public class AppController {
 	@RequestMapping(value="/logout", method = RequestMethod.GET)
 	public String logoutPage (HttpServletRequest request, HttpServletResponse response){
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth != null){    
+		if (auth != null){
 			//new SecurityContextLogoutHandler().logout(request, response, auth);
 			persistentTokenBasedRememberMeServices.logout(request, response, auth);
 			SecurityContextHolder.getContext().setAuthentication(null);
@@ -277,13 +265,18 @@ public class AppController {
 		}
 		return userName;
 	}
-	
+
 	/**
 	 * This method returns true if users is already authenticated [logged-in], else false.
 	 */
 	private boolean isCurrentAuthenticationAnonymous() {
 	    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    return authenticationTrustResolver.isAnonymous(authentication);
+	}
+
+	private boolean isAuthenticated() {
+		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication!=null;
 	}
 
 

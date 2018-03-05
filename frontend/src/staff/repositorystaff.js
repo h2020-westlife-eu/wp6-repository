@@ -2,6 +2,7 @@ import {ProjectApi} from '../components/projectapi';
 
 export class Repositorystaff {
   static inject = [ProjectApi];
+
   constructor(pa) {
     console.log("Repositorystaff()");
     this.visitors = [];//"Tomas Kulhanek","Andrea Giacchieti","Antonio Rosatto"];
