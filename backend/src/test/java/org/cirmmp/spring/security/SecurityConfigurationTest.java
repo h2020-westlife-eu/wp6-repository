@@ -60,21 +60,38 @@ public class SecurityConfigurationTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void testBadCsrf() throws Exception {
-		this.mvc
-		.perform(post("/").with(csrf().useInvalidToken()))
-		.andExpect(MockMvcResultMatchers.status().is(403));
-	}
-
-	@Test
-	public void testNotFound() throws Exception {
-		this.mvc.perform(get("/nonesuch")).andExpect(MockMvcResultMatchers.status().is(404));
-	}
 
 	@Test
 	public void testCanGetLoginForm() throws Exception {
 		this.mvc.perform(get("/login")).andExpect(MockMvcResultMatchers.status().isOk());
 	}
 
+
+	@Test
+	public void testBadCsrf() throws Exception {
+		this.mvc
+		.perform(post("/login").with(csrf().useInvalidToken()))
+		.andExpect(MockMvcResultMatchers.status().is(403));
+	}
+
+	@Test
+	public void testNotLoggedInGet() throws Exception {
+		this.mvc
+		.perform(get("/newuser"))
+		.andExpect(redirectedUrl("http://localhost/login"));
+	}
+	@Test
+	public void testNotLoggedInPost() throws Exception {
+		this.mvc
+		.perform(post("/newuser").with(csrf()))
+		.andExpect(redirectedUrl("http://localhost/login")); 
+			}
+
+	@Test
+	public void testNotFound() throws Exception {
+		this.mvc.perform(get("/nonesuch")).andExpect(MockMvcResultMatchers.status().is(404));
+	}
+
+    // TODO with dummy userid, check can log in
+	// check non-admin user cannot use admin functionality
 }
