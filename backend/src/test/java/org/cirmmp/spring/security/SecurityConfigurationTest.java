@@ -1,11 +1,14 @@
 package org.cirmmp.spring.security;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import org.cirmmp.spring.configuration.AppConfig;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -18,6 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -28,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 )
 @WebAppConfiguration
 public class SecurityConfigurationTest {
+
 
 	@Autowired
 	private WebApplicationContext context;
@@ -57,7 +63,18 @@ public class SecurityConfigurationTest {
 	@Test
 	public void testBadCsrf() throws Exception {
 		this.mvc
-		.perform(post("/").with(csrf().useInvalidToken()));
+		.perform(post("/").with(csrf().useInvalidToken()))
+		.andExpect(MockMvcResultMatchers.status().is(403));
+	}
+
+	@Test
+	public void testNotFound() throws Exception {
+		this.mvc.perform(get("/nonesuch")).andExpect(MockMvcResultMatchers.status().is(404));
+	}
+
+	@Test
+	public void testCanGetLoginForm() throws Exception {
+		this.mvc.perform(get("/login")).andExpect(MockMvcResultMatchers.status().isOk());
 	}
 
 }
