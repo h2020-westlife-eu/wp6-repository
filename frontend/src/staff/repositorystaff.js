@@ -36,7 +36,7 @@ export class Repositorystaff {
     if (indexremoved >=0 ) this.datasets.splice(indexremoved,1);
   }
   
-    selectItemToUpload(item) {
+  selectItemToUpload(item) {
     console.log("selected item");
     console.log(item);
   }

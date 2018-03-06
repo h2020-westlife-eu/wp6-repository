@@ -1,3 +1,56 @@
 <template>
   <h3>Data Upload - Select Data</h3>
+  <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>
+  <div class="w3-container">
+    <div class="w3-half">
+      <h4>Local files</h4>
+      <form>
+        <table class="w3-table-all w3-padding-tiny" drop.trigger="dropped($event)" ondragover="event.preventDefault();">
+          <thead>
+          <tr>
+            <th>drag & drop files/directories here or browse</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td><input class="w3-button" type="file" multiple="multiple" name="files[]" webkitdirectory="true"
+                       change.delegate="appendDir($event)" value.bind="uploaddir"/>
+              <input class="w3-button" type="file" multiple="multiple" title="Select Files to Download"
+                     change.delegate="appendFiles($event)" value.bind="uploadfiles"/>
+            </td>
+            <td>Totally: ${filestoupload.length} files will be uploaded.</td>
+          </tr>
+          <tr class="w3-hover-green w3-small" repeat.for="item of filestoupload" click.trigger="selectItemToUpload(item)">
+            <td class="w3-padding-0">${item.name}</td>
+            <td class="w3-padding-0">
+              <button class="w3-button  w3-padding-tiny" title="delete" click.delegate="removeItemToUpload(item)">&#10006;</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+    <div class="w3-half">
+
+      <h4><button disabled.bind="filestoupload.length == 0" class="w3-left w3-green w3-button w3-padding-0"
+                  click.delegate="submitUpload()">Upload to &raquo; </button>&nbsp;User account</h4>
+      <table class="w3-table-all w3-small">
+        <thead>
+        <tr>
+          <th>filename</th>
+          <th>date</th>
+          <th colspan="2">action</th>
+        </tr>
+        </thead>
+        <tr class="w3-hover-green" repeat.for="item of filesuploaded" click.trigger="selectitem(item)">
+          <td class="w3-padding-0">${item.name}</td>
+          <td class="w3-padding-0">${item.date}</td>
+          <td class="w3-padding-0">
+            <button class="w3-button w3-padding-0" title="delete" click.trigger="deleteitem(item)">&#10006;</button>
+          </td>
+
+        </tr>
+      </table>
+    </div>
+  </div>
 </template>

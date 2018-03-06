@@ -13,7 +13,7 @@ export class Createdataset {
     this.datasetinfo="0 b";
     this.datasetsummary="spectrum of antidote";
     this.datasetprojectid=null;
-    this. submitted=false;
+    this.submitted=false;
     this.ea.subscribe(Selectedproject,msg =>this.selectProject(msg.project));
   }
 

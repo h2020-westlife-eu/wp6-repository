@@ -77,6 +77,7 @@ public class RestCon {
 
 
     /* return list of users registered inside repository DB*/
+    @Secured("USER")
     @RequestMapping(value = { "/users" },method = RequestMethod.GET)
     public ResponseEntity listUsers(){
         List<User> users = userService.findAllUsers();
@@ -175,6 +176,7 @@ public class RestCon {
         user = userService.findBySSO(ssoId);
         //should have the user.getId() set now
 
+        //TODO authenticate user also in other requests, not only in case it doesn't exist in DB??
         //AUTO Authententicate USER
         // Authenticate the user on spring framework after creation
         AutoUser autoUser =new AutoUser();
