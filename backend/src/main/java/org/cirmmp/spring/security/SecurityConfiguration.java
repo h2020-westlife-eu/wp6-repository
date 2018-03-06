@@ -70,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("hasRole('ADMIN') or hasRole('DBA')")
                 .and()
                 .formLogin().loginPage("/login")
-                //.successHandler(successHandler())
+                .successHandler(successHandler())
                 .loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
                 .and()
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
@@ -79,13 +79,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().accessDeniedPage("/Access_Denied")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/login","/static/**").permitAll().and()
+                .antMatchers("/login","/static/**","/restcon/**").permitAll().and()
                 //enabling csrf for all except for restcon endpoints
                 .csrf().disable();
                 //.ignoringAntMatchers("/restcon/**").and()
                 // custom csrf filter for restcon endpoint
                 //.antMatcher("/restcon/**").addFilterBefore(new StatelessCSRFFilter(), CsrfFilter.class);
-                //.antMatchers("/login","/static/**").permitAll().and().csrf();//.disable();
+
     }
 
     @Bean

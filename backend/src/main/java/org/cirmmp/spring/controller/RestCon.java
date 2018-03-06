@@ -15,9 +15,12 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
 
@@ -68,7 +71,8 @@ public class RestCon {
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
-        return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
+        if (user!=null) return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
+        else return new ResponseEntity("user not authenticated",HttpStatus.UNAUTHORIZED);
     }
 
 
@@ -108,8 +112,8 @@ public class RestCon {
     // check using method security interceptor if the user have role USER
     @Secured("USER")
     @RequestMapping(value = "/project", method=RequestMethod.GET)
-    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
-        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+    public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         LOG.info("listProject()");
         String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Project> projects =projectService.findByUserId(user.getId());
@@ -197,6 +201,12 @@ public class RestCon {
         return s.toString();
     }
 
+    public synchronized User checkAuthentication(HttpServletRequest request,String xusername,String xname,String xemail,String xgroups){
+        Principal p = request.getUserPrincipal();
+        if (p!=null) return userService.findBySSO(p.getName());
+        else return checkAuthentication(xusername, xname, xemail, xgroups);
+    }
+
     //checks authentication, either it is authenticated via spring - or via sent arguments x*
     //synchronized - multiple calls might be concurrent in - userService.findBySSO(ssoid);
     public synchronized User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
@@ -224,7 +234,8 @@ public class RestCon {
                     user = createSSOUser(xusername, xname, xemail, ssoId, xgroups);
                 else {//return http 401
                     LOG.info("checkAuthentication: not authenticated");
-                    throw new AuthenticationCredentialsNotFoundException("authorization required");
+                    return null;//HttpStatus.UNAUTHORIZED
+                    //throw new AuthenticationCredentialsNotFoundException("authorization required");
                 }
             }
             LOG.info("checkAuthentication: OK");
