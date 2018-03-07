@@ -387,6 +387,11 @@ public class AppController {
 	}
 
 
+	public AutoUser getApplicationUser() {
+		AutoUser applicationUser = (AutoUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return applicationUser;
+	}
+
 	@RequestMapping(value = { "/newdataset" }, method = RequestMethod.GET)
 	public String newDataset(ModelMap model){
         DataSet dataSet = new DataSet();

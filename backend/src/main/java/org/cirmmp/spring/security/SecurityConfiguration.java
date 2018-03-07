@@ -11,7 +11,6 @@ import org.springframework.security.authentication.AuthenticationTrustResolverIm
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,10 +40,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     //TODO send 401
     //private AlwaysSendUnauthorized401AuthenticationEntryPoint  alwaysSendUnauthorized401AuthenticationEntryPoint = new AlwaysSendUnauthorized401AuthenticationEntryPoint();
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/resources/**");
-    }
+//    @Override
+//    public void configure(WebSecurity web) throws Exception {
+//        web.ignoring().antMatchers("/resources/**");
+//    }
 
     /*@Bean
     public OpenIdConnectFilter myFilter() {
@@ -69,7 +68,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("hasRole('ADMIN') or hasRole('DBA')")
                 .and()
                 .formLogin().loginPage("/login")
-                .successHandler(successHandler())
+              //  .successHandler(successHandler())
                 .loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
                 .and()
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
@@ -91,6 +90,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public AuthenticationSuccessHandler successHandler() {
         return new RedirectHandler("/");
     }
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
