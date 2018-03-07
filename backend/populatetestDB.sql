@@ -38,8 +38,8 @@ INSERT INTO PROJECT(user_id,project_name,summary,creation_date)
 
 INSERT INTO DATASET (id, project_id, type, name, info,summary,uri,creation_date)
   VALUES
-  (1,1,'folder','XufWqKa1','1.6 Mb','spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)','/files/XufWqKa1/',NOW()),
-  (2,1,'folder','XufWqKa2','1.2 Mb','spectrum of strychnine process 2','/files/XufWqKa2/',NOW()),
-  (3,1,'folder','XufWqKa3','1.2 Mb','spectrum of strychnine process 3','/files/XufWqKa3/',NOW()),
-  (4,2,'folder','XufWqKa1','1.3 Mb','spectrum of strychnine process 4','/files/XufWqKa1/',NOW()),
-  (5,2,'folder','XufWqKa2','1.3 Mb','spectrum of strychnine process 5','/files/XufWqKa2/',NOW());
+  (1,1,'folder','XufWqKa1','1.6 Mb','spectrum of strychnine process with v_noesy_pro.mac (NUTS-Pro) or v_noesy.mac (NUTS-2D)','/files/sampledata1/',NOW()),
+  (2,1,'folder','XufWqKa2','1.2 Mb','spectrum of strychnine process 2','/files/sampledata2/',NOW()),
+  (3,1,'folder','XufWqKa3','1.2 Mb','spectrum of strychnine process 3','/files/sampledata3/',NOW()),
+  (4,2,'folder','XufWqKa1','1.3 Mb','spectrum of strychnine process 4','/files/sampledata1/',NOW()),
+  (5,2,'folder','XufWqKa2','1.3 Mb','spectrum of strychnine process 5','/files/sampledata2/',NOW());

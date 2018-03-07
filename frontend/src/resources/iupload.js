@@ -1,6 +1,7 @@
 import {bindable} from 'aurelia-framework';
+import {ProjectApi} from "../components/projectapi";
 /** Iupload - <iupload href="link-reference"></iupload>
- * element to create a link icon which on click will copy the url into the clipboard
+ * element to create a link icon which on click will initiate copy task
  */
 /*
 var popup;
@@ -19,8 +20,9 @@ window.addEventListener("message", receiveMessage, false);
 */
 export class Iupload {
   @bindable href;
-
-  constructor() {
+  static inject = [ProjectApi];
+  constructor(pa) {
+    this.pa=pa;
     //receiveMessage will be registered in event listener - this declaration will assure that the context 'this' won't be lost
     this.receiveMessage = event=> {
       this.uploadhref=event.data;
@@ -29,6 +31,7 @@ export class Iupload {
         console.log("Iupload.receiveMessage()");
         console.log("will upload from:"+this.hreffull);
         console.log("              to:"+this.uploadhref);
+        this.pa.copytask(this.href,this.uploadhref);
       }
     }
 

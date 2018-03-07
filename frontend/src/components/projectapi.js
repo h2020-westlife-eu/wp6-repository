@@ -15,6 +15,7 @@ export class ProjectApi {
     //else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
     this.projecturl=apiurl+"/project";
     this.dataurl=apiurl+"/dataset";
+    this.copytaskurl=apiurl+"/copytask";
     this.userinfourl=apiurl+"/user";
     //needs admin/staff credentials
     this.usersurl=apiurl+"/users";//"/admin/restcon/users";
@@ -123,8 +124,11 @@ export class ProjectApi {
     return this.httpclient.fetch(this.dataurl+"/"+id,{method:"delete"})
       .then(response=> response.json())
       .then(data=> {return data;});
+    }
 
-    console.log('not implemented');
-    return id;
+    copytask(src,dest) {
+    return this.httpclient.fetch(this.copytaskurl, {method:"post",body:json({sourceurl:src,webdavurl:dest})})
+      .then(response =>response.json())
+      .then(data=> {return data;});
     }
 }

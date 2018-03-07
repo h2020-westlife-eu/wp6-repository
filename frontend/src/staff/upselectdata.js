@@ -1,8 +1,19 @@
-export class Upselectdata {
+import {ProjectApi} from "../components/projectapi";
 
-  constructor () {
+export class Upselectdata {
+  static inject = [ProjectApi];
+  constructor (pa) {
+    this.pa=pa;
     this.filestoupload=[];
     this.filesuploaded=[];
+  }
+
+  attached() {
+    this.filestoupload= this.pa.filestoupload;
+  }
+
+  detached() {
+    this.pa.filestoupload=this.filestoupload;
   }
 
   selectItemToUpload(item) {

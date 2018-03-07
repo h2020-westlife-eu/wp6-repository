@@ -1,8 +1,12 @@
 package org.cirmmp.spring.controller;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 
 /* DTO to encapsulate project meta info */
+@Getter @Setter
 public class ProjectDTO {
     Long id;
     Integer userId;

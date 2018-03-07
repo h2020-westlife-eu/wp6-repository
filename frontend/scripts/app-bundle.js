@@ -802,6 +802,7 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
 
       this.projecturl = apiurl + "/project";
       this.dataurl = apiurl + "/dataset";
+      this.copytaskurl = apiurl + "/copytask";
       this.userinfourl = apiurl + "/user";
 
       this.usersurl = apiurl + "/users";
@@ -907,9 +908,14 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
       }).then(function (data) {
         return data;
       });
+    };
 
-      console.log('not implemented');
-      return id;
+    ProjectApi.prototype.copytask = function copytask(src, dest) {
+      return this.httpclient.fetch(this.copytaskurl, { method: "post", body: (0, _aureliaFetchClient.json)({ sourceurl: src, webdavurl: dest }) }).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        return data;
+      });
     };
 
     return ProjectApi;
@@ -1460,7 +1466,7 @@ define('resources/index',['exports'], function (exports) {
     config.globalResources(['./irep.html', './irepdemo.html', './iadmin.html', './istaff.html', './ifile.html', './ilink.html', './icopy', './ifolder.html', './idata.html', './iproject.html', './itable.html', './ispincog.html', './iupload', './idelete.html', './inext.html']);
   }
 });
-define('resources/iupload',["exports", "aurelia-framework"], function (exports, _aureliaFramework) {
+define('resources/iupload',["exports", "aurelia-framework", "../components/projectapi"], function (exports, _aureliaFramework, _projectapi) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -1517,15 +1523,17 @@ define('resources/iupload',["exports", "aurelia-framework"], function (exports, 
     throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
   }
 
-  var _desc, _value, _class, _descriptor;
+  var _desc, _value, _class, _descriptor, _class2, _temp;
 
-  var Iupload = exports.Iupload = (_class = function () {
-    function Iupload() {
+  var Iupload = exports.Iupload = (_class = (_temp = _class2 = function () {
+    function Iupload(pa) {
       var _this = this;
 
       _classCallCheck(this, Iupload);
 
       _initDefineProp(this, "href", _descriptor, this);
+
+      this.pa = pa;
 
       this.receiveMessage = function (event) {
         _this.uploadhref = event.data;
@@ -1533,6 +1541,7 @@ define('resources/iupload',["exports", "aurelia-framework"], function (exports, 
           console.log("Iupload.receiveMessage()");
           console.log("will upload from:" + _this.hreffull);
           console.log("              to:" + _this.uploadhref);
+          _this.pa.copytask(_this.href, _this.uploadhref);
         }
       };
     }
@@ -1559,7 +1568,7 @@ define('resources/iupload',["exports", "aurelia-framework"], function (exports, 
     };
 
     return Iupload;
-  }(), (_descriptor = _applyDecoratedDescriptor(_class.prototype, "href", [_aureliaFramework.bindable], {
+  }(), _class2.inject = [_projectapi.ProjectApi], _temp), (_descriptor = _applyDecoratedDescriptor(_class.prototype, "href", [_aureliaFramework.bindable], {
     enumerable: true,
     initializer: null
   })), _class);
@@ -2271,12 +2280,13 @@ define('staff/upconfirm',["exports"], function (exports) {
     _classCallCheck(this, Upconfirm);
   };
 });
-define('staff/upselectdata',["exports"], function (exports) {
+define('staff/upselectdata',["exports", "../components/projectapi"], function (exports, _projectapi) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
+  exports.Upselectdata = undefined;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -2284,13 +2294,24 @@ define('staff/upselectdata',["exports"], function (exports) {
     }
   }
 
-  var Upselectdata = exports.Upselectdata = function () {
-    function Upselectdata() {
+  var _class, _temp;
+
+  var Upselectdata = exports.Upselectdata = (_temp = _class = function () {
+    function Upselectdata(pa) {
       _classCallCheck(this, Upselectdata);
 
+      this.pa = pa;
       this.filestoupload = [];
       this.filesuploaded = [];
     }
+
+    Upselectdata.prototype.attached = function attached() {
+      this.filestoupload = this.pa.filestoupload;
+    };
+
+    Upselectdata.prototype.detached = function detached() {
+      this.pa.filestoupload = this.filestoupload;
+    };
 
     Upselectdata.prototype.selectItemToUpload = function selectItemToUpload(item) {
       console.log("selected item");
@@ -2354,7 +2375,7 @@ define('staff/upselectdata',["exports"], function (exports) {
     };
 
     return Upselectdata;
-  }();
+  }(), _class.inject = [_projectapi.ProjectApi], _temp);
 });
 define('staff/upselectdataset',['exports', '../components/messages', 'aurelia-event-aggregator', 'aurelia-router', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _aureliaRouter, _projectapi) {
   'use strict';
@@ -5544,7 +5565,7 @@ define('text!staff/dashboard.html', ['module'], function(module) { module.export
 define('text!staff/dataupload.html', ['module'], function(module) { module.exports = "<template>\n<h4>Visitor Dataset Upload</h4>\n</template>\n"; });
 define('text!staff/repositorystaff.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Repository Staff UI</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  1. select user\n  2. select his dataset or create new dataset (=folder)\n  3. select files from local computer\n  4. click upload\n  5. watch progress - number of files\n  6. Done - redirect to 1.\n  <label>Project input\n    <input class=\"w3-input\">\n  </label>\n  <div show.bind=\"selectinguser\">\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\" click.trigger=\"selectvisitor(visitor)\">\n      <td>(${visitor.Id})</td><td>${visitor.FirstName} ${visitor.LastName}</td>\n    </tr>\n  </table>\n  </div>\n  <div show.bind=\"!selectinguser\">\n    <p><b>1.</b>Selected user: (${selectedvisitor.Id})${selectedvisitor.FirstName} ${selectedvisitor.LastName} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"deselectvisitor()\">change</button></p>\n    <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>\n    <div class=\"w3-container\">\n      <div class=\"w3-half\">\n        <h4>Local files</h4>\n        <form>\n          <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n            <thead>\n            <tr>\n              <th>drag & drop files/directories here or browse</th>\n            </tr>\n            </thead>\n            <tbody>\n            <tr>\n              <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                         change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n                <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                       change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n              </td>\n              <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n            </tr>\n            <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n              <td class=\"w3-padding-0\">${item.name}</td>\n              <td class=\"w3-padding-0\">\n                <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n              </td>\n            </tr>\n            </tbody>\n          </table>\n        </form>\n      </div>\n      <div class=\"w3-half\">\n\n        <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n        <table class=\"w3-table-all w3-small\">\n          <thead>\n          <tr>\n            <th>filename</th>\n            <th>date</th>\n            <th colspan=\"2\">action</th>\n          </tr>\n          </thead>\n          <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">${item.date}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n            </td>\n\n          </tr>\n        </table>\n      </div>\n    </div>\n    <div>\n      <p><b>3.</b><button class=\"w3-button w3-green\" disabled.bind=\"items.length == 0\">Enable user access. Generate WebDAV endpoint.</button></p>\n    </div>\n  </div>\n\n</template>\n"; });
 define('text!staff/upconfirm.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Data Upload - Confirmation</h3>\n</template>\n"; });
-define('text!staff/upselectdata.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Data Upload - Select Data</h3>\n  <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>\n  <div class=\"w3-container\">\n    <div class=\"w3-half\">\n      <h4>Local files</h4>\n      <form>\n        <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n          <thead>\n          <tr>\n            <th>drag & drop files/directories here or browse</th>\n          </tr>\n          </thead>\n          <tbody>\n          <tr>\n            <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                       change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n              <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                     change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n            </td>\n            <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n          </tr>\n          <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n            </td>\n          </tr>\n          </tbody>\n        </table>\n      </form>\n    </div>\n    <div class=\"w3-half\">\n\n      <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n      <table class=\"w3-table-all w3-small\">\n        <thead>\n        <tr>\n          <th>filename</th>\n          <th>date</th>\n          <th colspan=\"2\">action</th>\n        </tr>\n        </thead>\n        <tr class=\"w3-hover-green\" repeat.for=\"item of filesuploaded\" click.trigger=\"selectitem(item)\">\n          <td class=\"w3-padding-0\">${item.name}</td>\n          <td class=\"w3-padding-0\">${item.date}</td>\n          <td class=\"w3-padding-0\">\n            <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n          </td>\n\n        </tr>\n      </table>\n    </div>\n  </div>\n</template>\n"; });
+define('text!staff/upselectdata.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Data Upload - Select Data</h3>\n  <p><b>2.</b>Select or drop files or directories to upload to the user account. Then click\n  <a class=\"w3-pale-green w3-button\" route-href=\"route: upconfirm\">Next <inext></inext></a>\n  </p>\n  <div class=\"w3-container\">\n\n      <h4>Local files</h4>\n      <form>\n        <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n          <thead>\n          <tr>\n            <th>drag & drop files/directories here or click \"Browse...\" button</th>\n          </tr>\n          </thead>\n          <tbody>\n          <tr>\n            <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                       change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n              <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                     change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n            </td>\n            <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n          </tr>\n          <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n            </td>\n          </tr>\n          </tbody>\n        </table>\n      </form>\n\n    <!--div class=\"w3-half\">\n\n      <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n      <table class=\"w3-table-all w3-small\">\n        <thead>\n        <tr>\n          <th>filename</th>\n          <th>date</th>\n          <th colspan=\"2\">action</th>\n        </tr>\n        </thead>\n        <tr class=\"w3-hover-green\" repeat.for=\"item of filesuploaded\" click.trigger=\"selectitem(item)\">\n          <td class=\"w3-padding-0\">${item.name}</td>\n          <td class=\"w3-padding-0\">${item.date}</td>\n          <td class=\"w3-padding-0\">\n            <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n          </td>\n\n        </tr>\n      </table>\n    </div-->\n  </div>\n</template>\n"; });
 define('text!staff/upselectdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../scientist/createdataset\"></require>\n  <h3>Upload - Select Dataset</h3>\n  <p>Select dataset for user:<a route-href=\"route:selectuser\" title=\"ammend selection of user\">(${selectedUser.Id}) ${selectedUser.FirstName} ${selectedUser.LastName}</a></p>\n\n  <datasettable></datasettable>\n  <createdataset></createdataset>\n\n\n</template>\n"; });
 define('text!staff/upselectuser.html', ['module'], function(module) { module.exports = "<template>\n  <h3> Data Upload - Select User</h3>\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\">\n      <td><a route-href=\"route: upselectdataset\" click.trigger=\"selectUser(visitor)\">(${visitor.Id})</a></td><td><a route-href=\"route: upselectdataset\" click.trigger=\"selectUser(visitor)\">${visitor.FirstName} ${visitor.LastName}</a></td>\n    </tr>\n  </table>\n\n</template>\n"; });
 //# sourceMappingURL=app-bundle.js.map
