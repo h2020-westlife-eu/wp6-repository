@@ -8,4 +8,6 @@ import java.util.Date;
 public class CopyTaskDTO {
     String webdavurl;
     String sourceurl;
+    Boolean done;
+    String status;
 }

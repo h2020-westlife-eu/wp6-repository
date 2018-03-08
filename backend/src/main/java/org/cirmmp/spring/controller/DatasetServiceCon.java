@@ -179,14 +179,16 @@ public class DatasetServiceCon {
     @Synchronized
     public @ResponseBody ResponseEntity copyDataset(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody CopyTaskDTO dto){
         if (dto.getWebdavurl().length()>0) {
-            int id=copytasks.indexOf(dto);
-            if (id>-1) return new ResponseEntity(id, HttpStatus.OK); //second request to copy same returns already existing ID
-            String dsdir = getUserdir(xusername,getContextFromUri(dto.getSourceurl()));
-            if (! Files.exists(Paths.get(dsdir))) dsdir = getTestdir(getContextFromUri(dto.getSourceurl()));
-            //TODO consider to return task id, which may then contain progress, status, start/end time
+                int id = copytasks.lastIndexOf(dto);
+                if (id > -1 && !copytasks.get(id).getDone())
+                    return new ResponseEntity(id, HttpStatus.OK); //second request to copy same returns already existing ID
+                String dsdir = getUserdir(xusername, getContextFromUri(dto.getSourceurl()));
+                if (!Files.exists(Paths.get(dsdir))) dsdir = getTestdir(getContextFromUri(dto.getSourceurl()));
+                //TODO consider to return task id, which may then contain progress, status, start/end time
+
             if (Files.exists(Paths.get(dsdir))) {
                 copytasks.add(dto);
-                id = copytasks.indexOf(dto);
+                id = copytasks.lastIndexOf(dto);
                 webDAVCopyUtils.asyncCopyTask(copytasks,id,dsdir,dto.getWebdavurl());
                 return new ResponseEntity(id, HttpStatus.OK);
             }
