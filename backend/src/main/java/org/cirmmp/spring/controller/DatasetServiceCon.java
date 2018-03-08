@@ -96,7 +96,7 @@ public class DatasetServiceCon {
     ProjectService projectService;
 
 
-
+    private Object lock1 = new Object();
     @RequestMapping(value = {"/dataset"}, method = POST )
     public @ResponseBody ResponseEntity addDataset(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
@@ -115,8 +115,11 @@ public class DatasetServiceCon {
                 // creating dataset in DB
                 Project project = projectService.findById(dto.projectId);
                 DataSet ds = DTOUtils.getDataset(dto, projectService);
-                dataSetService.save(ds);
-                dto.id = ds.getId();
+
+                synchronized (lock1) {
+                    dataSetService.save(ds);
+                    dto.id = ds.getId();
+                }
                 return new ResponseEntity(dto, HttpStatus.OK);
             } catch (Exception e){
                 LOG.error(e.getMessage(),e);
