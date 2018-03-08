@@ -113,8 +113,10 @@ public class RestCon {
     // check using method security interceptor if the user have role USER
     @Secured("USER")
     @RequestMapping(value = "/project", method=RequestMethod.GET)
-    public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
-        User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+    //public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+    public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("listProject()");
         String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Project> projects =projectService.findByUserId(user.getId());
