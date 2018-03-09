@@ -16,9 +16,11 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.security.SecureRandom;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /*TODO 1. consider refactoring the class - extract methods handling /user /project /dataset /[others] to controller service class
@@ -63,6 +65,24 @@ public class RestCon {
 
     @Autowired
     UserProfileService userProfileService;
+
+
+
+    /* Exception handler for hibernate connection failure
+
+     */
+
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(CannotCreateTransactionException.class)
+    public ModelAndView exceptionHandlerHibernate (HttpServletRequest request, Exception ex) {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("exception", ex);
+        modelAndView.addObject("url", request.getRequestURL());
+
+        modelAndView.setViewName("error");
+        return modelAndView;
+    }
+
 
     /* returns spring authenticated as well as SSO authenticated (in http headers)*/
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)

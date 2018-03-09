@@ -19,14 +19,14 @@ public class WebDAVCopyUtils {
 
     @Synchronized
     public void copyFileToWebdav(String sourcepath, String targetwebdavdir) throws IOException{
-        Sardine sardine = SardineFactory.begin();
+        Sardine sardine = SardineFactory.begin("andrea","andrea");
         //InputStream fis = new FileInputStream(new File(sourcepath));
         //sardine.put(targetwebdavdir, fis);
 
         Path src = Paths.get(sourcepath);
         Path dest = Paths.get(targetwebdavdir);
 
-        String webdavdirectory= "http://yourdavserver.com/adirectory/";
+        String webdavdirectory= "http://150.217.145.60:8085/test";
 
         try {
             sardine.createDirectory(webdavdirectory + targetwebdavdir);
