@@ -6,9 +6,9 @@ import lombok.Setter;
 /* DTO to encapsulate user meta information */
 @Getter @Setter
 public class UserDTO {
-    String FirstName;
-    String LastName;
-    String Email;
-    String Id;
-    String SsoId;
+    private String FirstName;
+    private String LastName;
+    private String Email;
+    private String Id;
+    private String SsoId;
 }

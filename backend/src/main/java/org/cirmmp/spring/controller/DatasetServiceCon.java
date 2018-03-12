@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import lombok.Synchronized;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
+import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.service.DataSetService;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.WebDAVCopyUtils;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -26,7 +28,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 @RequestMapping("/restcon")
-public class DatasetServiceCon {
+public class DatasetServiceCon extends SharedCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
     //REP_USER_DIR environment variable sets directory where new dataset may resist
     private static final String USER_DIR=Optional.ofNullable(System.getenv("REP_USER_DIR")).orElse("/home/vagrant/work/");
@@ -42,14 +44,22 @@ public class DatasetServiceCon {
 
     public static final String DEFAULT_CSRF_TOKEN_ATTR_NAME = HttpSessionCsrfTokenRepository.class.getName().concat(".CSRF_TOKEN");
 
-    @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
     public ResponseEntity listDataset(@PathVariable Optional<Long> projectId) {
+        return listDataset(projectId,"","","","");
+    }
+
+    @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
+    public ResponseEntity listDataset(@PathVariable Optional<Long> projectId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("listing datasets, projectId is set:"+projectId.isPresent());
-        List<DataSet> files;
+        List<DataSet> dataSets;
+
         if (projectId.isPresent()) {
             //TODO implement it in DB layer dataSetService.findByProjectId(projectId.get())
-            files = dataSetService.findAllDataset();
-            for (Iterator<DataSet> iter = files.iterator(); iter.hasNext(); ) {
+            dataSets = dataSetService.findAllDataset();
+
+            for (Iterator<DataSet> iter = dataSets.iterator(); iter.hasNext(); ) {
                 DataSet a = iter.next();
                 //remove datasets that belongs to other project, or that doesn't belong to project
                 if ((a.getProject()==null) || (a.getProject().getId() != projectId.get())) {
@@ -58,17 +68,30 @@ public class DatasetServiceCon {
             }
 
         } else {
-            files = dataSetService.findAllDataset();
+            dataSets = dataSetService.findAllDataset();
+
+            //TODO it could be done by SQL query instead of iterating over results here.
+            // filter by project owned by user
+            // get projectids belonging to projects owned by user
+            List<Long> projectids =projectService.findByUserId(user.getId()).stream().map(p -> p.getId()).collect(Collectors.toList());
+            //remove datasets that doesn't belong to project among projectids
+            for (Iterator<DataSet> iter = dataSets.iterator();iter.hasNext();){
+                DataSet a = iter.next();
+                //dataset without project will not be returned, dataset with project belonging to somebody else will be removed
+                if ((a.getProject()==null) || (!(projectids.contains(a.getProject().getId())))) {
+                    iter.remove();
+                }
+            }
         }
 
         ArrayList<DatasetDTO> nfiles = new ArrayList<>();
 
-        for (DataSet ds : files) {
+        for (DataSet ds : dataSets) {
             DatasetDTO dto = new DatasetDTO();
             dto.name = ds.getDataName();
             dto.info = ds.getDataInfo();
             //infiles.setProjectId(ifile.getProjectId());
-            dto.creation_date = ds.getCreation_date();
+            dto.creation_date = ds.getCreation_date().toString();
             dto.summary = ds.getSummary();
             dto.webdavurl = ds.getUri();
             //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
@@ -76,7 +99,7 @@ public class DatasetServiceCon {
             dto.id = ds.getId();
             nfiles.add(dto);
         }
-        LOG.info("listing datasets,nfiles:"+files.size());
+        LOG.info("listing datasets,nfiles:"+dataSets.size());
 /*
         CsrfToken token = (CsrfToken) request.getSession().getAttribute(DEFAULT_CSRF_TOKEN_ATTR_NAME);
         //now setting the csrf token as http header, client can use it in subsequent POST call
@@ -108,7 +131,7 @@ public class DatasetServiceCon {
             try {
                 String output=DTOUtils.ExecuteCommand("sudo "+SCRIPT_DIR+"controlproxy.sh -a " + userdir+" "+proxycontext);
                 LOG.debug("controlproxy.sh:\n"+output);
-                dto.setCreation_date(new Date());
+                dto.setCreation_date(new Date().toString());
                 //proxy is created in /files/[proxycontext]
                 dto.setWebdavurl(getUriFromContext(proxycontext));
 

@@ -9,7 +9,7 @@ public class DatasetDTO {
 
     @Getter @Setter public String name;
     @Getter @Setter public String info;
-    @Getter @Setter public Date creation_date;
+    @Getter @Setter public String creation_date;
     @Getter @Setter public String summary;
     @Getter @Setter public String webdavurl;
     @Getter @Setter public Long projectId;

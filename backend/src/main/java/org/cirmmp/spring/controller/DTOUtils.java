@@ -16,11 +16,11 @@ public class DTOUtils {
     //pass User information into DTO structure serialized by json.
     public static UserDTO getUserDTO(User user) {
         UserDTO udto= new UserDTO();
-        udto.FirstName = user.getFirstName();
-        udto.LastName = user.getLastName();
-        udto.Email = user.getEmail();
-        udto.Id = user.getId().toString();
-        udto.SsoId = user.getSsoId();
+        udto.setFirstName(user.getFirstName());
+        udto.setLastName(user.getLastName());
+        udto.setEmail(user.getEmail());
+        udto.setId(user.getId().toString());
+        udto.setSsoId(user.getSsoId());
         return udto;
     }
 
@@ -53,7 +53,7 @@ public class DTOUtils {
 
     public static DatasetDTO getDatasetDTO(DataSet dataSet,Long pid) {
         DatasetDTO dto = new DatasetDTO();
-        dto.creation_date = dataSet.getCreation_date();
+        dto.creation_date = dataSet.getCreation_date().toString();
         dto.id=dataSet.getId();
         dto.info=dataSet.getDataInfo();
         dto.name=dataSet.getDataName();
@@ -68,7 +68,7 @@ public class DTOUtils {
         DataSet ds = new DataSet();
         ds.setId(dto.id);
         ds.setDataName(dto.name);
-        ds.setCreation_date(dto.creation_date);
+        ds.setCreation_date(new Date(dto.creation_date));
         ds.setDataInfo(dto.info);
         ds.setProject(projectService.findById(dto.projectId));
         ds.setSummary(dto.summary);
