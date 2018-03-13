@@ -85,7 +85,9 @@ export class Ariaapi {
             return this.proposallist
           })
           .catch(error => {
+            console.log("ariaapixhr.getProposalList() error");
             console.log(error);
+            throw error;
           });
       }
 

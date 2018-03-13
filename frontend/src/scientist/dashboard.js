@@ -55,6 +55,10 @@ export class Dashboard {
             console.log(list);
             this.ariaproposals=list;
           })
+            .catch(error =>{
+              this.importariastatus=error.statusText;
+              this.importariaerror=true;
+            })
         }
       });
     }

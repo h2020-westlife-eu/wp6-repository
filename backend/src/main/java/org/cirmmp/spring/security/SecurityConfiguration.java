@@ -70,7 +70,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .access("hasRole('ADMIN') or hasRole('DBA')")
                 .and()
                 .formLogin().loginPage("/login")
-                //.successHandler(successHandler())
+                .successHandler(successHandler())
                 .loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
                 .and()
                 .rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)

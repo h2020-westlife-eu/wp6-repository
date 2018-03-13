@@ -121,7 +121,20 @@ export class ProjectApi {
         });
     }
 
-    //getStaffUserInfo()
+    getStaffUserInfo(){
+ // getUserInfo() {
+    return this.httpclient.fetch(this.staffuserinfourl)
+      .then(response => response.json())
+      .then(data => {
+        return data;
+      })
+      .catch(error => {
+        console.log('getUserInfo() returns error:');
+        //console.log(error);
+        throw error;
+        //          alert("Sorry, error:"+error.statusCode+" "+error.message);
+      });
+  }
 
     deleteDataset(id){
     return this.httpclient.fetch(this.dataurl+"/"+id,{method:"delete"})

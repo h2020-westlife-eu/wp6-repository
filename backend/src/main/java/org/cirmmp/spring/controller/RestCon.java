@@ -118,11 +118,25 @@ public class RestCon extends SharedCon{
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("listProject()");
-        String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Project> projects =projectService.findByUserId(user.getId());
         LOG.info("list projects size:"+projects.size()+" first: "+ ((projects.size()>0) ? (projects.get(0).getProjectName()) : "NA"));
         return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(projects)), HttpStatus.OK);
     }
+
+    // check using method security interceptor if the user have role USER
+    @Secured("USER")
+    @RequestMapping(value = "/projectlist", method=RequestMethod.GET)
+    //public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+    public ResponseEntity listProjectAll(){
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication("","","","");
+        //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Project> projects =projectService.findAllProject();
+        LOG.info("list projects size:"+projects.size()+" first: "+ ((projects.size()>0) ? (projects.get(0).getProjectName()) : "NA"));
+        return new ResponseEntity(gson.toJson(DTOUtils.getProjectDTO(projects)), HttpStatus.OK);
+    }
+
 //Dataset moved to DatasetServiceCon
 //TODO remove - duplicates /dataset
     @RequestMapping(value = { "/filelist" }, method = RequestMethod.GET)
