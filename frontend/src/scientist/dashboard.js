@@ -1,5 +1,5 @@
-import {Ariaapi} from '../components/ariaapi';
-
+//import {Ariaapi} from '../components/ariaapi';
+import {Ariaapi} from '../components/ariaapixhr';
 
 const getParams = query => {
   if (!query) {
@@ -48,6 +48,13 @@ export class Dashboard {
         if (accessToken.error_description) {
           this.importariastatus=accessToken.error_description
           this.importariaerror=true;
+        } else {
+          //use accesstoken to get proposal list
+          this.ariaapi.getProposalList().then(list =>{
+            console.log("Dashboard.attached().getProposalList():")
+            console.log(list);
+            this.ariaproposals=list;
+          })
         }
       });
     }

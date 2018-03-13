@@ -1,5 +1,5 @@
-import {HttpClient,json} from 'aurelia-fetch-client';
-
+//import {HttpClient,json} from 'aurelia-fetch-client';
+import {HttpClient} from 'aurelia-http-client';
 
 /* Provides methods to return promise of data from REST Project api*/
 export class Ariaapi {
@@ -7,17 +7,11 @@ export class Ariaapi {
 
   constructor(httpclient) {
     this.httpclient=httpclient;
-    this.httpclient.configure(config => {
-      config
-        .rejectErrorResponses()
-        .withDefaults({
-          credentials: 'same-origin',
-          headers: {
-            'Accept': 'text/plain',
-            'Content-Type': 'text/plain'
-          }
-        })
+    this.httpclient.configure(config=> {
+      config.withHeader('Accept', 'text/plain');
+      config.withHeader('Content-Type', 'text/plain');
     });
+
     //needs SSO credentials
     this.proposallisturl = "https://www.structuralbiology.eu/ws/oauth/proposallist";
     this.proposalurl = "https://www.structuralbiology.eu/ws/oauth/proposal";
@@ -34,7 +28,8 @@ export class Ariaapi {
   }
 
   getProposal() {
-      return this.httpclient.fetch(this.proposalurl)
+//    return this.httpclient.fetch(this.proposalurl)
+      return this.httpclient.get(this.proposalurl)
         .then(response => response.json())
         .then(data => {
           this.proposal=data;
@@ -46,25 +41,32 @@ export class Ariaapi {
   }
 
   getAriaLink() {
-    return this.httpclient.fetch(this.accesstokenserviceurl)
+/*    return this.httpclient.fetch(this.accesstokenserviceurl)
       .then(response => response.json())
       .then(data => {
         return data;
       })
       .catch(error => {
         console.log(error);
-      });
+      });*/
+    return this.httpclient.get(this.accesstokenserviceurl).then(data =>
+    {
+      console.log("getAriaLink()");
+      console.log(data);
+      return JSON.parse(data.response);
+    })
+
   }
 
   getAccessToken(code,state){
     console.log("Ariaapi.getAccessToken()");
-    return this.httpclient.fetch(this.accesstokenserviceurl+"?code="+code+"&state="+state)
-      .then(response => response.json())
+//    return this.httpclient.fetch(this.accesstokenserviceurl+"?code="+code+"&state="+state)
+    return this.httpclient.get(this.accesstokenserviceurl+"?code="+code+"&state="+state)
       .then(data => {
         console.log("ariaapi.getaccesstoken() returned:");
         console.log(data);
-        this.accesstoken=data;
-        return data;
+        this.accesstoken=JSON.parse(data.response);
+        return this.accesstoken;
       })
       .catch(error => {
         console.log(error);
@@ -73,14 +75,14 @@ export class Ariaapi {
 
   getProposalList() {
     if (this.accesstoken && this.accesstoken.access_token) {
-      return this.httpclient.fetch( this.proposallisturl,{
-          method:"POST",
-          body:json({access_token:this.accesstoken.access_token,aria_response_format:'json'})
-        })
-          .then(response => response.json())
+//      return this.httpclient.fetch( this.proposallisturl,{
+      return this.httpclient.post( this.proposallisturl,{access_token:this.accesstoken.access_token,aria_response_format:'json'}
+        )
           .then(data => {
-            this.proposallist= data
-            return data
+            console.log("ariaapixhr.getProposalList()");
+            console.log(data);
+            this.proposallist= JSON.parse(data.response);
+            return this.proposallist
           })
           .catch(error => {
             console.log(error);

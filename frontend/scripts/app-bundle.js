@@ -180,8 +180,8 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
         config.rejectErrorResponses().withDefaults({
           credentials: 'same-origin',
           headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'Fetch'
+            'Accept': 'text/plain',
+            'Content-Type': 'text/plain'
           }
         });
       });
@@ -189,6 +189,7 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
       this.proposallisturl = "https://www.structuralbiology.eu/ws/oauth/proposallist";
       this.proposalurl = "https://www.structuralbiology.eu/ws/oauth/proposal";
       this.accesstokenserviceurl = "/ariademo/accessToken.php";
+      this.accesstoken = null;
     }
 
     Ariaapi.prototype.attached = function attached() {
@@ -199,26 +200,13 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
       console.log('ariaapi.created()');
     };
 
-    Ariaapi.prototype.getProposallist = function getProposallist() {
-      var _this = this;
-
-      return this.httpclient.fetch(this.proposallisturl).then(function (response) {
-        return response.json();
-      }).then(function (data) {
-        _this.proposallist = data;
-        return data;
-      }).catch(function (error) {
-        console.log(error);
-      });
-    };
-
     Ariaapi.prototype.getProposal = function getProposal() {
-      var _this2 = this;
+      var _this = this;
 
       return this.httpclient.fetch(this.proposalurl).then(function (response) {
         return response.json();
       }).then(function (data) {
-        _this2.proposal = data;
+        _this.proposal = data;
         return data;
       }).catch(function (error) {
         console.log(error);
@@ -236,16 +224,37 @@ define('components/ariaapi',['exports', 'aurelia-fetch-client'], function (expor
     };
 
     Ariaapi.prototype.getAccessToken = function getAccessToken(code, state) {
+      var _this2 = this;
+
       console.log("Ariaapi.getAccessToken()");
       return this.httpclient.fetch(this.accesstokenserviceurl + "?code=" + code + "&state=" + state).then(function (response) {
         return response.json();
       }).then(function (data) {
         console.log("ariaapi.getaccesstoken() returned:");
         console.log(data);
+        _this2.accesstoken = data;
         return data;
       }).catch(function (error) {
         console.log(error);
       });
+    };
+
+    Ariaapi.prototype.getProposalList = function getProposalList() {
+      var _this3 = this;
+
+      if (this.accesstoken && this.accesstoken.access_token) {
+        return this.httpclient.fetch(this.proposallisturl, {
+          method: "POST",
+          body: (0, _aureliaFetchClient.json)({ access_token: this.accesstoken.access_token, aria_response_format: 'json' })
+        }).then(function (response) {
+          return response.json();
+        }).then(function (data) {
+          _this3.proposallist = data;
+          return data;
+        }).catch(function (error) {
+          console.log(error);
+        });
+      }
     };
 
     return Ariaapi;
@@ -804,6 +813,7 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
       this.dataurl = apiurl + "/dataset";
       this.copytaskurl = apiurl + "/copytask";
       this.userinfourl = apiurl + "/user";
+      this.staffuserinfourl = "/admin/restcon/user";
 
       this.usersurl = apiurl + "/users";
       this.projects = [];
@@ -1590,7 +1600,7 @@ define('scientist/createdataset',['exports', '../components/messages', 'aurelia-
     return Createdataset;
   }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
 });
-define('scientist/dashboard',['exports', '../components/ariaapi'], function (exports, _ariaapi) {
+define('scientist/dashboard',['exports', '../components/ariaapixhr'], function (exports, _ariaapixhr) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1649,13 +1659,19 @@ define('scientist/dashboard',['exports', '../components/ariaapi'], function (exp
           if (accessToken.error_description) {
             _this.importariastatus = accessToken.error_description;
             _this.importariaerror = true;
+          } else {
+            _this.ariaapi.getProposalList().then(function (list) {
+              console.log("Dashboard.attached().getProposalList():");
+              console.log(list);
+              _this.ariaproposals = list;
+            });
           }
         });
       }
     };
 
     return Dashboard;
-  }(), _class.inject = [_ariaapi.Ariaapi], _temp);
+  }(), _class.inject = [_ariaapixhr.Ariaapi], _temp);
 });
 define('scientist/dashboarddetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
   'use strict';
@@ -5472,6 +5488,100 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
 
 });
 
+define('components/ariaapixhr',['exports', 'aurelia-http-client'], function (exports, _aureliaHttpClient) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Ariaapi = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Ariaapi = exports.Ariaapi = (_temp = _class = function () {
+    function Ariaapi(httpclient) {
+      _classCallCheck(this, Ariaapi);
+
+      this.httpclient = httpclient;
+      this.httpclient.configure(function (config) {
+        config.withHeader('Accept', 'text/plain');
+        config.withHeader('Content-Type', 'text/plain');
+      });
+
+      this.proposallisturl = "https://www.structuralbiology.eu/ws/oauth/proposallist";
+      this.proposalurl = "https://www.structuralbiology.eu/ws/oauth/proposal";
+      this.accesstokenserviceurl = "/ariademo/accessToken.php";
+      this.accesstoken = null;
+    }
+
+    Ariaapi.prototype.attached = function attached() {
+      console.log('ariaapi.attached()');
+    };
+
+    Ariaapi.prototype.created = function created() {
+      console.log('ariaapi.created()');
+    };
+
+    Ariaapi.prototype.getProposal = function getProposal() {
+      var _this = this;
+
+      return this.httpclient.get(this.proposalurl).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        _this.proposal = data;
+        return data;
+      }).catch(function (error) {
+        console.log(error);
+      });
+    };
+
+    Ariaapi.prototype.getAriaLink = function getAriaLink() {
+      return this.httpclient.get(this.accesstokenserviceurl).then(function (data) {
+        console.log("getAriaLink()");
+        console.log(data);
+        return JSON.parse(data.response);
+      });
+    };
+
+    Ariaapi.prototype.getAccessToken = function getAccessToken(code, state) {
+      var _this2 = this;
+
+      console.log("Ariaapi.getAccessToken()");
+
+      return this.httpclient.get(this.accesstokenserviceurl + "?code=" + code + "&state=" + state).then(function (data) {
+        console.log("ariaapi.getaccesstoken() returned:");
+        console.log(data);
+        _this2.accesstoken = JSON.parse(data.response);
+        return _this2.accesstoken;
+      }).catch(function (error) {
+        console.log(error);
+      });
+    };
+
+    Ariaapi.prototype.getProposalList = function getProposalList() {
+      var _this3 = this;
+
+      if (this.accesstoken && this.accesstoken.access_token) {
+        return this.httpclient.post(this.proposallisturl, { access_token: this.accesstoken.access_token, aria_response_format: 'json' }).then(function (data) {
+          console.log("ariaapixhr.getProposalList()");
+          console.log(data);
+          _this3.proposallist = JSON.parse(data.response);
+          return _this3.proposallist;
+        }).catch(function (error) {
+          console.log(error);
+        });
+      }
+    };
+
+    return Ariaapi;
+  }(), _class.inject = [_aureliaHttpClient.HttpClient], _temp);
+});
 define('text!app.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-card-2 w3-margin w3-padding\">\n    <p>\n      West-life Repository is standalone web application for experimental facilities that are newly embarking on data\n      management.\n    </p>\n    <p>\n      This is reference implementation of a repository that supplies\n    </p>\n    <ul>\n      <li> suitable metadata to the portal (D6.2) matching the metadata standards to be devised in WP7.</li>\n      <li> registering a new project,</li>\n      <li> adding files to a project.</li>\n    </ul>\n    <p>\n      Continue as: <a href=\"repository/index.html\" class=\"w3-button w3-pale-green\"><irep></irep>\n       Visiting scientist - requires login via West-Life SSO</a>\n    </p>\n    <p>\n      Or try: <a href=\"repositorytest/index.html\" class=\"w3-button w3-pale-green\"><irepdemo></irepdemo> Demo 1</a> - no login required.\n      <a href=\"repositorytest2/index.html\" class=\"w3-button w3-pale-green\"><irepdemo></irepdemo> Demo 2</a> - no login required.\n    </p>\n    <p>\n      Features in development, not yet implemented:\n    </p>\n    <ul>\n      <li>The implementation use the CERIF standard.</li>\n      <li>It will be compatible with existing CRIS repositories,</li>\n      <li>and also be capable of assigning an URI to a project if it is not yet recorded in a CRIS repository.</li>\n\n    </ul>\n\n    <p>\n      Support links:\n    </p>\n    <ul>\n      <li><a href=\"/admin/login?next=../staff/index.html\" class=\"w3-button w3-pale-green\"><iadmin></iadmin> Staff access</a> - available\n        only from local workstation\n      </li>\n      <li><a href=\"/admin/login\" class=\"w3-button w3-pale-green\"><iadmin></iadmin> Admin access</a> - available only from local\n        workstation\n      </li>\n    </ul>\n  </div>\n  <sharedfooter></sharedfooter>\n</template>\n"; });
 define('text!icons.css', ['module'], function(module) { module.exports = ".fa {\n  display: inline-block;\n  font-size: inherit;\n  text-rendering: auto;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  width: 16px;\n}\n.fa-remove:before,\n.fa-close:before,\n.fa-times:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20width%3D%27100%25%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2021.9%2021.9%27%20enable-background%3D%27new%200%200%2021.9%2021.9%27%3E%20%3Cg%3E%20%3Cg%3E%20%3Cpath%20d%3D%27M14.1%2C11.3c-0.2-0.2-0.2-0.5%2C0-0.7l7.5-7.5c0.2-0.2%2C0.3-0.5%2C0.3-0.7s-0.1-0.5-0.3-0.7l-1.4-1.4C20%2C0.1%2C19.7%2C0%2C19.5%2C0%20%20c-0.3%2C0-0.5%2C0.1-0.7%2C0.3l-7.5%2C7.5c-0.2%2C0.2-0.5%2C0.2-0.7%2C0L3.1%2C0.3C2.9%2C0.1%2C2.6%2C0%2C2.4%2C0S1.9%2C0.1%2C1.7%2C0.3L0.3%2C1.7C0.1%2C1.9%2C0%2C2.2%2C0%2C2.4%20%20s0.1%2C0.5%2C0.3%2C0.7l7.5%2C7.5c0.2%2C0.2%2C0.2%2C0.5%2C0%2C0.7l-7.5%2C7.5C0.1%2C19%2C0%2C19.3%2C0%2C19.5s0.1%2C0.5%2C0.3%2C0.7l1.4%2C1.4c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3%20%20s0.5-0.1%2C0.7-0.3l7.5-7.5c0.2-0.2%2C0.5-0.2%2C0.7%2C0l7.5%2C7.5c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3s0.5-0.1%2C0.7-0.3l1.4-1.4c0.2-0.2%2C0.3-0.5%2C0.3-0.7%20%20s-0.1-0.5-0.3-0.7L14.1%2C11.3z%27%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3C%2Fsvg%3E \");\n}\n.fa-cog:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.7%20489.7%27%20style%3D%27enable-background%3Anew%200%200%20489.7%20489.7%3B%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M60.6%2C461.95c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3s12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73%20%20s-73%2C32.7-73%2C73c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6H60.6z%20M24.3%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5s48.5%2C21.8%2C48.5%2C48.5%20%20s-21.8%2C48.5-48.5%2C48.5S24.3%2C115.25%2C24.3%2C88.45z%27%2F%3E%20%20%3Cpath%20d%3D%27M317.1%2C401.25c0-36.1-26.3-66-60.8-71.9V27.75c0-6.8-5.5-12.3-12.3-12.3s-12.3%2C5.5-12.3%2C12.3v301.6%20%20c-34.4%2C5.9-60.8%2C35.8-60.8%2C71.9c0%2C40.3%2C32.8%2C73%2C73%2C73S317.1%2C441.45%2C317.1%2C401.25z%20M195.6%2C401.25c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5S195.6%2C427.95%2C195.6%2C401.25z%27%2F%3E%20%20%3Cpath%20d%3D%27M416.6%2C474.25c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73s-73%2C32.7-73%2C73%20%20c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6C404.3%2C468.75%2C409.8%2C474.25%2C416.6%2C474.25z%20M368.1%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5C389.8%2C136.95%2C368.1%2C115.25%2C368.1%2C88.45z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E  \");\n}\n.fa-window-minimize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.3%20489.3%27%20style%3D%27enable-background%3Anew%200%200%20489.3%20489.3%3B%27%3E%3Cg%3E%09%3Cg%3E%09%09%3Cpath%20d%3D%27M0%2C12.251v464.7c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h224c6.8%2C0%2C12.3-5.5%2C12.3-12.3s-5.5-12.3-12.3-12.3H24.5v-440.2h440.2v210.5%09%09%09c0%2C6.8%2C5.5%2C12.2%2C12.3%2C12.2s12.3-5.5%2C12.3-12.2v-222.7c0-6.8-5.5-12.2-12.3-12.2H12.3C5.5-0.049%2C0%2C5.451%2C0%2C12.251z%27%2F%3E%09%09%3Cpath%20d%3D%27M476.9%2C489.151c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-170.3c0-6.8-5.5-12.3-12.3-12.3H306.6c-6.8%2C0-12.3%2C5.5-12.3%2C12.3v170.4%09%09%09c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h170.3V489.151z%20M318.8%2C318.751h145.9v145.9H318.8V318.751z%27%2F%3E%09%09%3Cpath%20d%3D%27M135.9%2C257.651c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h109.5c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-109.5c0-6.8-5.5-12.3-12.3-12.3%09%09%09s-12.3%2C5.5-12.3%2C12.3v79.9l-138.7-138.7c-4.8-4.8-12.5-4.8-17.3%2C0c-4.8%2C4.8-4.8%2C12.5%2C0%2C17.3l138.7%2C138.7h-79.9%09%09%09C141.4%2C245.351%2C135.9%2C250.851%2C135.9%2C257.651z%27%2F%3E%09%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n}\n.fa-window-maximize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20258.008%20258.008%27%20style%3D%27enable-background%3Anew%200%200%20258.008%20258.008%3B%27%20%20xml%3Aspace%3D%27preserve%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M125.609%2C122.35H10.049C4.5%2C122.35%2C0%2C126.85%2C0%2C132.399v115.56c0%2C5.549%2C4.5%2C10.048%2C10.049%2C10.048H125.61%20%20c5.548%2C0%2C10.046-4.499%2C10.046-10.048v-115.56C135.656%2C126.85%2C131.158%2C122.35%2C125.609%2C122.35z%20M115.559%2C237.909H20.098v-95.463%20%20h95.461V237.909z%27%2F%3E%20%20%3Cpath%20d%3D%27M247.958%2C0.001H10.049C4.5%2C0.001%2C0%2C4.5%2C0%2C10.049v93.312c0%2C5.55%2C4.5%2C10.05%2C10.049%2C10.05c5.55%2C0%2C10.049-4.5%2C10.049-10.05%20%20V20.098h217.812v217.812h-82.915c-5.55%2C0-10.05%2C4.5-10.05%2C10.05c0%2C5.549%2C4.5%2C10.048%2C10.05%2C10.048h92.964%20%20c5.55%2C0%2C10.05-4.499%2C10.05-10.048V10.049C258.008%2C4.5%2C253.508%2C0.001%2C247.958%2C0.001z%27%2F%3E%20%20%3Cpath%20d%3D%27M154.35%2C106.876c1.965%2C1.961%2C4.534%2C2.942%2C7.105%2C2.942c2.57%2C0%2C5.142-0.981%2C7.104-2.942l31.755-31.757V89.57%20%20c0%2C5.549%2C4.499%2C10.047%2C10.05%2C10.047c5.549%2C0%2C10.048-4.498%2C10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068%20%20c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513%20%20c-5.551%2C0-10.051%2C4.5-10.051%2C10.05c0%2C5.549%2C4.5%2C10.049%2C10.051%2C10.049h13.679L154.35%2C92.665%20%20C150.426%2C96.589%2C150.426%2C102.952%2C154.35%2C106.876z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E\");\n/*  content: url(\"data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 258.008 258.008' style='enable-background:new 0 0 258.008 258.008;'  xml:space='preserve'>  <g>  <g>  <path d='M125.609,122.35H10.049C4.5,122.35,0,126.85,0,132.399v115.56c0,5.549,4.5,10.048,10.049,10.048H125.61  c5.548,0,10.046-4.499,10.046-10.048v-115.56C135.656,126.85,131.158,122.35,125.609,122.35z M115.559,237.909H20.098v-95.463  h95.461V237.909z'/>  <path d='M247.958,0.001H10.049C4.5,0.001,0,4.5,0,10.049v93.312c0,5.55,4.5,10.05,10.049,10.05c5.55,0,10.049-4.5,10.049-10.05  V20.098h217.812v217.812h-82.915c-5.55,0-10.05,4.5-10.05,10.05c0,5.549,4.5,10.048,10.05,10.048h92.964  c5.55,0,10.05-4.499,10.05-10.048V10.049C258.008,4.5,253.508,0.001,247.958,0.001z'/>  <path d='M154.35,106.876c1.965,1.961,4.534,2.942,7.105,2.942c2.57,0,5.142-0.981,7.104-2.942l31.755-31.757V89.57  c0,5.549,4.499,10.047,10.05,10.047c5.549,0,10.048-4.498,10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068  c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513  c-5.551,0-10.051,4.5-10.051,10.05c0,5.549,4.5,10.049,10.051,10.049h13.679L154.35,92.665  C150.426,96.589,150.426,102.952,154.35,106.876z'/>  </g>  </g>  </svg>  \");*/\n}\n\n.fa-caret-down:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 292.362 292.362\" style=\"enable-background:new 0 0 292.362 292.362;\"  xml:space=\"preserve\">  <g>  <path d=\"M286.935,69.377c-3.614-3.617-7.898-5.424-12.848-5.424H18.274c-4.952,0-9.233,1.807-12.85,5.424  C1.807,72.998,0,77.279,0,82.228c0,4.948,1.807,9.229,5.424,12.847l127.907,127.907c3.621,3.617,7.902,5.428,12.85,5.428  s9.233-1.811,12.847-5.428L286.935,95.074c3.613-3.617,5.427-7.898,5.427-12.847C292.362,77.279,290.548,72.998,286.935,69.377z\"/>  </g> </svg>');\n}\n.fa-start:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 16 16\" style=\"enable-background:new 0 0 16 16;\" xml:space=\"preserve\">  <g>  <path d=\"M8,0C3.5,0,0,3.5,0,8s3.5,8,8,8s8-3.5,8-8S12.5,0,8,0z M8,14c-3.5,0-6-2.5-6-6s2.5-6,6-6s6,2.5,6,6  S11.5,14,8,14z\"/>  <polygon points=\"6,12 11,8 6,4\"/></g></svg>');\n}\n.fa-stop:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 508.52 508.52\" style=\"enable-background:new 0 0 508.52 508.52;\" xml:space=\"preserve\"><g><path d=\"M254.26,0C113.845,0,0,113.845,0,254.26s113.845,254.26,254.26,254.26s254.26-113.845,254.26-254.26S394.675,0,254.26,0z M254.26,476.737c-122.68,0-222.477-99.829-222.477-222.477c0-122.68,99.797-222.477,222.477-222.477c122.649,0,222.477,99.797,222.477,222.477C476.737,376.908,376.908,476.737,254.26,476.737z\"/><path d=\"M317.825,158.912h-127.13c-17.544,0-31.782,14.239-31.782,31.782v127.13c0,17.544,14.239,31.783,31.782,31.783h127.13c17.544,0,31.783-14.239,31.783-31.783v-127.13C349.607,173.151,335.369,158.912,317.825,158.912z\"/></g></svg>');\n}\n\n/* most icons derived from http://www.flaticon.com/free-icon/caret-down_25243, needs to attribute*/\n\n.vf-transition{\n  -webkit-transition: all 0.5s ease-in-out;\n  -moz-transition: all 0.5s ease-in-out;\n  -ms-transition: all 0.5s ease-in-out;\n  transition: visibility 0.5s, height 0.5s ease-in-out;\n}\n.vf-code-2{line-height:1;font-size:10px}\n\n.CodeMirror {\n  height: 75%!important;\n}\n\n"; });
 define('text!repositoryapp.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <require from=\"components/navigation.html\"></require>\n  <require from=\"components/userinfo\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-row\">\n  <div class=\"w3-col m3 l2\">\n    <navigation router.bind=\"router\"></navigation>\n  </div>\n  <div class=\"w3-col m9 l10\">\n    <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n      <router-view></router-view>\n    </div>\n\n\n  </div>\n  </div>\n  <sharedfooter></sharedfooter>\n\n</template>\n"; });

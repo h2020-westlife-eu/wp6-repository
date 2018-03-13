@@ -17,6 +17,7 @@ export class ProjectApi {
     this.dataurl=apiurl+"/dataset";
     this.copytaskurl=apiurl+"/copytask";
     this.userinfourl=apiurl+"/user";
+    this.staffuserinfourl="/admin/restcon/user";
     //needs admin/staff credentials
     this.usersurl=apiurl+"/users";//"/admin/restcon/users";
     this.projects=[];
@@ -119,6 +120,8 @@ export class ProjectApi {
           //          alert("Sorry, error:"+error.statusCode+" "+error.message);
         });
     }
+
+    //getStaffUserInfo()
 
     deleteDataset(id){
     return this.httpclient.fetch(this.dataurl+"/"+id,{method:"delete"})
