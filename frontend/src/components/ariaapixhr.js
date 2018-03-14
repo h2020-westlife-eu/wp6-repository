@@ -7,10 +7,10 @@ export class Ariaapi {
 
   constructor(httpclient) {
     this.httpclient=httpclient;
-    this.httpclient.configure(config=> {
-      config.withHeader('Accept', 'text/plain');
-      config.withHeader('Content-Type', 'text/plain');
-    });
+    /*this.httpclient.configure(config=> {
+      config.withHeader('Accept', 'application/json');
+      config.withHeader('Content-Type', 'application/json');
+    });*/
 
     //needs SSO credentials
     this.proposallisturl = "https://www.structuralbiology.eu/ws/oauth/proposallist";
@@ -27,9 +27,9 @@ export class Ariaapi {
     console.log('ariaapi.created()');
   }
 
-  getProposal() {
+  getProposal(pid) {
 //    return this.httpclient.fetch(this.proposalurl)
-      return this.httpclient.get(this.proposalurl)
+      return this.httpclient.get(this.proposalurl+"?access_token="+this.accesstoken.access_token+"&aria_show_all=true&aria_pid="+pid)
         .then(response => response.json())
         .then(data => {
           this.proposal=data;
@@ -76,8 +76,8 @@ export class Ariaapi {
   getProposalList() {
     if (this.accesstoken && this.accesstoken.access_token) {
 //      return this.httpclient.fetch( this.proposallisturl,{
-      return this.httpclient.post( this.proposallisturl,{access_token:this.accesstoken.access_token,aria_response_format:'json'}
-        )
+      return this.httpclient.get( this.proposallisturl+"?access_token="+this.accesstoken.access_token)
+
           .then(data => {
             console.log("ariaapixhr.getProposalList()");
             console.log(data);

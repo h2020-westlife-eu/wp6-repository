@@ -13,8 +13,9 @@ export class Ariaapi {
         .withDefaults({
           credentials: 'same-origin',
           headers: {
-            'Accept': 'text/plain',
-            'Content-Type': 'text/plain'
+
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
         })
     });
