@@ -48,10 +48,48 @@ public class DatasetServiceCon extends SharedCon {
         return listDataset(projectId,"","","","");
     }
 
-    @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
+    @RequestMapping(value = {"/datasets", "/project/{projectId}/datasets"}, method = GET)
+    public ResponseEntity listDatasets(@PathVariable Optional<Long> projectId) {
+        List<DataSet> dataSets;
+
+        if (projectId.isPresent()) {
+            dataSets = dataSetService.findAllDataset();
+            for (Iterator<DataSet> iter = dataSets.iterator(); iter.hasNext(); ) {
+                DataSet a = iter.next();
+                //remove datasets that belongs to other project, or that doesn't belong to project
+                if ((a.getProject() == null) || (a.getProject().getId() != projectId.get())) {
+                    iter.remove();
+                }
+            }
+        } else {
+            dataSets = dataSetService.findAllDataset();
+
+        }
+        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
+
+        for (DataSet ds : dataSets) {
+            DatasetDTO dto = new DatasetDTO();
+            dto.name = ds.getDataName();
+            dto.info = ds.getDataInfo();
+            //infiles.setProjectId(ifile.getProjectId());
+            dto.creation_date = ds.getCreation_date().toString();
+            dto.summary = ds.getSummary();
+            dto.webdavurl = ds.getUri();
+            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
+            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
+            dto.id = ds.getId();
+            nfiles.add(dto);
+        }
+        LOG.info("listing datasets,nfiles:"+dataSets.size());
+        return new ResponseEntity(nfiles, HttpStatus.OK);
+    }
+
+
+        @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
     public ResponseEntity listDataset(@PathVariable Optional<Long> projectId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
+
         LOG.info("listing datasets, projectId is set:"+projectId.isPresent());
         List<DataSet> dataSets;
 
