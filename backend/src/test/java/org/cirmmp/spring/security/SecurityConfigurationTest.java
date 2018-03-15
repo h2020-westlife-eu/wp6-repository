@@ -69,9 +69,10 @@ public class SecurityConfigurationTest {
 
 	@Test
 	public void testBadCsrf() throws Exception {
-		this.mvc
-		.perform(post("/login").with(csrf().useInvalidToken()))
-		.andExpect(MockMvcResultMatchers.status().is(403));
+		ResultActions result = this.mvc
+		.perform(post("/login").with(csrf().useInvalidToken()));
+		result.andExpect(redirectedUrl("/login?error" ));
+		// could result.andExpect(MockMvcResultMatchers.status().is(403));
 	}
 
 	@Test
@@ -91,7 +92,16 @@ public class SecurityConfigurationTest {
 	public void testNotFound() throws Exception {
 		this.mvc.perform(get("/nonesuch")).andExpect(MockMvcResultMatchers.status().is(404));
 	}
+	
+	@Test 
+	public void testLoginNonesuch() throws Exception {
+		//.loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
+		this.mvc
+		.perform( post("/login").param("ssoId", "nonesuch").param("password", "").with(csrf()) )
+		.andExpect(redirectedUrl("/login?error")); 
+			
+	}
 
-    // TODO with dummy userid, check can log in
-	// check non-admin user cannot use admin functionality
+    // TODO test successful login
+	// TODO check non-admin user cannot use admin functionality
 }
