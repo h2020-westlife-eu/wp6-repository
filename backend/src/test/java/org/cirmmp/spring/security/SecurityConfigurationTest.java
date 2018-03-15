@@ -1,5 +1,6 @@
 package org.cirmmp.spring.security;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,6 +17,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -81,6 +83,16 @@ public class SecurityConfigurationTest {
 		.perform(get("/newuser"))
 		.andExpect(redirectedUrl("http://localhost/login"));
 	}
+	
+
+	@Test
+	public void testUnknownGet() throws Exception {
+		this.mvc
+		.perform(get("/newuser").with(user("testuser")))
+		.andExpect(MockMvcResultMatchers.status().isForbidden());
+	}
+	
+	
 	@Test
 	public void testNotLoggedInPost() throws Exception {
 		this.mvc
@@ -95,12 +107,13 @@ public class SecurityConfigurationTest {
 	
 	@Test 
 	public void testLoginNonesuch() throws Exception {
-		//.loginProcessingUrl("/login").usernameParameter("ssoId").passwordParameter("password")
 		this.mvc
 		.perform( post("/login").param("ssoId", "nonesuch").param("password", "").with(csrf()) )
 		.andExpect(redirectedUrl("/login?error")); 
 			
 	}
+	
+
 
     // TODO test successful login
 	// TODO check non-admin user cannot use admin functionality
