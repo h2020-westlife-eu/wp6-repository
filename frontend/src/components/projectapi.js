@@ -14,7 +14,7 @@ export class ProjectApi {
     this.httpclient=httpclient;
 
     //needs SSO credentials
-    let apiurl = "/admin/restcon";
+    let apiurl = "restcon";
     //test fronted calls test backend uri - which has test authentication - test credentials added
     //if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
     //else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
@@ -22,7 +22,7 @@ export class ProjectApi {
     this.dataurl=apiurl+"/dataset";
     this.copytaskurl=apiurl+"/copytask";
     this.userinfourl=apiurl+"/user";
-    this.staffuserinfourl="/admin/restcon/user";
+    this.staffuserinfourl=apiurl+"/user";
     //needs admin/staff credentials
     this.usersurl=apiurl+"/users";//"/admin/restcon/users";
     this.projects=[];
@@ -42,7 +42,10 @@ export class ProjectApi {
     });
     this.selectedProjectId=0;
     this.selectedDatasetId=0;
-    this.authurl="restcon/authsso";
+    this.authurl=apiurl+"/authsso";
+    //is available if path contains two or more '/' e.g. /staff/
+    this.apiavailable=window.location.pathname.startsWith('/staff') || window.location.pathname.startsWith('/repository');
+    if (this.apiavailable)
     this.httpclient.fetch(this.authurl,{method:"POST"}).catch(error=>alert("Backend service not running: "+error.statusText));
   }
 
@@ -118,6 +121,7 @@ export class ProjectApi {
   }
 
   getUserInfo() {
+    if (!this.apiavailable) return Promise.reject("api not available");
       return this.httpclient.fetch(this.userinfourl)
         .then(response => response.json())
         .then(data => {

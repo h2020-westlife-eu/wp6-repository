@@ -66,8 +66,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 //.antMatchers("/login","/static/**","/restcon/**").permitAll().and()
-                .antMatchers("/login","/static/**","/restcon/authsso").permitAll()
-                .antMatchers( "/list","/listPro","/restcon/**")
+                .antMatchers("/login","/static/**","/restcon/**").permitAll() //was with /restcon/authsso
+                .antMatchers( "/list","/listPro")//was with,"/restcon/**")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
                 .access("hasRole('ADMIN')").antMatchers("/edit-user-*")
@@ -80,10 +80,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 /*.rememberMe().rememberMeParameter("remember-me").tokenRepository(tokenRepository)
                 .tokenValiditySeconds(86400)
                 .and()*/
-                .exceptionHandling().accessDeniedPage("/Access_Denied");
+                .exceptionHandling().accessDeniedPage("/Access_Denied")
 
                 //enabling csrf for all except for restcon endpoints
-                //.csrf();//.disable();
+                .and().csrf().disable();
                 //.ignoringAntMatchers("/restcon/**").and()
                 //.csrf().and()
                 // custom csrf filter for restcon endpoint

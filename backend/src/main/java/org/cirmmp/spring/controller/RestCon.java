@@ -16,10 +16,12 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.*;
@@ -68,28 +70,40 @@ public class RestCon extends SharedCon{
     UserProfileService userProfileService;
 
     @RequestMapping(value = { "/authsso" },method = RequestMethod.POST)
-    public ResponseEntity authSSO(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+    public ResponseEntity authSSO(final HttpServletRequest request,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        //if not custom headers are set - then return currently authenticated user by spring.
+        if (xusername.length()==0) return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
         AutoUser autoUser =new AutoUser();
-        String[] names = xname.split(" ");
-        autoUser.setFirstName(names[1]);
-        autoUser.setLastName(names[names.length-1]);
-        autoUser.setEmail(xemail);
-        autoUser.setPassword(DTOUtils.randomString(30));
+  //      String[] names = xname.split(" ");
+        autoUser.setFirstName(user.getFirstName());
+        autoUser.setLastName(user.getLastName());
+        autoUser.setEmail(user.getEmail());
+        autoUser.setPassword(user.getPassword());
         //chosose from USER ADMIN DBA all role have to be defined defined on SecurityConfiguration
-        autoUser.setRole("USER");
+        autoUser.setRole("ADMIN");
         Authentication auth = new UsernamePasswordAuthenticationToken(autoUser,
                 autoUser.getPassword(), autoUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        User user = checkAuthentication(xusername,xname,xemail,xgroups);
-        LOG.info("logged in user:"+SecurityContextHolder.getContext().getAuthentication().getName());
+
+
+        SecurityContext sc = SecurityContextHolder.getContext();
+        sc.setAuthentication(auth);
+        HttpSession session = request.getSession(true);
+        session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
+
+        //SecurityContextHolder.getContext().setAuthentication(auth);
+//        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        Authentication u = SecurityContextHolder.getContext().getAuthentication();
+        LOG.info("logged in user:"+u.getPrincipal().toString());
         if (user!=null) return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
         else return new ResponseEntity("user not authenticated",HttpStatus.UNAUTHORIZED);
     }
 
     /* returns spring authenticated as well as SSO authenticated (in http headers)*/
+    @Secured("USER")
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
-        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        User user = checkAuthentication2(xusername,xname,xemail,xgroups);
         if (user!=null) return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
         else return new ResponseEntity("user not authenticated",HttpStatus.UNAUTHORIZED);
     }
@@ -114,10 +128,10 @@ public class RestCon extends SharedCon{
     // POST = create, PUT=update, GET = list GET/id = project detail, DELETE = delete, application/json - spring doesn't operate it automatically?
     // Does spring framework have some automatic handling of content type - application/json is processed by json, application/xml is proccessed by some xml binding
     // tool?
-
+    @Secured("USER")
     @RequestMapping(value = {"/project"}, method=RequestMethod.POST,consumes = {"application/json"},produces = {"application/json"})
     public ResponseEntity createProject(@RequestBody JProject jProject, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
-        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        User user = checkAuthentication2(xusername,xname,xemail,xgroups);
         //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         Date now = new Date();
         Project project = new Project();
@@ -135,7 +149,7 @@ public class RestCon extends SharedCon{
     //public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
     public ResponseEntity listProject(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
-        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        User user = checkAuthentication2(xusername,xname,xemail,xgroups);
         LOG.info("listProject()");
         //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Project> projects =projectService.findByUserId(user.getId());
@@ -149,7 +163,7 @@ public class RestCon extends SharedCon{
     //public ResponseEntity listProject(HttpServletRequest request, @RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
     public ResponseEntity listProjectAll(){
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
-        User user = checkAuthentication("","","","");
+        User user = checkAuthentication2("","","","");
         //String ssoId = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Project> projects =projectService.findAllProject();
         LOG.info("list projects size:"+projects.size()+" first: "+ ((projects.size()>0) ? (projects.get(0).getProjectName()) : "NA"));

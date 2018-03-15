@@ -101,12 +101,6 @@ public class SharedCon {
         return s.toString();
     }
 
-    protected synchronized User checkAuthentication(HttpServletRequest request, String xusername, String xname, String xemail, String xgroups){
-        Principal p = request.getUserPrincipal();
-        if (p!=null) return userService.findBySSO(p.getName());
-        else return checkAuthentication(xusername, xname, xemail, xgroups);
-    }
-
     //checks authentication, either it is authenticated via spring - or via sent arguments x*
     //synchronized - multiple calls might be concurrent in - userService.findBySSO(ssoid);
     protected synchronized User checkAuthentication(String xusername,String xname,String xemail,String xgroups){
@@ -138,6 +132,30 @@ public class SharedCon {
                     //throw new AuthenticationCredentialsNotFoundException("authorization required");
                 }
             }
+            LOG.info("checkAuthentication: OK");
+            return user;
+        }
+    }
+    //checks authentication, either it is authenticated via spring - or via sent arguments x*
+    //synchronized - multiple calls might be concurrent in - userService.findBySSO(ssoid);
+    protected synchronized User checkAuthentication2(String xusername,String xname,String xemail,String xgroups){
+        LOG.info("checkAuthentication()");
+        //String xusername="";
+        //ssoid is xusername - if set, otherwise ask for context - spring authenticated
+        String ssoId = (xusername.length()>0)? xusername: SecurityContextHolder.getContext().getAuthentication().getName();
+
+        //if ssoid is not found or is empty
+        if (ssoId=="") {
+            LOG.info("checkAuthentication: not authenticated");
+            throw new AuthenticationCredentialsNotFoundException("authentication required");
+            //new ResponseEntity("authorization required", HttpStatus.UNAUTHORIZED);
+        } else {
+            //try to find sso in DB - if authenticated by spring - it is there
+            LOG.info("authenticated user ssoid:"+ssoId);
+            User user= userService.findBySSO(ssoId);
+            //only logs
+            if (user!=null) LOG.info("authenticated user id:"+user.getId());
+            else throw new AuthenticationCredentialsNotFoundException("authenticated user is not in DB");
             LOG.info("checkAuthentication: OK");
             return user;
         }

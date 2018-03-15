@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,7 +86,8 @@ public class DatasetServiceCon extends SharedCon {
     }
 
 
-        @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
+    @Secured("USER")
+    @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
     public ResponseEntity listDataset(@PathVariable Optional<Long> projectId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
