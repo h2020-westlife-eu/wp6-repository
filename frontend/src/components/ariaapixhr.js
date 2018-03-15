@@ -30,12 +30,12 @@ export class Ariaapi {
   getProposal(pid) {
 //    return this.httpclient.fetch(this.proposalurl)
       return this.httpclient.get(this.proposalurl+"?access_token="+this.accesstoken.access_token+"&aria_show_all=true&aria_pid="+pid)
-        .then(response => response.json())
+
         .then(data => {
           console.log("ariaapixhr.getProposal()");
           console.log(data);
-          this.proposal=data;
-          return data;
+          this.proposal=JSON.parse(data.response);
+          return this.proposal;
         })
         .catch(error => {
           console.log(error);

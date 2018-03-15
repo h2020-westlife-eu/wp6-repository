@@ -85,12 +85,13 @@ public class DatasetServiceCon extends SharedCon {
         return new ResponseEntity(nfiles, HttpStatus.OK);
     }
 
-
+    //@Secured seems not to be taken into account
     @Secured("USER")
     @RequestMapping(value = {"/dataset", "/project/{projectId}/dataset"}, method = GET)
     public ResponseEntity listDataset(@PathVariable Optional<Long> projectId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
+
 
         LOG.info("listing datasets, projectId is set:"+projectId.isPresent());
         List<DataSet> dataSets;

@@ -1,5 +1,6 @@
 //import {Ariaapi} from '../components/ariaapi';
 import {Ariaapi} from '../components/ariaapixhr';
+import {ProjectApi} from "../components/projectapi";
 
 const getParams = query => {
   if (!query) {
@@ -19,9 +20,10 @@ const getParams = query => {
 /* Dashboard receives list of projects and list of datasets, in case the project or dataset is selected either by click or within url it is filtered */
 export class Dashboard {
   /* Dashboarddetails shows details of projects/datasets */
-  static inject = [Ariaapi];
-  constructor(ariaapi) {
+  static inject = [Ariaapi,ProjectApi];
+  constructor(ariaapi,pa) {
     this.ariaapi = ariaapi;
+    this.pa= pa;
     this.importingaria=false;
     this.importariastatus="";
     this.importariaerror=false;
@@ -68,11 +70,18 @@ export class Dashboard {
 
   selectProposal(p){
 //    this.selectedProposal=p;
-    this.ariaapi.getProposal(p.pid),then(detail =>{
+    this.ariaapi.getProposal(p.pid).then(detail =>{
       console.log("Dashboard.selectProposal():")
       console.log(detail);
-      this.selectedProposal=detail;
+      this.selectedProposal=detail.proposal;
     })
+  }
+
+  importProposal(p) {
+    pr = {};
+    pr.projectName = p.title;
+    pr.shareable=p.pid;
+    this.pa.submitProject(pr);
   }
 }
 

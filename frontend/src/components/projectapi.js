@@ -101,9 +101,18 @@ export class ProjectApi {
       return this.httpclient.fetch(this.dataurl, { method:'post', body:json(dataset)})
         .then(response => response.json())
         .then(data => {
-          this.datasets=data;
+          this.datasets=data;//TODO ???
           return data;
         });
+  }
+
+  submitProject(project) {
+    return this.httpclient.fetch(this.projecturl, { method:'post', body:json(project)})
+      .then(response => response.json())
+      .then(data => {
+        this.projects=data; //TODO ???
+        return data;
+      });
   }
 
   /* getting list of users - available for staff */

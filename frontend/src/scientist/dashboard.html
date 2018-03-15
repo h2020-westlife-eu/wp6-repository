@@ -44,25 +44,30 @@
   <div  class="w3-half" show.bind="proposals.length>0">
     <h4>Aria proposal detail:</h4>
     <table class="w3-table-all">
-      <tr>
-        <td></td>
-      </tr>
+      <tr><td colspan="2">pid: ${selectedProposal.pid}title: ${selectedProposal.title} status: ${selectedProposal.status}</td></tr>
+      <tr><td>${selectedProposal.fields.11.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
+      <tr><td>${selectedProposal.fields.12.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
+      <tr><td>${selectedProposal.fields.13.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
+      <tr><td>${selectedProposal.fields.14.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
+      <tr><td>${selectedProposal.fields.15.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
+      <tr><td>${selectedProposal.fields.17.title}</td><td>${selectedProposal.fields.11.data}</td></tr>
     </table>
+    <button class="w3-button w3-pale-green" click.trigger="importProposal(selectedProposal)">Import this proposal as Repository Project</button>
   </div>
-  <div class="w3-clean"></div>
+  <div class="w3-clear"></div>
   <div class="w3-half">
-  <div class="w3-margin">
+
 
     <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>
     <projecttable></projecttable>
-  </div>
+
 </div>
   <div class="w3-half">
-    <div class="w3-margin">
+
     <h4>Available datasets:</h4>
       <datasettable></datasettable>
-    </div>
+
   </div>
 
-  <p class="w3-clear">&nbsp;</p>
+  <div class="w3-clear"></div>
 </template>
