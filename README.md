@@ -38,4 +38,11 @@ You may restart the backend service by
 
     sudo service westlife-repository restart
     
- See further details in the project documentation https://h2020-westlife-eu.gitbooks.io/virtual-folder-docs/content/repository/
+
+
+See further details in the project documentation https://h2020-westlife-eu.gitbooks.io/virtual-folder-docs/content/repository/
+
+You can build the backend using Maven. If using an IDE you must also install lombok. See for example:
+    https://projectlombok.org/setup/eclipse
+Unfortunately the installation is not quite right. You must then edit eclipse.ini to give an absolute path.
+
