@@ -26,7 +26,31 @@
   </li>
 </ul>
   </p>
-<div class="w3-half">
+  <div  class="w3-half" show.bind="proposals.length>0">
+  <h4>Aria proposals:</h4>
+    <table class="w3-table-all">
+      <tr>
+        <th>id</th>
+        <th>name</th>
+        <th>status</th>
+      </tr>
+      <tr class="w3-hover-green" repeat.for="proposal of proposals" click.delegate="selectProposal(proposal)">
+        <td>${proposal.pid}</td>
+        <td><iproject></iproject>${proposal.title}</td>
+        <td>${proposal.status}</td>
+      </tr>
+    </table>
+  </div>
+  <div  class="w3-half" show.bind="proposals.length>0">
+    <h4>Aria proposal detail:</h4>
+    <table class="w3-table-all">
+      <tr>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+  <div class="w3-clean"></div>
+  <div class="w3-half">
   <div class="w3-margin">
 
     <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>

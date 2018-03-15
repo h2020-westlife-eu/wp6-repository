@@ -1,6 +1,11 @@
 import {HttpClient,json} from 'aurelia-fetch-client';
 //import {Csrfheaderinterceptor} from '../components/csrfheaderinterceptor';
 /* Provides methods to return promise of data from REST Project api*/
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export class ProjectApi {
   static inject = [HttpClient];
 
@@ -9,7 +14,7 @@ export class ProjectApi {
     this.httpclient=httpclient;
 
     //needs SSO credentials
-    let apiurl = "restcon";
+    let apiurl = "/admin/restcon";
     //test fronted calls test backend uri - which has test authentication - test credentials added
     //if (window.location.pathname.indexOf('repositorytest2')>0) apiurl = "/restcontest2";
     //else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
@@ -37,7 +42,11 @@ export class ProjectApi {
     });
     this.selectedProjectId=0;
     this.selectedDatasetId=0;
+    this.authurl="restcon/authsso";
+    this.httpclient.fetch(this.authurl,{method:"POST"}).catch(error=>alert("Backend service not running: "+error.statusText));
   }
+
+
 
   getProjects() {
     //if the projects is already fetched - returns it, otherwise fetch
@@ -64,6 +73,7 @@ export class ProjectApi {
   }
 
   getDatasets() {
+  //  await sleep(1000);
     if (this.datasets.length>0)
       return new Promise(resolve => resolve(this.datasets))
     else

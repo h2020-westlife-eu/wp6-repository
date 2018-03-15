@@ -25,6 +25,8 @@ export class Dashboard {
     this.importingaria=false;
     this.importariastatus="";
     this.importariaerror=false;
+    this.proposals=[];
+    this.selectedProposal={};
   }
 /*
   activate(){
@@ -53,7 +55,7 @@ export class Dashboard {
           this.ariaapi.getProposalList().then(list =>{
             console.log("Dashboard.attached().getProposalList():")
             console.log(list);
-            this.ariaproposals=list;
+            this.proposals=list;
           })
             .catch(error =>{
               this.importariastatus=error.statusText;
@@ -62,6 +64,15 @@ export class Dashboard {
         }
       });
     }
+  }
+
+  selectProposal(p){
+//    this.selectedProposal=p;
+    this.ariaapi.getProposal(p.pid),then(detail =>{
+      console.log("Dashboard.selectProposal():")
+      console.log(detail);
+      this.selectedProposal=detail;
+    })
   }
 }
 

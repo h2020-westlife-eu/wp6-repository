@@ -32,6 +32,8 @@ export class Ariaapi {
       return this.httpclient.get(this.proposalurl+"?access_token="+this.accesstoken.access_token+"&aria_show_all=true&aria_pid="+pid)
         .then(response => response.json())
         .then(data => {
+          console.log("ariaapixhr.getProposal()");
+          console.log(data);
           this.proposal=data;
           return data;
         })
@@ -81,8 +83,8 @@ export class Ariaapi {
           .then(data => {
             console.log("ariaapixhr.getProposalList()");
             console.log(data);
-            this.proposallist= JSON.parse(data.response);
-            return this.proposallist
+            this.proposallistwrapper= JSON.parse(data.response);
+            return this.proposallistwrapper.proposals
           })
           .catch(error => {
             console.log("ariaapixhr.getProposalList() error");
@@ -92,5 +94,4 @@ export class Ariaapi {
       }
 
   }
-
 }

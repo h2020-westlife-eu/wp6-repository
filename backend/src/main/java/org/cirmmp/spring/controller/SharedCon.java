@@ -9,11 +9,16 @@ import org.cirmmp.spring.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -22,6 +27,7 @@ import java.util.HashSet;
 /**
  * Shared methods
  */
+
 public class SharedCon {
     /** utils to create user in database if it is logged using SSO and not in DB yet
      *
@@ -32,6 +38,9 @@ public class SharedCon {
     UserService userService;
     @Autowired
     UserProfileService userProfileService;
+
+    private static Gson gson = new Gson();
+
 
     private User createSSOUser(@RequestHeader(name = "X-USERNAME", defaultValue = "") String xusername, @RequestHeader(name = "X-NAME", defaultValue = "") String xname, @RequestHeader(name = "X-EMAIL", defaultValue = "") String xemail, String ssoId, @RequestHeader(name = "X-GROUPS", defaultValue = "")String xgroups) {
         User user;//user doesn't exist in local system yet, create it from SSO West-Life information

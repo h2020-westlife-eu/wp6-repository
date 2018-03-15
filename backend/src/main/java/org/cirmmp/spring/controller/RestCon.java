@@ -67,6 +67,25 @@ public class RestCon extends SharedCon{
     @Autowired
     UserProfileService userProfileService;
 
+    @RequestMapping(value = { "/authsso" },method = RequestMethod.POST)
+    public ResponseEntity authSSO(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
+        AutoUser autoUser =new AutoUser();
+        String[] names = xname.split(" ");
+        autoUser.setFirstName(names[1]);
+        autoUser.setLastName(names[names.length-1]);
+        autoUser.setEmail(xemail);
+        autoUser.setPassword(DTOUtils.randomString(30));
+        //chosose from USER ADMIN DBA all role have to be defined defined on SecurityConfiguration
+        autoUser.setRole("USER");
+        Authentication auth = new UsernamePasswordAuthenticationToken(autoUser,
+                autoUser.getPassword(), autoUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        LOG.info("logged in user:"+SecurityContextHolder.getContext().getAuthentication().getName());
+        if (user!=null) return new ResponseEntity (gson.toJson(DTOUtils.getUserDTO(user)), HttpStatus.OK);
+        else return new ResponseEntity("user not authenticated",HttpStatus.UNAUTHORIZED);
+    }
+
     /* returns spring authenticated as well as SSO authenticated (in http headers)*/
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){
