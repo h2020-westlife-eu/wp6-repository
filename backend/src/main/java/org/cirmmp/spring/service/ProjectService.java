@@ -28,4 +28,6 @@ public interface ProjectService {
     void deleteDataSet(Project project, DataSet dataset);
    // void fileUpdateProject(Project pro, FileList fileList);
 
+    List<DataSet> findDatasetByUserProjectId(int id);
+
 }

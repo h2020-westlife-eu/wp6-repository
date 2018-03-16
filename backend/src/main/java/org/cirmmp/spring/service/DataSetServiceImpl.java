@@ -45,7 +45,8 @@ public class DataSetServiceImpl implements DataSetService {
         DataSet dataset = findById(id);
         List<FileList> filelist = dataset.getFileLists();
         List<RestFileList> outFile = new ArrayList<>();
-        for(FileList file:filelist) {
+        for(FileList file:filelist){
+
             RestFileList restFileList = new RestFileList();
             restFileList.setFileName(file.getFileName());
             restFileList.setType(file.getType());

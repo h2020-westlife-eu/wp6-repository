@@ -18,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.SecureRandom;
 import java.util.*;
 
 /*TODO 1. consider refactoring the class - extract methods handling /user /project /dataset /[others] to controller service class
@@ -64,6 +63,15 @@ public class RestCon {
     @Autowired
     UserProfileService userProfileService;
 
+
+    @RequestMapping(value = {"/testRest"},method = RequestMethod.GET)
+    public String testRest(){
+
+        LOG.info("TestRest");
+        List<DataSet> dataSets = projectService.findDatasetByUserProjectId(2);
+        LOG.info("Size of Dataset"+dataSets.size());
+        return "TestRest";
+    }
     /* returns spring authenticated as well as SSO authenticated (in http headers)*/
     @RequestMapping(value = { "/user" },method = RequestMethod.GET)
     public ResponseEntity listOrder(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups){

@@ -1,6 +1,7 @@
 package org.cirmmp.spring.service;
 
 import org.cirmmp.spring.dao.DataSetDao;
+import org.cirmmp.spring.dao.HibernateGeneralDao;
 import org.cirmmp.spring.dao.ProjectDao;
 import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
@@ -25,6 +26,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private DataSetDao dataDao;
+
+    @Autowired
+    private HibernateGeneralDao hibernateGeneral;
+
 
     //@Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
     public Project findById(Long id){
@@ -92,6 +97,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
 
+    @Transactional
+    public List<DataSet> findDatasetByUserProjectId(int id){
+        return hibernateGeneral.findAllDasetFronUserPrjects(id);
+    }
 //    @Transactional
 //    public void fileUpdateProject(Project project, FileList fileList){
 //        Project entity = dao.findById(project.getId());
