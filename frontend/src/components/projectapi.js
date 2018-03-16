@@ -2,10 +2,6 @@ import {HttpClient,json} from 'aurelia-fetch-client';
 //import {Csrfheaderinterceptor} from '../components/csrfheaderinterceptor';
 /* Provides methods to return promise of data from REST Project api*/
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export class ProjectApi {
   static inject = [HttpClient];
 
