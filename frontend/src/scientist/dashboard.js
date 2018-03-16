@@ -28,7 +28,7 @@ export class Dashboard {
     this.importariastatus="";
     this.importariaerror=false;
     this.proposals=[];
-    this.selectedProposal={};
+    this.selectedProposal=false;
   }
 /*
   activate(){
@@ -70,18 +70,37 @@ export class Dashboard {
 
   selectProposal(p){
 //    this.selectedProposal=p;
+    this.importingaria=true;
     this.ariaapi.getProposal(p.pid).then(detail =>{
+      this.importingaria=false;
       console.log("Dashboard.selectProposal():")
       console.log(detail);
       this.selectedProposal=detail.proposal;
+      this.selectedFields= Object
+        .keys(this.selectedProposal.fields)
+        .sort((a,b) => +a - +b)
+        .filter(key => !isNaN(+key))
+        .map(key => this.selectedProposal.fields[key]);
     })
+      .catch(error =>{
+        this.importingaria=false;
+        this.importariaerror=true;
+        this.importariastatus= error.statusText;
+      })
   }
 
   importProposal(p) {
-    pr = {};
+    let pr={};
     pr.projectName = p.title;
     pr.shareable=p.pid;
-    this.pa.submitProject(pr);
+    this.importingaria=true;
+    this.pa.submitProject(pr).then(response =>{
+      this.importingaria=false;
+    }).catch (error=>{
+      this.importingaria=false;
+      this.importariaerror=true;
+      this.importariastatus= error.statusText;
+    });
   }
 }
 

@@ -1000,6 +1000,7 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
       return this.httpclient.fetch(this.projecturl, { method: 'post', body: (0, _aureliaFetchClient.json)(project) }).then(function (response) {
         return response.json();
       }).then(function (data) {
+        console.log("Project submitted");
         _this4.projects = data;
         return data;
       });
@@ -1810,7 +1811,7 @@ define('scientist/dashboard',['exports', '../components/ariaapixhr', '../compone
       this.importariastatus = "";
       this.importariaerror = false;
       this.proposals = [];
-      this.selectedProposal = {};
+      this.selectedProposal = false;
     }
 
     Dashboard.prototype.attached = function attached() {
@@ -1848,18 +1849,40 @@ define('scientist/dashboard',['exports', '../components/ariaapixhr', '../compone
     Dashboard.prototype.selectProposal = function selectProposal(p) {
       var _this2 = this;
 
+      this.importingaria = true;
       this.ariaapi.getProposal(p.pid).then(function (detail) {
+        _this2.importingaria = false;
         console.log("Dashboard.selectProposal():");
         console.log(detail);
         _this2.selectedProposal = detail.proposal;
+        _this2.selectedFields = Object.keys(_this2.selectedProposal.fields).sort(function (a, b) {
+          return +a - +b;
+        }).filter(function (key) {
+          return !isNaN(+key);
+        }).map(function (key) {
+          return _this2.selectedProposal.fields[key];
+        });
+      }).catch(function (error) {
+        _this2.importingaria = false;
+        _this2.importariaerror = true;
+        _this2.importariastatus = error.statusText;
       });
     };
 
     Dashboard.prototype.importProposal = function importProposal(p) {
-      pr = {};
+      var _this3 = this;
+
+      var pr = {};
       pr.projectName = p.title;
       pr.shareable = p.pid;
-      this.pa.submitProject(pr);
+      this.importingaria = true;
+      this.pa.submitProject(pr).then(function (response) {
+        _this3.importingaria = false;
+      }).catch(function (error) {
+        _this3.importingaria = false;
+        _this3.importariaerror = true;
+        _this3.importariastatus = error.statusText;
+      });
     };
 
     return Dashboard;
@@ -1953,204 +1976,6 @@ define('scientist/dashboarddetail',['exports', '../components/messages', 'aureli
     };
 
     return Dashboarddetail;
-  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
-});
-define('scientist/datasetdetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Datasetdetail = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Datasetdetail = exports.Datasetdetail = (_temp = _class = function () {
-    function Datasetdetail(ea, pa) {
-      var _this = this;
-
-      _classCallCheck(this, Datasetdetail);
-
-      this.ea = ea;
-      this.pa = pa;
-
-      this.ea.subscribe(_messages.Selectedproject, function (msg) {
-        return _this.selectProject(msg.project);
-      });
-      this.ea.subscribe(_messages.Selecteddataset, function (msg) {
-        return _this.selectDataset(msg.dataset);
-      });
-    }
-
-    Datasetdetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      console.log("dashboarddetail.activate()");
-      if (params && params.projectid) {
-        console.log("dashboarddetail projectid:" + params.projectid);
-        this.filterProject(params.projectid);
-      }
-      if (params && params.datasetid) {
-        console.log("dashboarddetail datasetid:" + params.datasetid);
-        this.filterDataset(params.datasetid);
-      }
-    };
-
-    Datasetdetail.prototype.attached = function attached() {
-      console.log("Dashboard.attached()");
-      this.selectedDataset = this.pa.getSelectedDataset() > 0;
-    };
-
-    Datasetdetail.prototype.selectProject = function selectProject(project) {
-      this.selectedProject = project;
-      this.filterSelectedProposal(project.id);
-      return true;
-    };
-
-    Datasetdetail.prototype.filterSelectedProposal = function filterSelectedProposal(id) {
-      this.selectedProjectId = id;
-      this.filterProject();
-      this.filterDataset();
-    };
-
-    Datasetdetail.prototype.filterProject = function filterProject(projectid) {
-      console.log("dashboarddetail.filterProject()");
-      this.pa.setSelectedProject(projectid);
-      this.ea.publish(new _messages.FilterProject(projectid));
-      this.ea.publish(new _messages.FilterDatasetByProject(projectid));
-    };
-
-    Datasetdetail.prototype.filterDataset = function filterDataset(datasetid) {
-      console.log("dashboarddetail.filterDataset()");
-      this.pa.setSelectedDataset(datasetid);
-      this.ea.publish(new _messages.FilterDataset(datasetid));
-    };
-
-    Datasetdetail.prototype.deselectProposal = function deselectProposal() {};
-
-    Datasetdetail.prototype.selectDataset = function selectDataset(item) {
-      this.selectedDataset = item;
-      if (!item) {
-        deselectDataset();return true;
-      }
-      this.selectedDatasetId = item.id;
-      console.log("selectDataset");
-      console.log(item);
-
-      this.pa.dataseturl = item.webdavurl;
-      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
-      return true;
-    };
-
-    Datasetdetail.prototype.selectFile = function selectFile(file) {
-      console.log("SelectFile()");
-      console.log(file);
-    };
-
-    Datasetdetail.prototype.deleteDataset = function deleteDataset() {
-      var _this2 = this;
-
-      this.pa.deleteDataset(this.selectedDatasetId);
-      then(function (data) {
-        _this2.deselectDataset();
-        var i = _this2.datasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this2.datasets.splice(i, 1);
-        i = _this2.alldatasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this2.alldatasets.splice(i, 1);
-      });
-    };
-
-    return Datasetdetail;
-  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
-});
-define('scientist/projectdetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
-  'use strict';
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.Projectdetail = undefined;
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _class, _temp;
-
-  var Projectdetail = exports.Projectdetail = (_temp = _class = function () {
-    function Projectdetail(ea, pa) {
-      _classCallCheck(this, Projectdetail);
-
-      this.ea = ea;
-      this.pa = pa;
-    }
-
-    Projectdetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
-      console.log("dashboarddetail.activate()");
-      if (params && params.projectid) {
-        this.filterProject(params.projectid);
-      }
-    };
-
-    Projectdetail.prototype.attached = function attached() {
-      console.log("Dashboard.attached()");
-      this.selectedDataset = this.pa.getSelectedDataset() > 0;
-    };
-
-    Projectdetail.prototype.filterProject = function filterProject(projectid) {
-      console.log("dashboarddetail.filterProject()");
-      this.pa.setSelectedProject(projectid);
-      this.ea.publish(new _messages.FilterProject(projectid));
-      this.ea.publish(new _messages.FilterDatasetByProject(projectid));
-    };
-
-    Projectdetail.prototype.selectDataset = function selectDataset(item) {
-      this.selectedDataset = item;
-      if (!item) {
-        deselectDataset();return true;
-      }
-      this.selectedDatasetId = item.id;
-      console.log("selectDataset");
-      console.log(item);
-
-      this.pa.dataseturl = item.webdavurl;
-      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
-      return true;
-    };
-
-    Projectdetail.prototype.selectFile = function selectFile(file) {
-      console.log("SelectFile()");
-      console.log(file);
-    };
-
-    Projectdetail.prototype.deleteDataset = function deleteDataset() {
-      var _this = this;
-
-      this.pa.deleteDataset(this.selectedDatasetId);
-      then(function (data) {
-        _this.deselectDataset();
-        var i = _this.datasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this.datasets.splice(i, 1);
-        i = _this.alldatasets.map(function (e) {
-          return e.id;
-        }).indexOf(data.id);
-        _this.alldatasets.splice(i, 1);
-      });
-    };
-
-    return Projectdetail;
   }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
 });
 define('scientist/repositorytovf',['exports', 'aurelia-event-aggregator', '../components/messages'], function (exports, _aureliaEventAggregator, _messages) {
@@ -3107,27 +2932,6 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     return "string";
   }
 
-  function tokenNestedComment(depth) {
-    return function (stream, state) {
-      var ch
-      while (ch = stream.next()) {
-        if (ch == "*" && stream.eat("/")) {
-          if (depth == 1) {
-            state.tokenize = null
-            break
-          } else {
-            state.tokenize = tokenNestedComment(depth - 1)
-            return state.tokenize(stream, state)
-          }
-        } else if (ch == "/" && stream.eat("*")) {
-          state.tokenize = tokenNestedComment(depth + 1)
-          return state.tokenize(stream, state)
-        }
-      }
-      return "comment"
-    }
-  }
-
   def("text/x-scala", {
     name: "clike",
     keywords: words(
@@ -3183,12 +2987,6 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         } else {
           return false
         }
-      },
-
-      "/": function(stream, state) {
-        if (!stream.eat("*")) return false
-        state.tokenize = tokenNestedComment(1)
-        return state.tokenize(stream, state)
       }
     },
     modeProps: {closeBrackets: {triples: '"'}}
@@ -3223,7 +3021,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       "file import where by get set abstract enum open inner override private public internal " +
       "protected catch finally out final vararg reified dynamic companion constructor init " +
       "sealed field property receiver param sparam lateinit data inline noinline tailrec " +
-      "external annotation crossinline const operator infix suspend actual expect"
+      "external annotation crossinline const operator infix suspend"
     ),
     types: words(
       /* package java.lang */
@@ -3641,7 +3439,6 @@ var xmlConfig = {
   doNotIndent: {},
   allowUnquoted: false,
   allowMissing: false,
-  allowMissingTagName: false,
   caseFold: false
 }
 
@@ -3816,9 +3613,6 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
       state.tagName = stream.current();
       setStyle = "tag";
       return attrState;
-    } else if (config.allowMissingTagName && type == "endTag") {
-      setStyle = "tag bracket";
-      return attrState(type, stream, state);
     } else {
       setStyle = "error";
       return tagNameState;
@@ -3837,9 +3631,6 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
         setStyle = "tag error";
         return closeStateErr;
       }
-    } else if (config.allowMissingTagName && type == "endTag") {
-      setStyle = "tag bracket";
-      return closeState(type, stream, state);
     } else {
       setStyle = "error";
       return closeStateErr;
@@ -4017,7 +3808,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c"), D = kw("keyword d");
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
 
-    return {
+    var jsKeywords = {
       "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
       "return": D, "break": D, "continue": D, "new": kw("new"), "delete": C, "void": C, "throw": C,
       "debugger": kw("debugger"), "var": kw("var"), "const": kw("var"), "let": kw("var"),
@@ -4029,6 +3820,33 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       "yield": C, "export": kw("export"), "import": kw("import"), "extends": C,
       "await": C
     };
+
+    // Extend the 'normal' keywords with the TypeScript language extensions
+    if (isTS) {
+      var type = {type: "variable", style: "type"};
+      var tsKeywords = {
+        // object-like things
+        "interface": kw("class"),
+        "implements": C,
+        "namespace": C,
+
+        // scope modifiers
+        "public": kw("modifier"),
+        "private": kw("modifier"),
+        "protected": kw("modifier"),
+        "abstract": kw("modifier"),
+        "readonly": kw("modifier"),
+
+        // types
+        "string": type, "number": type, "boolean": type, "any": type
+      };
+
+      for (var attr in tsKeywords) {
+        jsKeywords[attr] = tsKeywords[attr];
+      }
+    }
+
+    return jsKeywords;
   }();
 
   var isOperatorChar = /[+\-*&%=<>!?|~^@]/;
@@ -4274,10 +4092,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
   }
 
-  function isModifier(name) {
-    return name == "public" || name == "private" || name == "protected" || name == "abstract" || name == "readonly"
-  }
-
   // Combinators
 
   var defaultVars = {name: "this", next: {name: "arguments"}};
@@ -4334,7 +4148,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "function") return cont(functiondef);
     if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
-    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), className, poplex); }
     if (type == "variable") {
       if (isTS && value == "type") {
         cx.marked = "keyword"
@@ -4345,9 +4158,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (isTS && (value == "module" || value == "enum") && cx.stream.match(/^\s*\w/, false)) {
         cx.marked = "keyword"
         return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
-      } else if (isTS && value == "namespace") {
-        cx.marked = "keyword"
-        return cont(pushlex("form"), expression, block, poplex)
       } else {
         return cont(pushlex("stat"), maybelabel);
       }
@@ -4358,23 +4168,24 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "default") return cont(expect(":"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                      statement, poplex, popcontext);
+    if (type == "class") return cont(pushlex("form"), className, poplex);
     if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
     if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
     if (type == "async") return cont(statement)
     if (value == "@") return cont(expression, statement)
     return pass(pushlex("stat"), expression, expect(";"), poplex);
   }
-  function expression(type, value) {
-    return expressionInner(type, value, false);
+  function expression(type) {
+    return expressionInner(type, false);
   }
-  function expressionNoComma(type, value) {
-    return expressionInner(type, value, true);
+  function expressionNoComma(type) {
+    return expressionInner(type, true);
   }
   function parenExpr(type) {
     if (type != "(") return pass()
     return cont(pushlex(")"), expression, expect(")"), poplex)
   }
-  function expressionInner(type, value, noComma) {
+  function expressionInner(type, noComma) {
     if (cx.state.fatArrowAt == cx.stream.start) {
       var body = noComma ? arrowBodyNoComma : arrowBody;
       if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, expect("=>"), body, popcontext);
@@ -4384,7 +4195,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
     if (type == "function") return cont(functiondef, maybeop);
-    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
+    if (type == "class") return cont(pushlex("form"), classExpression, poplex);
     if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
     if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
     if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
@@ -4482,11 +4293,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(afterprop);
     } else if (type == "jsonld-keyword") {
       return cont(afterprop);
-    } else if (isTS && isModifier(value)) {
-      cx.marked = "keyword"
+    } else if (type == "modifier") {
       return cont(objprop)
     } else if (type == "[") {
-      return cont(expression, maybetype, expect("]"), afterprop);
+      return cont(expression, expect("]"), afterprop);
     } else if (type == "spread") {
       return cont(expressionNoComma, afterprop);
     } else if (value == "*") {
@@ -4588,7 +4398,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
     if (value == "|" || type == ".") return cont(typeexpr)
     if (type == "[") return cont(expect("]"), afterType)
-    if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
+    if (value == "extends") return cont(typeexpr)
   }
   function maybeTypeArgs(_, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
@@ -4603,7 +4413,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     return pass(pattern, maybetype, maybeAssign, vardefCont);
   }
   function pattern(type, value) {
-    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(pattern) }
+    if (type == "modifier") return cont(pattern)
     if (type == "variable") { register(value); return cont(); }
     if (type == "spread") return cont(pattern);
     if (type == "[") return contCommasep(pattern, "]");
@@ -4657,8 +4467,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function funarg(type, value) {
     if (value == "@") cont(expression, funarg)
-    if (type == "spread") return cont(funarg);
-    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
+    if (type == "spread" || type == "modifier") return cont(funarg);
     return pass(pattern, maybetype, maybeAssign);
   }
   function classExpression(type, value) {
@@ -4676,9 +4485,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "{") return cont(pushlex("}"), classBody, poplex);
   }
   function classBody(type, value) {
-    if (type == "async" ||
+    if (type == "modifier" || type == "async" ||
         (type == "variable" &&
-         (value == "static" || value == "get" || value == "set" || (isTS && isModifier(value))) &&
+         (value == "static" || value == "get" || value == "set") &&
          cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false))) {
       cx.marked = "keyword";
       return cont(classBody);
@@ -4688,7 +4497,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(isTS ? classfield : functiondef, classBody);
     }
     if (type == "[")
-      return cont(expression, maybetype, expect("]"), isTS ? classfield : functiondef, classBody)
+      return cont(expression, expect("]"), isTS ? classfield : functiondef, classBody)
     if (value == "*") {
       cx.marked = "keyword";
       return cont(classBody);
@@ -4926,9 +4735,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return ret("qualifier", "qualifier");
     } else if (/[:;{}\[\]\(\)]/.test(ch)) {
       return ret(null, ch);
-    } else if (((ch == "u" || ch == "U") && stream.match(/rl(-prefix)?\(/i)) ||
-               ((ch == "d" || ch == "D") && stream.match("omain(", true, true)) ||
-               ((ch == "r" || ch == "R") && stream.match("egexp(", true, true))) {
+    } else if ((ch == "u" && stream.match(/rl(-prefix)?\(/)) ||
+               (ch == "d" && stream.match("omain(")) ||
+               (ch == "r" && stream.match("egexp("))) {
       stream.backUp(1);
       state.tokenize = tokenParenthesized;
       return ret("property", "word");
@@ -5011,16 +4820,16 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return pushContext(state, stream, "block");
     } else if (type == "}" && state.context.prev) {
       return popContext(state);
-    } else if (supportsAtComponent && /@component/i.test(type)) {
+    } else if (supportsAtComponent && /@component/.test(type)) {
       return pushContext(state, stream, "atComponentBlock");
-    } else if (/^@(-moz-)?document$/i.test(type)) {
+    } else if (/^@(-moz-)?document$/.test(type)) {
       return pushContext(state, stream, "documentTypes");
-    } else if (/^@(media|supports|(-moz-)?document|import)$/i.test(type)) {
+    } else if (/^@(media|supports|(-moz-)?document|import)$/.test(type)) {
       return pushContext(state, stream, "atBlock");
-    } else if (/^@(font-face|counter-style)/i.test(type)) {
+    } else if (/^@(font-face|counter-style)/.test(type)) {
       state.stateArg = type;
       return "restricted_atBlock_before";
-    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/i.test(type)) {
+    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/.test(type)) {
       return "keyframes";
     } else if (type && type.charAt(0) == "@") {
       return pushContext(state, stream, "at");
@@ -5642,7 +5451,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       },
       "@": function(stream) {
         if (stream.eat("{")) return [null, "interpolation"];
-        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/i, false)) return false;
+        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/, false)) return false;
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ["variable-2", "variable-definition"];
@@ -5684,10 +5493,10 @@ define('text!app.html', ['module'], function(module) { module.exports = "<templa
 define('text!icons.css', ['module'], function(module) { module.exports = ".fa {\n  display: inline-block;\n  font-size: inherit;\n  text-rendering: auto;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  width: 16px;\n}\n.fa-remove:before,\n.fa-close:before,\n.fa-times:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20width%3D%27100%25%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2021.9%2021.9%27%20enable-background%3D%27new%200%200%2021.9%2021.9%27%3E%20%3Cg%3E%20%3Cg%3E%20%3Cpath%20d%3D%27M14.1%2C11.3c-0.2-0.2-0.2-0.5%2C0-0.7l7.5-7.5c0.2-0.2%2C0.3-0.5%2C0.3-0.7s-0.1-0.5-0.3-0.7l-1.4-1.4C20%2C0.1%2C19.7%2C0%2C19.5%2C0%20%20c-0.3%2C0-0.5%2C0.1-0.7%2C0.3l-7.5%2C7.5c-0.2%2C0.2-0.5%2C0.2-0.7%2C0L3.1%2C0.3C2.9%2C0.1%2C2.6%2C0%2C2.4%2C0S1.9%2C0.1%2C1.7%2C0.3L0.3%2C1.7C0.1%2C1.9%2C0%2C2.2%2C0%2C2.4%20%20s0.1%2C0.5%2C0.3%2C0.7l7.5%2C7.5c0.2%2C0.2%2C0.2%2C0.5%2C0%2C0.7l-7.5%2C7.5C0.1%2C19%2C0%2C19.3%2C0%2C19.5s0.1%2C0.5%2C0.3%2C0.7l1.4%2C1.4c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3%20%20s0.5-0.1%2C0.7-0.3l7.5-7.5c0.2-0.2%2C0.5-0.2%2C0.7%2C0l7.5%2C7.5c0.2%2C0.2%2C0.5%2C0.3%2C0.7%2C0.3s0.5-0.1%2C0.7-0.3l1.4-1.4c0.2-0.2%2C0.3-0.5%2C0.3-0.7%20%20s-0.1-0.5-0.3-0.7L14.1%2C11.3z%27%2F%3E%20%3C%2Fg%3E%20%3C%2Fg%3E%20%3C%2Fsvg%3E \");\n}\n.fa-cog:before {\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.7%20489.7%27%20style%3D%27enable-background%3Anew%200%200%20489.7%20489.7%3B%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M60.6%2C461.95c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3s12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73%20%20s-73%2C32.7-73%2C73c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6H60.6z%20M24.3%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5s48.5%2C21.8%2C48.5%2C48.5%20%20s-21.8%2C48.5-48.5%2C48.5S24.3%2C115.25%2C24.3%2C88.45z%27%2F%3E%20%20%3Cpath%20d%3D%27M317.1%2C401.25c0-36.1-26.3-66-60.8-71.9V27.75c0-6.8-5.5-12.3-12.3-12.3s-12.3%2C5.5-12.3%2C12.3v301.6%20%20c-34.4%2C5.9-60.8%2C35.8-60.8%2C71.9c0%2C40.3%2C32.8%2C73%2C73%2C73S317.1%2C441.45%2C317.1%2C401.25z%20M195.6%2C401.25c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5S195.6%2C427.95%2C195.6%2C401.25z%27%2F%3E%20%20%3Cpath%20d%3D%27M416.6%2C474.25c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-301.6c34.4-5.9%2C60.8-35.8%2C60.8-71.9c0-40.3-32.8-73-73-73s-73%2C32.7-73%2C73%20%20c0%2C36.1%2C26.3%2C66%2C60.8%2C71.9v301.6C404.3%2C468.75%2C409.8%2C474.25%2C416.6%2C474.25z%20M368.1%2C88.45c0-26.7%2C21.8-48.5%2C48.5-48.5%20%20s48.5%2C21.8%2C48.5%2C48.5s-21.8%2C48.5-48.5%2C48.5C389.8%2C136.95%2C368.1%2C115.25%2C368.1%2C88.45z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E  \");\n}\n.fa-window-minimize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20489.3%20489.3%27%20style%3D%27enable-background%3Anew%200%200%20489.3%20489.3%3B%27%3E%3Cg%3E%09%3Cg%3E%09%09%3Cpath%20d%3D%27M0%2C12.251v464.7c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h224c6.8%2C0%2C12.3-5.5%2C12.3-12.3s-5.5-12.3-12.3-12.3H24.5v-440.2h440.2v210.5%09%09%09c0%2C6.8%2C5.5%2C12.2%2C12.3%2C12.2s12.3-5.5%2C12.3-12.2v-222.7c0-6.8-5.5-12.2-12.3-12.2H12.3C5.5-0.049%2C0%2C5.451%2C0%2C12.251z%27%2F%3E%09%09%3Cpath%20d%3D%27M476.9%2C489.151c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-170.3c0-6.8-5.5-12.3-12.3-12.3H306.6c-6.8%2C0-12.3%2C5.5-12.3%2C12.3v170.4%09%09%09c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h170.3V489.151z%20M318.8%2C318.751h145.9v145.9H318.8V318.751z%27%2F%3E%09%09%3Cpath%20d%3D%27M135.9%2C257.651c0%2C6.8%2C5.5%2C12.3%2C12.3%2C12.3h109.5c6.8%2C0%2C12.3-5.5%2C12.3-12.3v-109.5c0-6.8-5.5-12.3-12.3-12.3%09%09%09s-12.3%2C5.5-12.3%2C12.3v79.9l-138.7-138.7c-4.8-4.8-12.5-4.8-17.3%2C0c-4.8%2C4.8-4.8%2C12.5%2C0%2C17.3l138.7%2C138.7h-79.9%09%09%09C141.4%2C245.351%2C135.9%2C250.851%2C135.9%2C257.651z%27%2F%3E%09%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E\");\n}\n.fa-window-maximize:before{\n  content: url(\"data:image/svg+xml,%3Csvg%20version%3D%271.1%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20x%3D%270px%27%20y%3D%270px%27%20viewBox%3D%270%200%20258.008%20258.008%27%20style%3D%27enable-background%3Anew%200%200%20258.008%20258.008%3B%27%20%20xml%3Aspace%3D%27preserve%27%3E%20%20%3Cg%3E%20%20%3Cg%3E%20%20%3Cpath%20d%3D%27M125.609%2C122.35H10.049C4.5%2C122.35%2C0%2C126.85%2C0%2C132.399v115.56c0%2C5.549%2C4.5%2C10.048%2C10.049%2C10.048H125.61%20%20c5.548%2C0%2C10.046-4.499%2C10.046-10.048v-115.56C135.656%2C126.85%2C131.158%2C122.35%2C125.609%2C122.35z%20M115.559%2C237.909H20.098v-95.463%20%20h95.461V237.909z%27%2F%3E%20%20%3Cpath%20d%3D%27M247.958%2C0.001H10.049C4.5%2C0.001%2C0%2C4.5%2C0%2C10.049v93.312c0%2C5.55%2C4.5%2C10.05%2C10.049%2C10.05c5.55%2C0%2C10.049-4.5%2C10.049-10.05%20%20V20.098h217.812v217.812h-82.915c-5.55%2C0-10.05%2C4.5-10.05%2C10.05c0%2C5.549%2C4.5%2C10.048%2C10.05%2C10.048h92.964%20%20c5.55%2C0%2C10.05-4.499%2C10.05-10.048V10.049C258.008%2C4.5%2C253.508%2C0.001%2C247.958%2C0.001z%27%2F%3E%20%20%3Cpath%20d%3D%27M154.35%2C106.876c1.965%2C1.961%2C4.534%2C2.942%2C7.105%2C2.942c2.57%2C0%2C5.142-0.981%2C7.104-2.942l31.755-31.757V89.57%20%20c0%2C5.549%2C4.499%2C10.047%2C10.05%2C10.047c5.549%2C0%2C10.048-4.498%2C10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068%20%20c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513%20%20c-5.551%2C0-10.051%2C4.5-10.051%2C10.05c0%2C5.549%2C4.5%2C10.049%2C10.051%2C10.049h13.679L154.35%2C92.665%20%20C150.426%2C96.589%2C150.426%2C102.952%2C154.35%2C106.876z%27%2F%3E%20%20%3C%2Fg%3E%20%20%3C%2Fg%3E%20%20%3C%2Fsvg%3E\");\n/*  content: url(\"data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' x='0px' y='0px' viewBox='0 0 258.008 258.008' style='enable-background:new 0 0 258.008 258.008;'  xml:space='preserve'>  <g>  <g>  <path d='M125.609,122.35H10.049C4.5,122.35,0,126.85,0,132.399v115.56c0,5.549,4.5,10.048,10.049,10.048H125.61  c5.548,0,10.046-4.499,10.046-10.048v-115.56C135.656,126.85,131.158,122.35,125.609,122.35z M115.559,237.909H20.098v-95.463  h95.461V237.909z'/>  <path d='M247.958,0.001H10.049C4.5,0.001,0,4.5,0,10.049v93.312c0,5.55,4.5,10.05,10.049,10.05c5.55,0,10.049-4.5,10.049-10.05  V20.098h217.812v217.812h-82.915c-5.55,0-10.05,4.5-10.05,10.05c0,5.549,4.5,10.048,10.05,10.048h92.964  c5.55,0,10.05-4.499,10.05-10.048V10.049C258.008,4.5,253.508,0.001,247.958,0.001z'/>  <path d='M154.35,106.876c1.965,1.961,4.534,2.942,7.105,2.942c2.57,0,5.142-0.981,7.104-2.942l31.755-31.757V89.57  c0,5.549,4.499,10.047,10.05,10.047c5.549,0,10.048-4.498,10.048-10.047V53.054c0-0.365-0.068-0.713-0.107-1.068  c0.329-2.933-0.588-5.979-2.837-8.229c-2.146-2.148-5.023-3.079-7.831-2.873c-0.233-0.017-0.461-0.072-0.696-0.072h-36.513  c-5.551,0-10.051,4.5-10.051,10.05c0,5.549,4.5,10.049,10.051,10.049h13.679L154.35,92.665  C150.426,96.589,150.426,102.952,154.35,106.876z'/>  </g>  </g>  </svg>  \");*/\n}\n\n.fa-caret-down:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 292.362 292.362\" style=\"enable-background:new 0 0 292.362 292.362;\"  xml:space=\"preserve\">  <g>  <path d=\"M286.935,69.377c-3.614-3.617-7.898-5.424-12.848-5.424H18.274c-4.952,0-9.233,1.807-12.85,5.424  C1.807,72.998,0,77.279,0,82.228c0,4.948,1.807,9.229,5.424,12.847l127.907,127.907c3.621,3.617,7.902,5.428,12.85,5.428  s9.233-1.811,12.847-5.428L286.935,95.074c3.613-3.617,5.427-7.898,5.427-12.847C292.362,77.279,290.548,72.998,286.935,69.377z\"/>  </g> </svg>');\n}\n.fa-start:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 16 16\" style=\"enable-background:new 0 0 16 16;\" xml:space=\"preserve\">  <g>  <path d=\"M8,0C3.5,0,0,3.5,0,8s3.5,8,8,8s8-3.5,8-8S12.5,0,8,0z M8,14c-3.5,0-6-2.5-6-6s2.5-6,6-6s6,2.5,6,6  S11.5,14,8,14z\"/>  <polygon points=\"6,12 11,8 6,4\"/></g></svg>');\n}\n.fa-stop:before{\n  content:url('data:image/svg+xml,<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"  viewBox=\"0 0 508.52 508.52\" style=\"enable-background:new 0 0 508.52 508.52;\" xml:space=\"preserve\"><g><path d=\"M254.26,0C113.845,0,0,113.845,0,254.26s113.845,254.26,254.26,254.26s254.26-113.845,254.26-254.26S394.675,0,254.26,0z M254.26,476.737c-122.68,0-222.477-99.829-222.477-222.477c0-122.68,99.797-222.477,222.477-222.477c122.649,0,222.477,99.797,222.477,222.477C476.737,376.908,376.908,476.737,254.26,476.737z\"/><path d=\"M317.825,158.912h-127.13c-17.544,0-31.782,14.239-31.782,31.782v127.13c0,17.544,14.239,31.783,31.782,31.783h127.13c17.544,0,31.783-14.239,31.783-31.783v-127.13C349.607,173.151,335.369,158.912,317.825,158.912z\"/></g></svg>');\n}\n\n/* most icons derived from http://www.flaticon.com/free-icon/caret-down_25243, needs to attribute*/\n\n.vf-transition{\n  -webkit-transition: all 0.5s ease-in-out;\n  -moz-transition: all 0.5s ease-in-out;\n  -ms-transition: all 0.5s ease-in-out;\n  transition: visibility 0.5s, height 0.5s ease-in-out;\n}\n.vf-code-2{line-height:1;font-size:10px}\n\n.CodeMirror {\n  height: 75%!important;\n}\n\n"; });
 define('text!repositoryapp.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <require from=\"components/navigation.html\"></require>\n  <require from=\"components/userinfo\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-row\">\n  <div class=\"w3-col m3 l2\">\n    <navigation router.bind=\"router\"></navigation>\n  </div>\n  <div class=\"w3-col m9 l10\">\n    <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n      <router-view></router-view>\n    </div>\n\n\n  </div>\n  </div>\n  <sharedfooter></sharedfooter>\n\n</template>\n"; });
 define('text!w3.css', ['module'], function(module) { module.exports = "/* W3.CSS 2.99 Mar 2017 by Jan Egil and Borge Refsnes */\nhtml{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}\n/* Extract from normalize.css by Nicolas Gallagher and Jonathan Neal git.io/normalize */\nhtml{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}\narticle,aside,details,figcaption,figure,footer,header,main,menu,nav,section,summary{display:block}\naudio,canvas,progress,video{display:inline-block}progress{vertical-align:baseline}\naudio:not([controls]){display:none;height:0}[hidden],template{display:none}\na{background-color:transparent;-webkit-text-decoration-skip:objects}\na:active,a:hover{outline-width:0}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}\ndfn{font-style:italic}mark{background:#ff0;color:#000}\nsmall{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}\nsub{bottom:-0.25em}sup{top:-0.5em}figure{margin:1em 40px}\nimg{border-style:none}svg:not(:root){overflow:hidden}\ncode,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}\nhr{box-sizing:content-box;height:0;overflow:visible}\nbutton,input,select,textarea{font:inherit;margin:0}optgroup{font-weight:bold}\nbutton,input{overflow:visible}button,select{text-transform:none}\nbutton,html [type=button],[type=reset],[type=submit]{-webkit-appearance:button}\nbutton::-moz-focus-inner, [type=button]::-moz-focus-inner, [type=reset]::-moz-focus-inner, [type=submit]::-moz-focus-inner{border-style:none;padding:0}\nbutton:-moz-focusring, [type=button]:-moz-focusring, [type=reset]:-moz-focusring, [type=submit]:-moz-focusring{outline:1px dotted ButtonText}\nfieldset{border:1px solid #c0c0c0;margin:0 2px;padding:.35em .625em .75em}\nlegend{color:inherit;display:table;max-width:100%;padding:0;white-space:normal}textarea{overflow:auto}\n[type=checkbox],[type=radio]{padding:0}\n[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}\n[type=search]{-webkit-appearance:textfield;outline-offset:-2px}\n[type=search]::-webkit-search-cancel-button,[type=search]::-webkit-search-decoration{-webkit-appearance:none}\n::-webkit-input-placeholder{color:inherit;opacity:0.54}\n::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}\n/* End extract */\nhtml,body{font-family:Verdana,sans-serif;font-size:15px;line-height:1.5}html{overflow-x:hidden}\nh1,h2,h3,h4,h5,h6,.w3-slim,.w3-wide{font-family:\"Segoe UI\",Arial,sans-serif}\nh1{font-size:36px}h2{font-size:30px}h3{font-size:24px}h4{font-size:20px}h5{font-size:18px}h6{font-size:16px}\n.w3-serif{font-family:\"Times New Roman\",Times,serif}\nh1,h2,h3,h4,h5,h6{font-weight:400;margin:10px 0}.w3-wide{letter-spacing:4px}\nh1 a,h2 a,h3 a,h4 a,h5 a,h6 a{font-weight:inherit}\nhr{border:0;border-top:1px solid #eee;margin:20px 0}\na{color:inherit}\n.w3-image{max-width:100%;height:auto}\n.w3-table,.w3-table-all{border-collapse:collapse;border-spacing:0;width:100%;display:table}\n.w3-table-all{border:1px solid #ccc}\n.w3-bordered tr,.w3-table-all tr{border-bottom:1px solid #ddd}\n.w3-striped tbody tr:nth-child(even){background-color:#f1f1f1}\n.w3-table-all tr:nth-child(odd){background-color:#fff}\n.w3-table-all tr:nth-child(even){background-color:#f1f1f1}\n.w3-hoverable tbody tr:hover,.w3-ul.w3-hoverable li:hover{background-color:#ccc}\n.w3-centered tr th,.w3-centered tr td{text-align:center}\n.w3-table td,.w3-table th,.w3-table-all td,.w3-table-all th{padding:0px 0px;display:table-cell;text-align:left;vertical-align:top}\n.w3-table th:first-child,.w3-table td:first-child,.w3-table-all th:first-child,.w3-table-all td:first-child{padding-left:4px}\n.w3-btn,.w3-btn-block,.w3-button{border:none;display:inline-block;outline:0;padding:6px 16px;vertical-align:middle;overflow:hidden;text-decoration:none!important;color:#fff;background-color:#000;text-align:center;cursor:pointer;white-space:nowrap}\n.w3-btn:hover,.w3-btn-block:hover,.w3-btn-floating:hover,.w3-btn-floating-large:hover{box-shadow:0 8px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)}\n.w3-button{color:#000;background-color:#e1e1e1;padding:8px 16px}.w3-button:hover{color:#000!important;background-color:#ccc!important}\n.w3-btn,.w3-btn-floating,.w3-btn-floating-large,.w3-closenav,.w3-opennav,.w3-btn-block,.w3-button{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}\n.w3-btn-floating,.w3-btn-floating-large{display:inline-block;text-align:center;color:#fff;background-color:#000;position:relative;overflow:hidden;z-index:1;padding:0;border-radius:50%;cursor:pointer;font-size:24px}\n.w3-btn-floating{width:40px;height:40px;line-height:40px}.w3-btn-floating-large{width:56px;height:56px;line-height:56px}\n.w3-disabled,.w3-btn:disabled,.w3-button:disabled,.w3-btn-floating:disabled,.w3-btn-floating-large:disabled{cursor:not-allowed;opacity:0.3}.w3-disabled *,:disabled *{pointer-events:none}\n.w3-btn.w3-disabled:hover,.w3-btn-block.w3-disabled:hover,.w3-btn:disabled:hover,.w3-btn-floating.w3-disabled:hover,.w3-btn-floating:disabled:hover,\n.w3-btn-floating-large.w3-disabled:hover,.w3-btn-floating-large:disabled:hover{box-shadow:none}\n.w3-btn-group .w3-btn{float:left}.w3-btn-block{width:100%}\n.w3-btn-bar .w3-btn{box-shadow:none;background-color:inherit;color:inherit;float:left}.w3-btn-bar .w3-btn:hover{background-color:#ccc}\n.w3-badge,.w3-tag,.w3-sign{background-color:#000;color:#fff;display:inline-block;padding-left:8px;padding-right:8px;text-align:center}\n.w3-badge{border-radius:50%}\nul.w3-ul{list-style-type:none;padding:0;margin:0}ul.w3-ul li{padding:6px 2px 6px 16px;border-bottom:1px solid #ddd}ul.w3-ul li:last-child{border-bottom:none}\n.w3-tooltip,.w3-display-container{position:relative}.w3-tooltip .w3-text{display:none}.w3-tooltip:hover .w3-text{display:inline-block}\n.w3-navbar{list-style-type:none;margin:0;padding:0;overflow:hidden}\n.w3-navbar li{float:left}.w3-navbar li a,.w3-navitem,.w3-navbar li .w3-btn,.w3-navbar li .w3-input{display:block;padding:8px 16px}.w3-navbar li .w3-btn,.w3-navbar li .w3-input{border:none;outline:none;width:100%}\n.w3-navbar li a:hover{color:#000;background-color:#ccc}\n.w3-navbar .w3-dropdown-hover,.w3-navbar .w3-dropdown-click{position:static}\n.w3-navbar .w3-dropdown-hover:hover{background-color:#ccc;color:#000}\n.w3-navbar a,.w3-topnav a,.w3-sidenav a,.w3-dropdown-content a,.w3-accordion-content a,.w3-dropnav a,.w3-navblock a{text-decoration:none!important}\n.w3-navbar .w3-opennav.w3-right{float:right!important}.w3-topnav{padding:8px 8px}\n.w3-navblock .w3-dropdown-hover:hover,.w3-navblock .w3-dropdown-click:hover{background-color:#ccc;color:#000}\n.w3-navblock .w3-dropdown-hover,.w3-navblock .w3-dropdown-click{width:100%}.w3-navblock .w3-dropdown-hover .w3-dropdown-content,.w3-navblock .w3-dropdown-click .w3-dropdown-content{min-width:100%}\n.w3-topnav a{padding:0 8px;border-bottom:3px solid transparent;-webkit-transition:border-bottom .25s;transition:border-bottom .25s}\n.w3-topnav a:hover{border-bottom:3px solid #fff}.w3-topnav .w3-dropdown-hover a{border-bottom:0}\n.w3-opennav,.w3-closenav{color:inherit}.w3-opennav:hover,.w3-closenav:hover{cursor:pointer;opacity:0.8}\n.w3-btn,.w3-btn-floating,.w3-dropnav a,.w3-btn-floating-large,.w3-btn-block, .w3-navbar a,.w3-navblock a,.w3-sidenav a,.w3-pagination li a,.w3-hoverable tbody tr,.w3-hoverable li,\n.w3-accordion-content a,.w3-dropdown-content a,.w3-dropdown-click:hover,.w3-dropdown-hover:hover,.w3-opennav,.w3-closenav,.w3-closebtn,*[class*=\"w3-hover-\"]\n{-webkit-transition:background-color .25s,color .15s,box-shadow .25s,opacity 0.25s,filter 0.25s,border 0.15s;transition:background-color .25s,color .15s,box-shadow .15s,opacity .25s,filter .25s,border .15s}\n.w3-ripple:active{opacity:0.5}.w3-ripple{-webkit-transition:opacity 0s;transition:opacity 0s}\n.w3-sidenav,.w3-sidebar{height:100%;width:200px;background-color:#fff;position:fixed!important;z-index:1;overflow:auto}\n.w3-sidenav a,.w3-navblock a{padding:4px 2px 4px 16px}.w3-sidenav a:hover,.w3-navblock a:hover{background-color:#ccc;color:#000}.w3-sidenav a,.w3-dropnav a,.w3-navblock a{display:block}\n.w3-sidenav .w3-dropdown-hover:hover,.w3-sidenav .w3-dropdown-hover:first-child,.w3-sidenav .w3-dropdown-click:hover,.w3-dropnav a:hover{background-color:#ccc;color:#000}\n.w3-sidenav .w3-dropdown-hover,.w3-sidenav .w3-dropdown-click,.w3-bar-block .w3-dropdown-hover,.w3-bar-block .w3-dropdown-click{width:100%}\n.w3-sidenav .w3-dropdown-hover .w3-dropdown-content,.w3-sidenav .w3-dropdown-click .w3-dropdown-content,.w3-bar-block .w3-dropdown-hover .w3-dropdown-content,.w3-bar-block .w3-dropdown-click .w3-dropdown-content{min-width:100%}\n.w3-bar-block .w3-dropdown-hover .w3-button,.w3-bar-block .w3-dropdown-click .w3-button{width:100%;text-align:left;background-color:inherit;color:inherit;padding:6px 2px 6px 16px}\n.w3-main,#main{transition:margin-left .4s}\n.w3-modal{z-index:3;display:none;padding-top:100px;position:fixed;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgb(0,0,0);background-color:rgba(0,0,0,0.4)}\n.w3-modal-content{margin:auto;background-color:#fff;position:relative;padding:0;outline:0;width:600px}.w3-closebtn{text-decoration:none;float:right;font-size:24px;font-weight:bold;color:inherit}\n.w3-closebtn:hover,.w3-closebtn:focus{color:#000;text-decoration:none;cursor:pointer}\n.w3-pagination{display:inline-block;padding:0;margin:0}.w3-pagination li{display:inline}\n.w3-pagination li a{text-decoration:none;color:#000;float:left;padding:8px 16px}\n.w3-pagination li a:hover{background-color:#ccc}\n.w3-input-group,.w3-group{margin-top:24px;margin-bottom:24px}\n.w3-input{padding:8px;display:block;border:none;border-bottom:1px solid #808080;width:100%}\n.w3-label{color:#009688}.w3-input:not(:valid)~.w3-validate{color:#f44336}\n.w3-select{padding:9px 0;width:100%;color:#000;border:1px solid transparent;border-bottom:1px solid #009688}\n.w3-select select:focus{color:#000;border:1px solid #009688}.w3-select option[disabled]{color:#009688}\n.w3-dropdown-click,.w3-dropdown-hover{position:relative;display:inline-block;cursor:pointer}\n.w3-dropdown-hover:hover .w3-dropdown-content{display:block;z-index:1}\n.w3-dropdown-click:hover{background-color:#ccc;color:#000}\n.w3-dropdown-hover:hover > .w3-button:first-child,.w3-dropdown-click:hover > .w3-button:first-child{background-color:#ccc;color:#000}\n.w3-dropdown-content{cursor:auto;color:#000;background-color:#fff;display:none;position:absolute;min-width:160px;margin:0;padding:0}\n.w3-dropdown-content a{padding:6px 16px;display:block}\n.w3-dropdown-content a:hover{background-color:#ccc}\n.w3-accordion{width:100%;cursor:pointer}\n.w3-accordion-content{cursor:auto;display:none;position:relative;width:100%;margin:0;padding:0}\n.w3-accordion-content a{padding:6px 16px;display:block}.w3-accordion-content a:hover{background-color:#ccc}\n.w3-progress-container{width:100%;height:1.5em;position:relative;background-color:#f1f1f1}\n.w3-progressbar{background-color:#757575;height:100%;position:absolute;line-height:inherit}\ninput[type=checkbox].w3-check,input[type=radio].w3-radio{width:24px;height:24px;position:relative;top:6px}\ninput[type=checkbox].w3-check:checked+.w3-validate,input[type=radio].w3-radio:checked+.w3-validate{color:#009688}\ninput[type=checkbox].w3-check:disabled+.w3-validate,input[type=radio].w3-radio:disabled+.w3-validate{color:#aaa}\n.w3-bar{width:100%;overflow:hidden}.w3-center .w3-bar{display:inline-block;width:auto}\n.w3-bar .w3-bar-item{padding:8px 16px;float:left;background-color:inherit;color:inherit;width:auto;border:none;outline:none;display:block}\n.w3-bar .w3-dropdown-hover,.w3-bar .w3-dropdown-click{position:static;float:left}\n.w3-bar .w3-button{background-color:inherit;color:inherit;white-space:normal}\n.w3-bar-block .w3-bar-item{width:100%;display:block;padding:6px 2px 6px 16px;text-align:left;background-color:inherit;color:inherit;border:none;outline:none}\n.w3-block{display:block;width:100%}\n.w3-responsive{overflow-x:auto}\n.w3-container:after,.w3-container:before,.w3-panel:after,.w3-panel:before,.w3-row:after,.w3-row:before,.w3-row-padding:after,.w3-row-padding:before,.w3-cell-row:before,.w3-cell-row:after,\n.w3-topnav:after,.w3-topnav:before,.w3-clear:after,.w3-clear:before,.w3-btn-group:before,.w3-btn-group:after,.w3-btn-bar:before,.w3-btn-bar:after,.w3-bar:before,.w3-bar:after\n{content:\"\";display:table;clear:both}\n.w3-col,.w3-half,.w3-third,.w3-twothird,.w3-threequarter,.w3-quarter{float:left;width:100%}\n.w3-col.s1{width:8.33333%}\n.w3-col.s2{width:16.66666%}\n.w3-col.s3{width:24.99999%}\n.w3-col.s4{width:33.33333%}\n.w3-col.s5{width:41.66666%}\n.w3-col.s6{width:49.99999%}\n.w3-col.s7{width:58.33333%}\n.w3-col.s8{width:66.66666%}\n.w3-col.s9{width:74.99999%}\n.w3-col.s10{width:83.33333%}\n.w3-col.s11{width:91.66666%}\n.w3-col.s12,.w3-half,.w3-third,.w3-twothird,.w3-threequarter,.w3-quarter{width:99.99999%}\n@media (min-width:601px){\n  .w3-col.m1{width:8.33333%}\n  .w3-col.m2{width:16.66666%}\n  .w3-col.m3,.w3-quarter{width:24.99999%}\n  .w3-col.m4,.w3-third{width:33.33333%}\n  .w3-col.m5{width:41.66666%}\n  .w3-col.m6,.w3-half{width:49.99999%}\n  .w3-col.m7{width:58.33333%}\n  .w3-col.m8,.w3-twothird{width:66.66666%}\n  .w3-col.m9,.w3-threequarter{width:74.99999%}\n  .w3-col.m10{width:83.33333%}\n  .w3-col.m11{width:91.66666%}\n  .w3-col.m12{width:99.99999%}}\n@media (min-width:993px){\n  .w3-col.l1{width:8.33333%}\n  .w3-col.l2{width:16.66666%}\n  .w3-col.l3,.w3-quarter{width:24.99999%}\n  .w3-col.l4,.w3-third{width:33.33333%}\n  .w3-col.l5{width:41.66666%}\n  .w3-col.l6,.w3-half{width:49.99999%}\n  .w3-col.l7{width:58.33333%}\n  .w3-col.l8,.w3-twothird{width:66.66666%}\n  .w3-col.l9,.w3-threequarter{width:74.99999%}\n  .w3-col.l10{width:83.33333%}\n  .w3-col.l11{width:91.66666%}\n  .w3-col.l12{width:99.99999%}}\n.w3-content{max-width:980px;margin:auto}\n.w3-rest{overflow:hidden}\n.w3-layout-container,.w3-cell-row{display:table;width:100%}.w3-layout-row{display:table-row}.w3-layout-cell,.w3-layout-col,.w3-cell{display:table-cell}\n.w3-layout-top,.w3-cell-top{vertical-align:top}.w3-layout-middle,.w3-cell-middle{vertical-align:middle}.w3-layout-bottom,.w3-cell-bottom{vertical-align:bottom}\n.w3-hide{display:none!important}.w3-show-block,.w3-show{display:block!important}.w3-show-inline-block{display:inline-block!important}\n@media (max-width:600px){.w3-modal-content{margin:0 10px;width:auto!important}.w3-modal{padding-top:30px}\n  .w3-topnav a{display:block}.w3-navbar li:not(.w3-opennav){float:none;width:100%!important}.w3-navbar li.w3-right{float:none!important}\n  .w3-topnav .w3-dropdown-hover .w3-dropdown-content,.w3-navbar .w3-dropdown-click .w3-dropdown-content,.w3-navbar .w3-dropdown-hover .w3-dropdown-content,.w3-dropdown-hover.w3-mobile .w3-dropdown-content,.w3-dropdown-click.w3-mobile .w3-dropdown-content{position:relative}\n  .w3-topnav,.w3-navbar{text-align:center}.w3-hide-small{display:none!important}.w3-layout-col,.w3-mobile{display:block;width:100%!important}.w3-bar-item.w3-mobile,.w3-dropdown-hover.w3-mobile,.w3-dropdown-click.w3-mobile{text-align:center}\n  .w3-dropdown-hover.w3-mobile,.w3-dropdown-hover.w3-mobile .w3-btn,.w3-dropdown-hover.w3-mobile .w3-button,.w3-dropdown-click.w3-mobile,.w3-dropdown-click.w3-mobile .w3-btn,.w3-dropdown-click.w3-mobile .w3-button{width:100%}}\n@media (max-width:768px){.w3-modal-content{width:500px}.w3-modal{padding-top:50px}}\n@media (min-width:993px){.w3-modal-content{width:900px}.w3-hide-large{display:none!important}.w3-sidenav.w3-collapse,.w3-sidebar.w3-collapse{display:block!important}}\n@media (max-width:992px) and (min-width:601px){.w3-hide-medium{display:none!important}}\n@media (max-width:992px){.w3-sidenav.w3-collapse,.w3-sidebar.w3-collapse{display:none}.w3-main{margin-left:0!important;margin-right:0!important}}\n.w3-top,.w3-bottom{position:fixed;width:100%;z-index:1}.w3-top{top:0}.w3-bottom{bottom:0}\n.w3-overlay{position:fixed;display:none;width:100%;height:100%;top:0;left:0;right:0;bottom:0;background-color:rgba(0,0,0,0.5);z-index:2}\n.w3-left{float:left!important}.w3-right{float:right!important}\n.w3-tiny{font-size:10px!important}.w3-small{font-size:12px!important}\n.w3-medium{font-size:15px!important}.w3-large{font-size:18px!important}\n.w3-xlarge{font-size:24px!important}.w3-xxlarge{font-size:36px!important}\n.w3-xxxlarge{font-size:48px!important}.w3-jumbo{font-size:64px!important}\n.w3-vertical{word-break:break-all;line-height:1;text-align:center;width:0.6em}\n.w3-left-align{text-align:left!important}.w3-right-align{text-align:right!important}\n.w3-justify{text-align:justify!important}.w3-center{text-align:center!important}\n.w3-display-topleft{position:absolute;left:0;top:0}.w3-display-topright{position:absolute;right:0;top:0}\n.w3-display-bottomleft{position:absolute;left:0;bottom:0}.w3-display-bottomright{position:absolute;right:0;bottom:0}\n.w3-display-middle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);-ms-transform:translate(-50%,-50%)}\n.w3-display-left{position:absolute;top:50%;left:0%;transform:translate(0%,-50%);-ms-transform:translate(-0%,-50%)}\n.w3-display-right{position:absolute;top:50%;right:0%;transform:translate(0%,-50%);-ms-transform:translate(0%,-50%)}\n.w3-display-topmiddle{position:absolute;left:50%;top:0;transform:translate(-50%,0%);-ms-transform:translate(-50%,0%)}\n.w3-display-bottommiddle{position:absolute;left:50%;bottom:0;transform:translate(-50%,0%);-ms-transform:translate(-50%,0%)}\n.w3-display-container:hover .w3-display-hover{display:block}.w3-display-container:hover span.w3-display-hover{display:inline-block}.w3-display-hover{display:none}\n.w3-display-position{position:absolute}\n.w3-circle{border-radius:50%!important}\n.w3-round-small{border-radius:2px!important}.w3-round,.w3-round-medium{border-radius:4px!important}\n.w3-round-large{border-radius:8px!important}.w3-round-xlarge{border-radius:16px!important}\n.w3-round-xxlarge{border-radius:32px!important}.w3-round-jumbo{border-radius:64px!important}\n.w3-border-0{border:0!important}.w3-border{border:1px solid #ccc!important}\n.w3-border-top{border-top:1px solid #ccc!important}.w3-border-bottom{border-bottom:1px solid #ccc!important}\n.w3-border-left{border-left:1px solid #ccc!important}.w3-border-right{border-right:1px solid #ccc!important}\n.w3-margin{margin:16px!important}.w3-margin-0{margin:0!important}\n.w3-margin-top{margin-top:16px!important}.w3-margin-bottom{margin-bottom:16px!important}\n.w3-margin-left{margin-left:16px!important}.w3-margin-right{margin-right:16px!important}\n.w3-section{margin-top:16px!important;margin-bottom:16px!important}\n.w3-padding-tiny{padding:2px 4px!important}.w3-padding-small{padding:4px 8px!important}\n.w3-padding-medium,.w3-padding,.w3-form{padding:8px 16px!important}\n.w3-padding-large{padding:12px 24px!important}.w3-padding-xlarge{padding:16px 32px!important}\n.w3-padding-xxlarge{padding:24px 48px!important}.w3-padding-jumbo{padding:32px 64px!important}\n.w3-padding-4{padding-top:4px!important;padding-bottom:4px!important}\n.w3-padding-8{padding-top:8px!important;padding-bottom:8px!important}\n.w3-padding-12{padding-top:12px!important;padding-bottom:12px!important}\n.w3-padding-16{padding-top:16px!important;padding-bottom:16px!important}\n.w3-padding-24{padding-top:24px!important;padding-bottom:24px!important}\n.w3-padding-32{padding-top:32px!important;padding-bottom:32px!important}\n.w3-padding-48{padding-top:48px!important;padding-bottom:48px!important}\n.w3-padding-64{padding-top:64px!important;padding-bottom:64px!important}\n.w3-padding-128{padding-top:128px!important;padding-bottom:128px!important}\n.w3-padding-0{padding:0!important}\n.w3-padding-top{padding-top:8px!important}.w3-padding-bottom{padding-bottom:8px!important}\n.w3-padding-left{padding-left:16px!important}.w3-padding-right{padding-right:16px!important}\n.w3-topbar{border-top:6px solid #ccc!important}.w3-bottombar{border-bottom:6px solid #ccc!important}\n.w3-leftbar{border-left:6px solid #ccc!important}.w3-rightbar{border-right:6px solid #ccc!important}\n.w3-row-padding,.w3-row-padding>.w3-half,.w3-row-padding>.w3-third,.w3-row-padding>.w3-twothird,.w3-row-padding>.w3-threequarter,.w3-row-padding>.w3-quarter,.w3-row-padding>.w3-col{padding:0 8px}\n.w3-spin{animation:w3-spin 2s infinite linear;-webkit-animation:w3-spin 2s infinite linear}\n@-webkit-keyframes w3-spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(359deg);transform:rotate(359deg)}}\n@keyframes w3-spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(359deg);transform:rotate(359deg)}}\n.w3-container{padding:0.01em 16px}\n.w3-panel{padding:0.01em 16px;margin-top:16px!important;margin-bottom:16px!important}\n.w3-example{background-color:#f1f1f1;padding:0.01em 16px}\n.w3-code,.w3-codespan{font-family:Consolas,\"courier new\";font-size:16px}\n.w3-code{line-height:1.4;width:auto;background-color:#fff;padding:8px 12px;border-left:4px solid #4CAF50;word-wrap:break-word}\n.w3-codespan{color:crimson;background-color:#f1f1f1;padding-left:4px;padding-right:4px;font-size:110%}\n.w3-example,.w3-code{margin:20px 0}.w3-card{border:1px solid #ccc}\n.w3-card-2,.w3-example{box-shadow:0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)!important}\n.w3-card-4,.w3-hover-shadow:hover{box-shadow:0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)!important}\n.w3-card-8{box-shadow:0 8px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)!important}\n.w3-card-12{box-shadow:0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19)!important}\n.w3-card-16{box-shadow:0 16px 24px 0 rgba(0,0,0,0.22),0 25px 55px 0 rgba(0,0,0,0.21)!important}\n.w3-card-24{box-shadow:0 24px 24px 0 rgba(0,0,0,0.2),0 40px 77px 0 rgba(0,0,0,0.22)!important}\n.w3-animate-fading{-webkit-animation:fading 10s infinite;animation:fading 10s infinite}\n@-webkit-keyframes fading{0%{opacity:0}50%{opacity:1}100%{opacity:0}}\n@keyframes fading{0%{opacity:0}50%{opacity:1}100%{opacity:0}}\n.w3-animate-opacity{-webkit-animation:opac 0.8s;animation:opac 0.8s}\n@-webkit-keyframes opac{from{opacity:0} to{opacity:1}}\n@keyframes opac{from{opacity:0} to{opacity:1}}\n.w3-animate-top{position:relative;-webkit-animation:animatetop 0.4s;animation:animatetop 0.4s}\n@-webkit-keyframes animatetop{from{top:-300px;opacity:0} to{top:0;opacity:1}}\n@keyframes animatetop{from{top:-300px;opacity:0} to{top:0;opacity:1}}\n.w3-animate-left{position:relative;-webkit-animation:animateleft 0.4s;animation:animateleft 0.4s}\n@-webkit-keyframes animateleft{from{left:-300px;opacity:0} to{left:0;opacity:1}}\n@keyframes animateleft{from{left:-300px;opacity:0} to{left:0;opacity:1}}\n.w3-animate-right{position:relative;-webkit-animation:animateright 0.4s;animation:animateright 0.4s}\n@-webkit-keyframes animateright{from{right:-300px;opacity:0} to{right:0;opacity:1}}\n@keyframes animateright{from{right:-300px;opacity:0} to{right:0;opacity:1}}\n.w3-animate-bottom{position:relative;-webkit-animation:animatebottom 0.4s;animation:animatebottom 0.4s}\n@-webkit-keyframes animatebottom{from{bottom:-300px;opacity:0} to{bottom:0px;opacity:1}}\n@keyframes animatebottom{from{bottom:-300px;opacity:0} to{bottom:0;opacity:1}}\n.w3-animate-zoom {-webkit-animation:animatezoom 0.6s;animation:animatezoom 0.6s}\n@-webkit-keyframes animatezoom{from{-webkit-transform:scale(0)} to{-webkit-transform:scale(1)}}\n@keyframes animatezoom{from{transform:scale(0)} to{transform:scale(1)}}\n.w3-animate-input{-webkit-transition:width 0.4s ease-in-out;transition:width 0.4s ease-in-out}.w3-animate-input:focus{width:100%!important}\n.w3-opacity,.w3-hover-opacity:hover{opacity:0.60;-webkit-backface-visibility:hidden}\n.w3-opacity-off,.w3-hover-opacity-off:hover{opacity:1;-webkit-backface-visibility:hidden}\n.w3-opacity-max{opacity:0.25;-webkit-backface-visibility:hidden}\n.w3-opacity-min{opacity:0.75;-webkit-backface-visibility:hidden}\n.w3-greyscale-max,.w3-grayscale-max,.w3-hover-greyscale:hover,.w3-hover-grayscale:hover{-webkit-filter:grayscale(100%);filter:grayscale(100%)}\n.w3-greyscale,.w3-grayscale{-webkit-filter:grayscale(75%);filter:grayscale(75%)}\n.w3-greyscale-min,.w3-grayscale-min{-webkit-filter:grayscale(50%);filter:grayscale(50%)}\n.w3-sepia{-webkit-filter:sepia(75%);filter:sepia(75%)}\n.w3-sepia-max,.w3-hover-sepia:hover{-webkit-filter:sepia(100%);filter:sepia(100%)}\n.w3-sepia-min{-webkit-filter:sepia(50%);filter:sepia(50%)}\n.w3-text-shadow{text-shadow:1px 1px 0 #444}.w3-text-shadow-white{text-shadow:1px 1px 0 #ddd}\n.w3-transparent{background-color:transparent!important}\n.w3-hover-none:hover{box-shadow:none!important;background-color:transparent!important}\n/* Colors */\n.w3-amber,.w3-hover-amber:hover{color:#000!important;background-color:#ffc107!important}\n.w3-aqua,.w3-hover-aqua:hover{color:#000!important;background-color:#00ffff!important}\n.w3-blue,.w3-hover-blue:hover{color:#fff!important;background-color:#2196F3!important}\n.w3-light-blue,.w3-hover-light-blue:hover{color:#000!important;background-color:#87CEEB!important}\n.w3-brown,.w3-hover-brown:hover{color:#fff!important;background-color:#795548!important}\n.w3-cyan,.w3-hover-cyan:hover{color:#000!important;background-color:#00bcd4!important}\n.w3-blue-grey,.w3-hover-blue-grey:hover,.w3-blue-gray,.w3-hover-blue-gray:hover{color:#fff!important;background-color:#607d8b!important}\n.w3-green,.w3-hover-green:hover{color:#fff!important;background-color:#4CAF50!important}\n.w3-light-green,.w3-hover-light-green:hover{color:#000!important;background-color:#8bc34a!important}\n.w3-indigo,.w3-hover-indigo:hover{color:#fff!important;background-color:#3f51b5!important}\n.w3-khaki,.w3-hover-khaki:hover{color:#000!important;background-color:#f0e68c!important}\n.w3-lime,.w3-hover-lime:hover{color:#000!important;background-color:#cddc39!important}\n.w3-orange,.w3-hover-orange:hover{color:#000!important;background-color:#ff9800!important}\n.w3-deep-orange,.w3-hover-deep-orange:hover{color:#fff!important;background-color:#ff5722!important}\n.w3-pink,.w3-hover-pink:hover{color:#fff!important;background-color:#e91e63!important}\n.w3-purple,.w3-hover-purple:hover{color:#fff!important;background-color:#9c27b0!important}\n.w3-deep-purple,.w3-hover-deep-purple:hover{color:#fff!important;background-color:#673ab7!important}\n.w3-red,.w3-hover-red:hover{color:#fff!important;background-color:#f44336!important}\n.w3-sand,.w3-hover-sand:hover{color:#000!important;background-color:#fdf5e6!important}\n.w3-teal,.w3-hover-teal:hover{color:#fff!important;background-color:#009688!important}\n.w3-yellow,.w3-hover-yellow:hover{color:#000!important;background-color:#ffeb3b!important}\n.w3-white,.w3-hover-white:hover{color:#000!important;background-color:#fff!important}\n.w3-black,.w3-hover-black:hover{color:#fff!important;background-color:#000!important}\n.w3-grey,.w3-hover-grey:hover,.w3-gray,.w3-hover-gray:hover{color:#000!important;background-color:#9e9e9e!important}\n.w3-light-grey,.w3-hover-light-grey:hover,.w3-light-gray,.w3-hover-light-gray:hover{color:#000!important;background-color:#f1f1f1!important}\n.w3-dark-grey,.w3-hover-dark-grey:hover,.w3-dark-gray,.w3-hover-dark-gray:hover{color:#fff!important;background-color:#616161!important}\n.w3-pale-red,.w3-hover-pale-red:hover{color:#000!important;background-color:#ffdddd!important}\n.w3-pale-green,.w3-hover-pale-green:hover{color:#000!important;background-color:#ddffdd!important}\n.w3-pale-yellow,.w3-hover-pale-yellow:hover{color:#000!important;background-color:#ffffcc!important}\n.w3-pale-blue,.w3-hover-pale-blue:hover{color:#000!important;background-color:#ddffff!important}\n.w3-text-amber,.w3-hover-text-amber:hover{color:#ffc107!important}\n.w3-text-aqua,.w3-hover-text-aqua:hover{color:#00ffff!important}\n.w3-text-blue,.w3-hover-text-blue:hover{color:#2196F3!important}\n.w3-text-light-blue,.w3-hover-text-light-blue:hover{color:#87CEEB!important}\n.w3-text-brown,.w3-hover-text-brown:hover{color:#795548!important}\n.w3-text-cyan,.w3-hover-text-cyan:hover{color:#00bcd4!important}\n.w3-text-blue-grey,.w3-hover-text-blue-grey:hover,.w3-text-blue-gray,.w3-hover-text-blue-gray:hover{color:#607d8b!important}\n.w3-text-green,.w3-hover-text-green:hover{color:#4CAF50!important}\n.w3-text-light-green,.w3-hover-text-light-green:hover{color:#8bc34a!important}\n.w3-text-indigo,.w3-hover-text-indigo:hover{color:#3f51b5!important}\n.w3-text-khaki,.w3-hover-text-khaki:hover{color:#b4aa50!important}\n.w3-text-lime,.w3-hover-text-lime:hover{color:#cddc39!important}\n.w3-text-orange,.w3-hover-text-orange:hover{color:#ff9800!important}\n.w3-text-deep-orange,.w3-hover-text-deep-orange:hover{color:#ff5722!important}\n.w3-text-pink,.w3-hover-text-pink:hover{color:#e91e63!important}\n.w3-text-purple,.w3-hover-text-purple:hover{color:#9c27b0!important}\n.w3-text-deep-purple,.w3-hover-text-deep-purple:hover{color:#673ab7!important}\n.w3-text-red,.w3-hover-text-red:hover{color:#f44336!important}\n.w3-text-sand,.w3-hover-text-sand:hover{color:#fdf5e6!important}\n.w3-text-teal,.w3-hover-text-teal:hover{color:#009688!important}\n.w3-text-yellow,.w3-hover-text-yellow:hover{color:#d2be0e!important}\n.w3-text-white,.w3-hover-text-white:hover{color:#fff!important}\n.w3-text-black,.w3-hover-text-black:hover{color:#000!important}\n.w3-text-grey,.w3-hover-text-grey:hover,.w3-text-gray,.w3-hover-text-gray:hover{color:#757575!important}\n.w3-text-light-grey,.w3-hover-text-light-grey:hover,.w3-text-light-gray,.w3-hover-text-light-gray:hover{color:#f1f1f1!important}\n.w3-text-dark-grey,.w3-hover-text-dark-grey:hover,.w3-text-dark-gray,.w3-hover-text-dark-gray:hover{color:#3a3a3a!important}\n.w3-border-amber,.w3-hover-border-amber:hover{border-color:#ffc107!important}\n.w3-border-aqua,.w3-hover-border-aqua:hover{border-color:#00ffff!important}\n.w3-border-blue,.w3-hover-border-blue:hover{border-color:#2196F3!important}\n.w3-border-light-blue,.w3-hover-border-light-blue:hover{border-color:#87CEEB!important}\n.w3-border-brown,.w3-hover-border-brown:hover{border-color:#795548!important}\n.w3-border-cyan,.w3-hover-border-cyan:hover{border-color:#00bcd4!important}\n.w3-border-blue-grey,.w3-hover-border-blue-grey:hover,.w3-border-blue-gray,.w3-hover-border-blue-gray:hover{border-color:#607d8b!important}\n.w3-border-green,.w3-hover-border-green:hover{border-color:#4CAF50!important}\n.w3-border-light-green,.w3-hover-border-light-green:hover{border-color:#8bc34a!important}\n.w3-border-indigo,.w3-hover-border-indigo:hover{border-color:#3f51b5!important}\n.w3-border-khaki,.w3-hover-border-khaki:hover{border-color:#f0e68c!important}\n.w3-border-lime,.w3-hover-border-lime:hover{border-color:#cddc39!important}\n.w3-border-orange,.w3-hover-border-orange:hover{border-color:#ff9800!important}\n.w3-border-deep-orange,.w3-hover-border-deep-orange:hover{border-color:#ff5722!important}\n.w3-border-pink,.w3-hover-border-pink:hover{border-color:#e91e63!important}\n.w3-border-purple,.w3-hover-border-purple:hover{border-color:#9c27b0!important}\n.w3-border-deep-purple,.w3-hover-border-deep-purple:hover{border-color:#673ab7!important}\n.w3-border-red,.w3-hover-border-red:hover{border-color:#f44336!important}\n.w3-border-sand,.w3-hover-border-sand:hover{border-color:#fdf5e6!important}\n.w3-border-teal,.w3-hover-border-teal:hover{border-color:#009688!important}\n.w3-border-yellow,.w3-hover-border-yellow:hover{border-color:#ffeb3b!important}\n.w3-border-white,.w3-hover-border-white:hover{border-color:#fff!important}\n.w3-border-black,.w3-hover-border-black:hover{border-color:#000!important}\n.w3-border-grey,.w3-hover-border-grey:hover,.w3-border-gray,.w3-hover-border-gray:hover{border-color:#9e9e9e!important}\n.w3-border-light-grey,.w3-hover-border-light-grey:hover,.w3-border-light-gray,.w3-hover-border-light-gray:hover{border-color:#f1f1f1!important}\n.w3-border-dark-grey,.w3-hover-border-dark-grey:hover,.w3-border-dark-gray,.w3-hover-border-dark-gray:hover{border-color:#616161!important}\n.w3-border-pale-red,.w3-hover-border-pale-red:hover{border-color:#ffe7e7!important}.w3-border-pale-green,.w3-hover-border-pale-green:hover{border-color:#e7ffe7!important}\n.w3-border-pale-yellow,.w3-hover-border-pale-yellow:hover{border-color:#ffffcc!important}.w3-border-pale-blue,.w3-hover-border-pale-blue:hover{border-color:#e7ffff!important}\n\n"; });
-define('text!staffapp.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <require from=\"components/navigation.html\"></require>\n  <require from=\"components/staffuserinfo\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-row\">\n    <div class=\"w3-col m4 l3\">\n      <navigation router.bind=\"router\"></navigation>\n    </div>\n    <div class=\"w3-col m8 l9\">\n      <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n        <router-view></router-view>\n      </div>\n    </div>\n  </div>\n  <sharedfooter></sharedfooter>\n</template>\n"; });
 define('text!components/heads.css', ['module'], function(module) { module.exports = "nav {\n    float:right!important;\n    border-radius:8px!important;\n  }\n\n  nav ul {\n    margin: 0;\n    padding: 0;\n    list-style: none;\n  }\n\n  nav a:link,\n  nav a:visited {\n    color: #f0f0f0;\n    text-decoration: none;\n  }\n\n  nav li li a:link,\n  nav li li a:visited {\n    color: #303030;\n    text-decoration: none;\n    padding: 6px 8px;\n  }\n\n  nav a {\n    display: block;\n\n  }\n\n  nav li {\n    font-family: 'Lato', sans-serif;\n    font-weight: 400;\n    float: left;\n    background-color: #393b3e;\n    color:#f0f0f0 !important;\n    margin-right: 0px;\n    position: relative;\n    padding: 0.9em;\n  }\n\n  nav li li{\n    width: 160px;\n    z-index:4;\n    background-color:#f0f0f0;\n    padding: 0;\n  }\n\n  nav li:hover {\n    background-color: #55afff;\n  }\n  nav li li:hover {\n    background-color: #757575;\n  }\n\n\n  nav ul ul  {\n    position: absolute;\n    visibility: hidden;\n  }\n\n  nav ul ul ul{\n    position: absolute;\n    right: 100%;\n    top: -2px;\n    border: solid 1px transparent;\n  }\n\n  nav li:hover > ul {\n    visibility: visible;\n  }\n\n  body {\n    line-height: 1.5;\n    font-size:15px;\n    margin:0;\n  }\n\n  .vf-black {\n    color:#fff!important;\n    background-color:#000!important;\n  }\n  .vf-modal{z-index:3;display:none;padding-top:100px;position:fixed;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgb(0,0,0);background-color:rgba(0,0,0,0.4)}\n  .vf-modal-content{margin:auto;background-color:#fff;position:relative;padding:0;outline:0;width:600px}.w3-closebtn{text-decoration:none;float:right;font-size:24px;font-weight:bold;color:inherit}\n  .vf-sand{color:#000!important;background-color:#fdf5e6!important}\n  .vf-card-2{}\n  .vf-white{color:#000!important;background-color:#fff!important}\n  .vf-right-border{\n    border-top-right-radius: 16px;\n    border-bottom-right-radius: 16px;\n  }\n\n.aurelia-hide-remove {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeIn 2s;\n}\n\n.aurelia-hide-add {\n  -webkit-animation: fadeOut 2s;\n  animation: fadeOut 2s;\n}\n\n.aurelia-hide-enter {\n  animation: fadeOut 2s;\n}\n.aurelia-hide-leave {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeIn 2s;\n}\n\n.au-leave-active {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeOut 2s;\n}\n.animation-enter-active {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeIn 2s;\n}\n\n.aurelia-enter-active {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeIn 2s;\n}\n\n.au-enter-active {\n  -webkit-animation: fadeIn 2s;\n  animation: fadeIn 2s;\n}\n\n/* CSS3-Animations */\n@-webkit-keyframes fadeIn {\n  0%   { opacity: 0; }\n  100% { opacity: 1; }\n}\n\n@keyframes fadeIn {\n  0%   { opacity: 0; }\n  100% { opacity: 1; }\n}\n\n@-webkit-keyframes fadeOut {\n  0%   { opacity: 1; }\n  100% { opacity: 0; }\n}\n\n@keyframes fadeOut {\n  0%   { opacity: 1; }\n  100% { opacity: 0; }\n}\n"; });
-define('text!components/datasettable.html', ['module'], function(module) { module.exports = "<template>\n  <!--table class=\"w3-table-all\">\n  <thead>\n  <tr>\n    <th>date</th>\n    <th>Summary</th>\n    <th>i</th>\n  </tr>\n  </thead>\n  <tbody>\n  <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of alldatasets\">\n    <td>${item.date}</td>\n    <td><idata></idata><a class=\"w3-hover-green\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n    <td>${item.info}</td>\n    <td>${item.projectId}</td>\n  </tr>\n  <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n    <td>${selectedDataset.creation_date}</td>\n    <td>${selectedDataset.name}</td>\n    <td>${selectedDataset.summary}</td>\n    <td>${selectedDataset.info}</td>\n    <td>${selectedDataset.projectId}</td>\n  </tr>\n  </tbody>\n</table-->\n  <table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"datasets.length == 0\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"! selectedDataset\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td><idata></idata><a class=\"w3-hover-green\" click.trigger=\"selectDataset(item)\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.name}</a></td>\n      <td><a class=\"w3-hover-green\" click.trigger=\"selectDataset(item)\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"selectedDataset\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\"><idata></idata>${selectedDataset.name}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.summary}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td><icopy href.bind=\"selectedDataset.webdavurl\"></icopy></td>\n      <td><ilink href.bind=\"selectedDataset.zip\"></ilink></td>\n      <td><iupload href.bind=\"selectedDataset.webdavurl\"></iupload></td>\n      <td click.trigger=\"deleteDataset()\"><idelete></idelete></td>\n    </tr>\n    </tbody>\n  </table>\n</template>\n"; });
+define('text!staffapp.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./w3.css\"></require>\n  <require from=\"components/heads.css\"></require>\n  <require from=\"components/sharedheader.html\"></require>\n  <require from=\"components/sharedfooter.html\"></require>\n  <require from=\"components/navigation.html\"></require>\n  <require from=\"components/staffuserinfo\"></require>\n  <sharedheader></sharedheader>\n  <div class=\"w3-row\">\n    <div class=\"w3-col m4 l3\">\n      <navigation router.bind=\"router\"></navigation>\n    </div>\n    <div class=\"w3-col m8 l9\">\n      <div class=\"w3-card-2 w3-white w3-margin w3-padding\">\n        <router-view></router-view>\n      </div>\n    </div>\n  </div>\n  <sharedfooter></sharedfooter>\n</template>\n"; });
 define('text!scientist/dashboard.css', ['module'], function(module) { module.exports = ".aurelia-hide-add {\n  animation: fadeOut 2s;\n}\n\n.aurelia-hide-remove {\n  animation: fadeIn 2s;\n}\n\n@keyframes fadeIn {\n  0%   { opacity: 0; }\n  100% { opacity: 1; }\n}\n\n@keyframes fadeOut {\n  0%   { opacity: 1; }\n  100% { opacity: 0; }\n}\n\n"; });
+define('text!components/datasettable.html', ['module'], function(module) { module.exports = "<template>\n  <!--table class=\"w3-table-all\">\n  <thead>\n  <tr>\n    <th>date</th>\n    <th>Summary</th>\n    <th>i</th>\n  </tr>\n  </thead>\n  <tbody>\n  <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of alldatasets\">\n    <td>${item.date}</td>\n    <td><idata></idata><a class=\"w3-hover-green\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n    <td>${item.info}</td>\n    <td>${item.projectId}</td>\n  </tr>\n  <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n    <td>${selectedDataset.creation_date}</td>\n    <td>${selectedDataset.name}</td>\n    <td>${selectedDataset.summary}</td>\n    <td>${selectedDataset.info}</td>\n    <td>${selectedDataset.projectId}</td>\n  </tr>\n  </tbody>\n</table-->\n  <table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"datasets.length == 0\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"! selectedDataset\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td><idata></idata><a class=\"w3-hover-green\" click.trigger=\"selectDataset(item)\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.name}</a></td>\n      <td><a class=\"w3-hover-green\" click.trigger=\"selectDataset(item)\" route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"selectedDataset\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\"><idata></idata>${selectedDataset.name}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.summary}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td><icopy href.bind=\"selectedDataset.webdavurl\"></icopy></td>\n      <td><ilink href.bind=\"selectedDataset.zip\"></ilink></td>\n      <td><iupload href.bind=\"selectedDataset.webdavurl\"></iupload></td>\n      <td click.trigger=\"deleteDataset()\"><idelete></idelete></td>\n    </tr>\n    </tbody>\n  </table>\n</template>\n"; });
 define('text!components/fileeditor.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"codemirror/lib/codemirror.css\"></require>\n  <require from=\"codemirror/theme/eclipse.css\"></require>\n  <div show.bind=\"!isimage\" class=\"w3-card-2 w3-pale-blue w3-code-2\">\n    Preview file (first 4kB):<i class=\"w3-tiny\">${filename}</i> <span title=\"Click to view data as table\" click.trigger=\"table()\"><itable></itable></span>\n   <div show.bind=\"! showtable\">\n    <textarea ref=\"cmTextarea\">\n\n    </textarea>\n   </div>\n\n    <div show.bind=\"showtable\" ref=\"filetable\">\n\n    </div>\n\n  </div>\n  <div if.bind=\"isimage\" class=\"w3-card-2 w3-code-2\">\n    <img src.bind=\"imageurl\" class=\"w3-image\"/>\n  </div>\n</template>\n"; });
 define('text!components/htable.html', ['module'], function(module) { module.exports = "<template>\n  <div ref=\"idtable\"></div>\n</template>\n"; });
 define('text!components/importaria.html', ['module'], function(module) { module.exports = "<template>\n  <a href.bind=\"ariaurl\" class=\"w3-button w3-small w3-round-small\">Import from ARIA service <ispincog show.bind=\"showspinner\"></ispincog></a>\n</template>\n"; });
@@ -5716,10 +5525,8 @@ define('text!resources/istaff.html', ['module'], function(module) { module.expor
 define('text!resources/itable.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-table\"></i>\n</template>\n"; });
 define('text!resources/iupload.html', ['module'], function(module) { module.exports = "<template bindable=\"href\">\n\n  <i class=\"fa fa-cloud-upload\" click.trigger=\"uploadtovf()\" title=\"Upload to Virtual Folder\"></i>\n</template>\n"; });
 define('text!scientist/createdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/projecttable\"></require>\n  <h3>Create Empty Dataset</h3>\n  <h4>Select Project</h4>\n  <projecttable></projecttable>\n  <h4>Name</h4>\n  <input value.bind=\"datasetname\"/>\n  <h4>Info</h4>\n  <input value.bind=\"datasetinfo\"/>\n  <h4>Summary</h4>\n  <input value.bind=\"datasetsummary\"/>\n  <br/>\n  <button class=\"w3-button\" click.delegate=\"submit()\" disabled.bind=\"!datasetprojectid\">Submit</button>\n  <button class=\"w3-button\" click.delegate=\"generate()\">Fill in sample data</button>\n\n  <table show.bind=\"submitted\"><tr>\n  <td><idata></idata><a class=\"w3-hover-green\" route-href=\"route: datasetdetail; params.bind: {datasetid:submitteditem.id}\">${submitteditem.name} ${submitteditem.info} ${submitteditem.summary}</a></td>\n  </tr></table>\n</template>\n"; });
-define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/searchbydate\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../components/importaria\"></require>\n  <h3>Visitor Dashboard</h3>\n  <htable></htable>\n  <p>You are logged as visiting scientist.\n\n    You can view your datasets available after your visit.\n    <ul><li>To review Visit Proposal, go to Instruct <a target=\"_blank\"\n                                                href=\"https://www.structuralbiology.eu/dashboard?t=instruct\"\n                                                class=\"w3-button w3-round-small w3-small\">Dashboard</a>\n</li>\n    <li>To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\"\n       class=\"w3-button  w3-round-small w3-small\">Submission</a>.\n    </li>\n  <li>\n      To get existing projects from Instruct <importaria></importaria>.\n  <p show.bind=\"importingaria\">Importing from aria <ispincog></ispincog></p>\n  <p show.bind=\"importariaerror\" class=\"w3-pale-red\">Status: ${importariastatus}</p>\n  </li>\n</ul>\n  </p>\n  <div  class=\"w3-half\" show.bind=\"proposals.length>0\">\n  <h4>Aria proposals:</h4>\n    <table class=\"w3-table-all\">\n      <tr>\n        <th>id</th>\n        <th>name</th>\n        <th>status</th>\n      </tr>\n      <tr class=\"w3-hover-green\" repeat.for=\"proposal of proposals\" click.delegate=\"selectProposal(proposal)\">\n        <td>${proposal.pid}</td>\n        <td><iproject></iproject>${proposal.title}</td>\n        <td>${proposal.status}</td>\n      </tr>\n    </table>\n  </div>\n  <div  class=\"w3-half\" show.bind=\"proposals.length>0\">\n    <h4>Aria proposal detail:</h4>\n    <table class=\"w3-table-all\">\n      <tr><td colspan=\"2\">pid: ${selectedProposal.pid}title: ${selectedProposal.title} status: ${selectedProposal.status}</td></tr>\n      <tr><td>${selectedProposal.fields.11.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n      <tr><td>${selectedProposal.fields.12.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n      <tr><td>${selectedProposal.fields.13.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n      <tr><td>${selectedProposal.fields.14.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n      <tr><td>${selectedProposal.fields.15.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n      <tr><td>${selectedProposal.fields.17.title}</td><td>${selectedProposal.fields.11.data}</td></tr>\n    </table>\n    <button class=\"w3-button w3-pale-green\" click.trigger=\"importProposal(selectedProposal)\">Import this proposal as Repository Project</button>\n  </div>\n  <div class=\"w3-clear\"></div>\n  <div class=\"w3-half\">\n\n\n    <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>\n    <projecttable></projecttable>\n\n</div>\n  <div class=\"w3-half\">\n\n    <h4>Available datasets:</h4>\n      <datasettable></datasettable>\n\n  </div>\n\n  <div class=\"w3-clear\"></div>\n</template>\n"; });
+define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/searchbydate\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../components/importaria\"></require>\n  <h3>Visitor Dashboard</h3>\n  <htable></htable>\n  <p>You are logged as visiting scientist.\n\n    You can view your datasets available after your visit.\n    <ul><li>To review Visit Proposal, go to Instruct <a target=\"_blank\"\n                                                href=\"https://www.structuralbiology.eu/dashboard?t=instruct\"\n                                                class=\"w3-button w3-round-small w3-small\">Dashboard</a>\n</li>\n    <li>To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\"\n       class=\"w3-button  w3-round-small w3-small\">Submission</a>.\n    </li>\n  <li>\n      To get existing projects from Instruct <importaria></importaria>.\n  <p show.bind=\"importingaria\">Importing from aria <ispincog></ispincog></p>\n  <p show.bind=\"importariaerror\" class=\"w3-pale-red\">Status: ${importariastatus}</p>\n  </li>\n</ul>\n  </p>\n  <div  class=\"w3-half\" show.bind=\"proposals.length>0\">\n  <h4>Aria proposals:</h4>\n    <table class=\"w3-table-all\">\n      <tr>\n        <th>id</th>\n        <th>name</th>\n        <th>status</th>\n      </tr>\n      <tr show.bind=\"!importingaria\" class=\"w3-hover-green\" repeat.for=\"proposal of proposals\" click.delegate=\"selectProposal(proposal)\">\n        <td>${proposal.pid}</td>\n        <td><iproject></iproject>${proposal.title}</td>\n        <td>${proposal.status}</td>\n      </tr>\n    </table>\n  </div>\n  <div  class=\"w3-half\" if.bind=\"selectedProposal\">\n    <h4>Aria proposal detail:</h4>\n    <table class=\"w3-table-all\">\n      <tr><td colspan=\"2\">pid: ${selectedProposal.pid} title: ${selectedProposal.title} status: ${selectedProposal.status}</td></tr>\n      <tr repeat.for=\"field of selectedFields\"><td><b>${field.title}</b></td><td>${field.data}</td></tr>\n    </table>\n\n    <button class=\"w3-button w3-pale-green\" click.trigger=\"importProposal(selectedProposal)\">Import this proposal as Repository Project</button>\n\n  </div>\n  <div class=\"w3-clear\"></div>\n  <div class=\"w3-half\">\n\n\n    <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>\n    <projecttable></projecttable>\n\n</div>\n  <div class=\"w3-half\">\n\n    <h4>Available datasets:</h4>\n      <datasettable></datasettable>\n\n  </div>\n\n  <div class=\"w3-clear\"></div>\n</template>\n"; });
 define('text!scientist/dashboarddetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project/Dataset Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
-define('text!scientist/datasetdetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project/Dataset Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
-define('text!scientist/projectdetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
 define('text!scientist/repositorytovf.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../pickerclient/pickerclient\"></require>\n  <h3>Repository to West-Life Virtual Folder</h3>\n  <p> This page shows dialog to select files or directories to be uploaded from local repository to user's Virtual Folder.</p>\n  <div show.bind=\"selectingfiles\">\n    <p><b>1.</b>Select files or directories that will be uploaded:</p>\n    <h4>Repository files</h4>\n    <table class=\"w3-table-all\">\n      <thead>\n      <tr>\n        <th>filename</th>\n        <th>date</th>\n        <th colspan=\"2\">action</th>\n      </tr>\n      </thead>\n      <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n        <td class=\"w3-padding-tiny\">${item.name}</td>\n        <td class=\"w3-padding-tiny\">${item.date}</td>\n        <td class=\"w3-padding-tiny\">\n          <button class=\"w3-button w3-padding-tiny\" title=\"delete\" click.trigger=\"deleteitem(item)\">x</button>\n        </td>\n\n      </tr>\n    </table>\n    <button class=\"w3-button\" title=\"submit\" click.trigger=\"submitfiles()\">Submit</button>\n  </div>\n\n  <div show.bind=\"!selectingfiles\">\n    <p><b>1.</b>Selected files: ${selectedfiles} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"unsubmitfiles()\">change</button></p>\n    <p><b>2.</b>Select Virtual Folder:</p>\n    <pickerclient mode=\"dir\"></pickerclient>\n  </div>\n\n  <div show.bind=\"selectedUploadDir\">\n    <p><b>3.</b> Press the button to start <button class=\"w3-button w3-pale-green\" click.trigger=\"copy()\">upload all files.</button></p>\n    <p show.bind=\"copyinprogress\">... upload in progress ...</p>\n  </div>\n\n</template>\n"; });
 define('text!staff/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <h3> Dashboard</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  <a class=\"w3-pale-green w3-button\" route-href=\"route: upselectuser\">Next <inext></inext></a>\n\n\n</template>\n"; });
 define('text!staff/dataupload.html', ['module'], function(module) { module.exports = "<template>\n<h4>Visitor Dataset Upload</h4>\n</template>\n"; });

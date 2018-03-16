@@ -49,8 +49,6 @@ export class ProjectApi {
     this.httpclient.fetch(this.authurl,{method:"POST"}).catch(error=>alert("Backend service not running: "+error.statusText));
   }
 
-
-
   getProjects() {
     //if the projects is already fetched - returns it, otherwise fetch
     if (this.projects.length>0)
@@ -110,6 +108,7 @@ export class ProjectApi {
     return this.httpclient.fetch(this.projecturl, { method:'post', body:json(project)})
       .then(response => response.json())
       .then(data => {
+        console.log("Project submitted");
         this.projects=data; //TODO ???
         return data;
       });
