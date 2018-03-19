@@ -2,7 +2,7 @@ import {ProjectApi} from '../components/projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {
   Selecteddataset, FilterDataset, FilterDatasetByProject, FilterProjectByDataset,
-  Webdavresource
+  Webdavresource, Adddataset
 } from "./messages";
 
 export class Datasettable {
@@ -15,6 +15,7 @@ export class Datasettable {
     this.ea=ea;
     this.ea.subscribe(FilterDataset,msg =>this.filterSelectedDataset(msg.id));
     this.ea.subscribe(FilterDatasetByProject,msg =>this.filterProjectDatasets(msg.id));
+    this.ea.subscribe(Adddataset,msg=> this.addDataset(msg.dataset));
     this.selectedDatasetId=0;
     this.selectedProjectId=0;
   }
@@ -106,6 +107,12 @@ export class Datasettable {
       i=this.alldatasets.map(function(e) {return e.id;}).indexOf(data);
       this.alldatasets.splice(i,1);
     })
+  }
+
+  addDataset(dataset) {
+    console.log("adddataset()");
+    console.log(dataset);
+    this.datasets.push(dataset);
   }
 
 }

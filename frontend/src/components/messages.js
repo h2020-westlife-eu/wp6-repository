@@ -65,3 +65,9 @@ export class Preselecteddatasets {
   constructor(){
   }
 }
+
+export class Adddataset {
+  constructor(dataset){
+    this.dataset= dataset;
+  }
+}

@@ -22,7 +22,7 @@
             </td>
             <td>Totally: ${filestoupload.length} files will be uploaded.</td>
           </tr>
-          <tr class="w3-hover-green w3-small" repeat.for="item of filestoupload" click.trigger="selectItemToUpload(item)">
+          <tr class="w3-hover-green w3-small" repeat.for="item of filestoupload">
             <td class="w3-padding-0">${item.name}</td>
             <td class="w3-padding-0">
               <button class="w3-button  w3-padding-tiny" title="delete" click.delegate="removeItemToUpload(item)">&#10006;</button>

@@ -14,6 +14,6 @@
   <button class="w3-button" click.delegate="generate()">Fill in sample data</button>
 
   <table show.bind="submitted"><tr>
-  <td><idata></idata><a class="w3-hover-green" route-href="route: datasetdetail; params.bind: {datasetid:submitteditem.id}">${submitteditem.name} ${submitteditem.info} ${submitteditem.summary}</a></td>
+  <td><idata></idata><a class="w3-hover-green" click.delegate="selectDataset()" route-href="route: datasetdetail; params.bind: {datasetid:submitteditem.id}">${submitteditem.name} ${submitteditem.info} ${submitteditem.summary}</a></td>
   </tr></table>
 </template>
