@@ -57,6 +57,7 @@ public class RestConTest {
 	}
 
 	private RestCon restCon;
+	private ProjectCon projectCon;
 	private DatasetServiceCon datasetCon;
 	private org.springframework.security.core.userdetails.User  user;
 
@@ -64,6 +65,9 @@ public class RestConTest {
 	public void setUp() throws Exception {
 		this.restCon = this.applicationContext.getBean(
 				RestCon.class
+		);
+		this.projectCon = this.applicationContext.getBean(
+				ProjectCon.class
 		);
 		this.datasetCon = this.applicationContext.getBean(
 				DatasetServiceCon.class
@@ -117,7 +121,7 @@ public class RestConTest {
 		
 		// create a project
 		JProject jProject = new JProject();
-		ResponseEntity<?> response = this.restCon.createProject(
+		ResponseEntity<?> response = this.projectCon.createProject(
 				jProject ,
 				this.user.getUsername(), "", "", ""
 		);
@@ -128,7 +132,7 @@ public class RestConTest {
 		String id = m.group(1);
 		
 		// check it is in the list of projects
-		response = this.restCon.listProject(
+		response = this.projectCon.listProject(
 				this.user.getUsername(), "", "", ""
 		);
 		assertEquals(HttpStatus.OK, response.getStatusCode() );
@@ -147,7 +151,7 @@ public class RestConTest {
 
 	@Test
 	public void testListFiles() {
-		ResponseEntity<?> response = this.restCon.listFiles();
+		ResponseEntity<?> response = this.projectCon.listFiles();
 		assertEquals(HttpStatus.OK, response.getStatusCode() );
 		// TODO check response
 	}
