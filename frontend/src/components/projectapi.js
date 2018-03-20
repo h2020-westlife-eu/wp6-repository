@@ -38,11 +38,15 @@ export class ProjectApi {
     });
     this.selectedProjectId=0;
     this.selectedDatasetId=0;
+    this.selecttedDataset={};
     this.authurl=apiurl+"/authsso";
     //is available if path contains two or more '/' e.g. /staff/
     this.apiavailable=window.location.pathname.startsWith('/staff') || window.location.pathname.startsWith('/repository');
     if (this.apiavailable)
     this.httpclient.fetch(this.authurl,{method:"POST"}).catch(error=>alert("Backend service not running: "+error.statusText));
+    //required by upselectdata and upconfirm
+    this.filestoupload=[];
+    this.selectedUser=null;
   }
 
   getProjects() {
@@ -88,10 +92,13 @@ export class ProjectApi {
   setSelectedDataset(id){
     this.selectedDatasetId=id;
   }
+
   getSelectedDataset(){
     return this.selectedDatasetId;
   }
+
   submitDataset(dataset) {
+    //sets the user - on behalf this request is done
       return this.httpclient.fetch(this.dataurl, { method:'post', body:json(dataset)})
         .then(response => response.json())
         .then(data => {

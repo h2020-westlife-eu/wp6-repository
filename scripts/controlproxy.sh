@@ -23,7 +23,8 @@ mkdir -p $1
 #moddav to get from specified directory
 APACHEFILE=/etc/httpd/conf.d/proxy-${PROXY}.conf
 #change owner to vagrant
-chown -R vagrant:vagrant $1
+chown -R vagrant:apache $1
+chmod 774 $1
 
 echo "Alias '/files/${PROXY}' '$1/'
 <Directory '$1'>

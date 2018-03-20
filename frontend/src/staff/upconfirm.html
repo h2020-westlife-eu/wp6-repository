@@ -1,12 +1,14 @@
 <template>
   <h3>Data Upload - Confirmation</h3>
   <b>Summary</b>
-  <p><b>Dataset ID:</b><i>pa.selectedDatasetId</i></p>
+  <p><b>Dataset:</b><i>${dataset.id}</i> <i>${dataset.name}</i></p>
+  <p><b>Files:</b></p>
   <ul class="w3-tiny">
-  <li repeat.for="file of pa.filestoupload">
-    <i>file</i>
+  <li repeat.for="file of filestoupload">
+    <code>${file.name}</code>
   </li>
+
 </ul>
-  <button class="w3-button w3-pale-green" onclick="alert('Not yet implemented.')">Upload files to dataset</button>
+  <button class="w3-button w3-pale-green" click.trigger="uploadFiles()">Upload files to dataset</button>
 
 </template>

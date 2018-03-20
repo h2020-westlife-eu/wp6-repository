@@ -14,7 +14,7 @@ export class Upselectdataset {
 
   selectedDataset(dataset) {
     console.log('Upselectdataset.selectedDataset()');
-    this.pa.setSelectedDataset(dataset.id);
+    this.pa.selectedDataset=dataset;
     this.router.navigate("upselectdata");
   }
 

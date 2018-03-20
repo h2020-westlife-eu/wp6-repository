@@ -161,12 +161,17 @@ public class DatasetServiceCon extends SharedCon {
 
 
     private Object lock1 = new Object();
+
+    @Secured("USER")
     @RequestMapping(value = {"/dataset"}, method = POST )
     public @ResponseBody ResponseEntity addDataset(@RequestHeader(name="X-USERNAME",defaultValue="") String xusername,@RequestHeader(name="X-NAME",defaultValue="") String xname,@RequestHeader(name="X-EMAIL",defaultValue="") String xemail,@RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody DatasetDTO dto){
         LOG.info("addDataset()");
         if (dto.projectId!=null) {
             //create webdavurl
             String proxycontext= DTOUtils.randomString(8);
+            Project project = projectService.findById(dto.projectId);
+            //if this is done by STAFF - TODO need to check authorization - secured(user) should be enough - but needs to work
+            if (xusername.length()==0) xusername = userService.findById(project.getUserId()).getSsoId();
             String userdir = getUserdir(xusername, proxycontext);
             //TODO check whether webdavurl is unique
             try {
@@ -177,7 +182,7 @@ public class DatasetServiceCon extends SharedCon {
                 dto.setWebdavurl(getUriFromContext(proxycontext));
 
                 // creating dataset in DB
-                Project project = projectService.findById(dto.projectId);
+                //Project project = projectService.findById(dto.projectId);
                 DataSet ds = DTOUtils.getDataset(dto, projectService);
 
                 synchronized (lock1) {

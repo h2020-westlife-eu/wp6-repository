@@ -10,6 +10,7 @@ export class Upselectuser {
  }
 
   attached(){
+    //this.pa.selectedUser;
     this.pa.getUsers()
      .then(data => { this.visitors = data });
  }

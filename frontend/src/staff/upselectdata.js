@@ -10,10 +10,14 @@ export class Upselectdata {
   }
 
   attached() {
+    console.log("Upselectdata.attached()")
+    this.filestoupload=[];
     this.filestoupload= this.pa.filestoupload;
   }
 
   detached() {
+    console.log("Upselectdata.dettached()");
+    console.log(this.filestoupload);
     this.pa.filestoupload=this.filestoupload;
   }
 
@@ -38,17 +42,19 @@ export class Upselectdata {
   }
 
   appendFiles(event){
-    console.log("appendFiles()");
-    console.log(event.target.files);
-    //this.uploadfiles=event.target.files;
+    console.log("appendFiles()",event,this.uploaddir);
+
     this.filestoupload.unshift(...event.target.files);
-    //else this.filestoupload.unshift(event.target.files);
+    console.log("filestoupload",this.filestoupload);
+
   }
 
   appendDir(event) {
-    console.log("appendDir");
-    console.log(event.target.files);
-    this.filestoupload.unshift(...event.target.files)
+    console.log("appendDir",event,this.uploadfiles);
+
+      this.filestoupload.unshift(...event.target.files);
+
+    console.log("filestoupload",this.filestoupload);
   }
 
   submitUpload(){
