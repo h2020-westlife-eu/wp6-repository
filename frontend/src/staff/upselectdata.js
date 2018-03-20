@@ -2,6 +2,7 @@ import {ProjectApi} from "../components/projectapi";
 
 export class Upselectdata {
   static inject = [ProjectApi];
+
   constructor (pa) {
     this.pa=pa;
     this.filestoupload=[];
@@ -14,11 +15,6 @@ export class Upselectdata {
 
   detached() {
     this.pa.filestoupload=this.filestoupload;
-  }
-
-  selectItemToUpload(item) {
-    console.log("selected item");
-    console.log(item);
   }
 
   removeItemToUpload(item){

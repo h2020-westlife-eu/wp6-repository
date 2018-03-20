@@ -1,6 +1,6 @@
 //import {Ariaapi} from '../components/ariaapi';
 import {Ariaapi} from '../components/ariaapixhr';
-//import {ProjectApi} from "../components/projectapi";
+import {ProjectApi} from "../components/projectapi";
 
 const getParams = query => {
   if (!query) {
@@ -20,15 +20,15 @@ const getParams = query => {
 /* Dashboard receives list of projects and list of datasets, in case the project or dataset is selected either by click or within url it is filtered */
 export class Dashboard {
   /* Dashboarddetails shows details of projects/datasets */
-  static inject = [Ariaapi];
-  constructor(ariaapi) {
+  static inject = [Ariaapi,ProjectApi];
+  constructor(ariaapi,pa) {
     this.ariaapi = ariaapi;
-  //  this.pa= pa;
+    this.pa= pa;
     this.importingaria=false;
     this.importariastatus="";
     this.importariaerror=false;
     this.proposals=[];
-    this.selectedProposal={};
+    this.selectedProposal=false;
   }
 /*
   activate(){
@@ -70,18 +70,37 @@ export class Dashboard {
 
   selectProposal(p){
 //    this.selectedProposal=p;
+    this.importingaria=true;
     this.ariaapi.getProposal(p.pid).then(detail =>{
+      this.importingaria=false;
       console.log("Dashboard.selectProposal():")
       console.log(detail);
       this.selectedProposal=detail.proposal;
+      this.selectedFields= Object
+        .keys(this.selectedProposal.fields)
+        .sort((a,b) => +a - +b)
+        .filter(key => !isNaN(+key))
+        .map(key => this.selectedProposal.fields[key]);
     })
+      .catch(error =>{
+        this.importingaria=false;
+        this.importariaerror=true;
+        this.importariastatus= error.statusText;
+      })
   }
 
-/*  importProposal(p) {
-    pr = {};
+  importProposal(p) {
+    let pr={};
     pr.projectName = p.title;
     pr.shareable=p.pid;
-    this.pa.submitProject(pr);
-  }*/
+    this.importingaria=true;
+    this.pa.submitProject(pr).then(response =>{
+      this.importingaria=false;
+    }).catch (error=>{
+      this.importingaria=false;
+      this.importariaerror=true;
+      this.importariastatus= error.statusText;
+    });
+  }
 }
 

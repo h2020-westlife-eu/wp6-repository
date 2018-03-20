@@ -1,6 +1,7 @@
-import {Selectedproject} from "../components/messages";
+import {Selectedproject, Adddataset} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {ProjectApi} from '../components/projectapi';
+
 
 /* Dashboarddetails shows details of projects/datasets */
 export class Createdataset {
@@ -23,6 +24,7 @@ export class Createdataset {
       .then(dataset =>{
         this.submitted=true;
         this.submitteditem=dataset;
+        this.ea.publish(new Adddataset(dataset));
       })
       .catch(error => {
         console.log(error);
@@ -43,6 +45,9 @@ export class Createdataset {
     if (project) {
       this.datasetprojectid = project.id;
     } else this.datasetprojectid=null;
+  }
+
+  selectDataset(){
 
   }
 }
