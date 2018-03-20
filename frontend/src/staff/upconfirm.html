@@ -9,6 +9,6 @@
   </li>
 
 </ul>
-  <button class="w3-button w3-pale-green" click.trigger="uploadFiles()">Upload files to dataset</button>
-
+  <button class="w3-button w3-pale-green" click.trigger="uploadFiles()" disabled.bind="submitted">Upload files to dataset</button>
+  <pre class="w3-tiny">${status}</pre>
 </template>

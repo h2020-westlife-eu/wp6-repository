@@ -11,6 +11,8 @@ export class Upconfirm {
   attached() {
     this.filestoupload= this.pa.filestoupload;
     this.dataset=this.pa.selectedDataset;
+    this.submitted=false;
+    this.status="";
   }
 
   uploadFiles(){
@@ -22,12 +24,15 @@ export class Upconfirm {
     for (let file of this.filestoupload) {
       this.httpclient.fetch(this.dataset.webdavurl+file.name, {method:"PUT",body:file}).then(response =>
       {
+        this.status+=file.name+" -- OK\n"
         console.log("fetch ok:",response);
       }).catch(error => {
+        this.status+=file.name+" -- error\n"
         console.log("fetch error:",error);
         }
       );
     }
+    this.submitted=true;
     //this.pa.filestoupload -> webdav this.pa.dataset
   }
 
