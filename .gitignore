@@ -33,6 +33,5 @@ sp_metadata.pem
 sp-metadata.pem
 sp-metadata.xml
 idp-metadata.xml
-index.php
 backend/wp6-backend.iml
 frontend/ariademo/clientIds.php
