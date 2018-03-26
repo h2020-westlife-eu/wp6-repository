@@ -32,9 +32,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class DatasetServiceCon extends SharedCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
     //REP_USER_DIR environment variable sets directory where new dataset may resist
-    private static final String USER_DIR=Optional.ofNullable(System.getenv("REP_USER_DIR")).orElse("/home/vagrant/work/");
-    private static final String TEST_DIR=Optional.ofNullable(System.getenv("REP_TEST_DIR")).orElse("/home/vagrant/wp6-repository/test/");
-    private static final String SCRIPT_DIR=Optional.ofNullable(System.getenv("REP_SCRIPT_DIR")).orElse("/home/vagrant/wp6-repository/scripts/");
+    private static final String REP_LOCATION=Optional.ofNullable(System.getenv("REP_LOCATION")).orElse("/home/vagrant/wp6_repository/frontend");
+    private static final String USER_DIR=Optional.ofNullable(System.getenv("VF_STORAGE_DIR")).orElse("/home/vagrant/work/");
+    private static final String TEST_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndefOf("/"))+"test";
+    private static final String SCRIPT_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndefOf("/"))+"scripts";
     private static Gson gson = new Gson();
 
     @Autowired
