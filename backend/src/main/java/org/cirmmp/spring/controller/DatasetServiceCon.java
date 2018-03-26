@@ -34,8 +34,8 @@ public class DatasetServiceCon extends SharedCon {
     //REP_USER_DIR environment variable sets directory where new dataset may resist
     private static final String REP_LOCATION=Optional.ofNullable(System.getenv("REP_LOCATION")).orElse("/home/vagrant/wp6_repository/frontend");
     private static final String USER_DIR=Optional.ofNullable(System.getenv("VF_STORAGE_DIR")).orElse("/home/vagrant/work/");
-    private static final String TEST_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndefOf("/"))+"test";
-    private static final String SCRIPT_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndefOf("/"))+"scripts";
+    private static final String TEST_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndexOf("/"))+"test";
+    private static final String SCRIPT_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndexOf("/"))+"scripts";
     private static Gson gson = new Gson();
 
     @Autowired

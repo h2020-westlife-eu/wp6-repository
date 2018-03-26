@@ -1,8 +1,8 @@
 <template>
   <li class="nav-item" show.bind="showuserinfo"> ${userinfo.FirstName} ${userinfo.LastName}
   <ul>
-    <li class="nav-item"><a href="https://auth.west-life.eu/user">West-Life User Account </a></li>
-    <li class="nav-item"><a href="/mellon/logout?ReturnTo=/">Logout</a></li>
+    <li class="nav-item"><a href.bind="userinfo.AccountLink">User Account Info</a></li>
+    <li class="nav-item"><a href.bind="userinfo.LogoutLink">Logout</a></li>
   </ul>
   </li>
 </template>

@@ -21,6 +21,14 @@ public class DTOUtils {
         udto.setEmail(user.getEmail());
         udto.setId(user.getId().toString());
         udto.setSsoId(user.getSsoId());
+
+        if (user.getEmail().contains("eppn")) { //if west-life user - set west-life link
+            udto.setAccountLink("https://auth.west-life.eu/user");
+            udto.setLogoutLink("/mellon/logout?ReturnTo=/");
+        } else {
+            udto.setAccountLink("/admin/user");
+            udto.setLogoutLink("/admin/logout");
+        }
         return udto;
     }
 

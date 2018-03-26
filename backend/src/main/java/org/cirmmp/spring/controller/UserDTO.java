@@ -11,4 +11,6 @@ public class UserDTO {
     private String Email;
     private String Id;
     private String SsoId;
+    private String AccountLink;
+    private String LogoutLink;
 }

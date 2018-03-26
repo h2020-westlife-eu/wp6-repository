@@ -15,7 +15,7 @@ export class Userinfo {
         this.showuserinfo=true;
       })
       .catch(error => {
-        console.log("no user info, disable showing it")
+        console.log("no user info, disable showing it");
         this.showuserinfo=false;
       })
   }
