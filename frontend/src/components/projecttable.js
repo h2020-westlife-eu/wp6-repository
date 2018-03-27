@@ -16,6 +16,7 @@ export class Projecttable {
     this.ea.subscribe(FilterProject,msg =>this.filterSelectedProposal(msg.id));
     this.ea.subscribe(Addproject,msg =>this.addProposal(msg.project));
     this.ea.subscribe(FilterProjectByDataset,msg =>this.filterSelectedProposal(msg.id));
+    console.log("Projecttable() subscribe 2");
   }
 
   attached() {
