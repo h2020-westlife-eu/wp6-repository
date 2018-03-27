@@ -186,8 +186,10 @@ if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) throw new C
         assertThat(
                 response.getStatusLine().getStatusCode(), equalTo(HttpStatus.SC_OK)
         );
-        //TODO delete
-        //HttpDelete request3 = new HttpDelete("http://localhost/repositorytest/restcon/dataset");
+
+        //delete
+        DatasetDTO resource = retrieveResourceFromResponse(response, DatasetDTO.class);
+        HttpDelete request3 = new HttpDelete("http://localhost/repositorytest/restcon/dataset/"+resource.id);
 
     }
 

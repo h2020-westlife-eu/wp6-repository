@@ -5,10 +5,9 @@
         <th>name</th>
         <th>summary</th>
       </tr>
-      <tr show.bind="!selectedProject" class="w3-hover-green" repeat.for="project of projects" >
+      <tr show.bind="!selectedProject" class="w3-hover-green" repeat.for="project of projects" click.delegate="selectProject(project)">
         <td>${project.id}</td>
-        <td><iproject></iproject><a class="w3-hover-green" route-href="route: projectdetail; params.bind: {projectid:project.id}"
-                                    click.delegate="selectProject(project)">${project.projectName}</a></td>
+        <td><a title="click icon to redirect to project details" class="w3-hover-green" route-href="route: projectdetail; params.bind: {projectid:project.id}"><iproject></iproject></a>${project.projectName}</td>
         <td>${project.summary} (${project.datasets})</td>
       </tr>
       <tr show.bind="selectedProject" title="click to show all projects" class="w3-hover-green" click.delegate="deselectProject()">
