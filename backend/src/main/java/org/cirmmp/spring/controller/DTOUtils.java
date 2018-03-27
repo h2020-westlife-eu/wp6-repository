@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.*;
 
 public class DTOUtils {
@@ -76,7 +78,11 @@ public class DTOUtils {
         DataSet ds = new DataSet();
         ds.setId(dto.id);
         ds.setDataName(dto.name);
-        ds.setCreation_date(new Date(dto.creation_date));
+        try {
+            ds.setCreation_date(DateFormat.getDateInstance().parse(dto.creation_date));
+        } catch (ParseException e){
+            ds.setCreation_date(new Date());
+        }
         ds.setDataInfo(dto.info);
         ds.setProject(projectService.findById(dto.projectId));
         ds.setSummary(dto.summary);

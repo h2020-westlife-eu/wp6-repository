@@ -8,8 +8,11 @@ import static org.junit.Assert.*;
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
@@ -19,6 +22,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.Date;
 /*
 @WebAppConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -164,6 +168,26 @@ if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) throw new C
                     resource[0].getId()==resource2[i].getId()
             );
         }
+
+    }
+
+    @Test
+    public void testcreateEmptyDatasets() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost/repositorytest/restcon/user");
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        assertThat(
+                response.getStatusLine().getStatusCode(), equalTo(HttpStatus.SC_OK)
+        );
+        UserDTO user = retrieveResourceFromResponse(response, UserDTO.class);
+        HttpPost request2 = new HttpPost("http://localhost/repositorytest/restcon/dataset");
+        request2.setEntity(new StringEntity("{\"info\":\"0b\",\"name\":\"Antidote\",\"projectId\":1}" ));
+
+        response = HttpClientBuilder.create().build().execute(request2);
+        assertThat(
+                response.getStatusLine().getStatusCode(), equalTo(HttpStatus.SC_OK)
+        );
+        //TODO delete
+        //HttpDelete request3 = new HttpDelete("http://localhost/repositorytest/restcon/dataset");
 
     }
 
