@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,7 @@ public class DatasetServiceCon extends SharedCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
     //REP_USER_DIR environment variable sets directory where new dataset may resist
     private static final String REP_LOCATION=Optional.ofNullable(System.getenv("REP_LOCATION")).orElse("/home/vagrant/wp6_repository");
-    private static final String USER_DIR=Optional.ofNullable(System.getenv("VF_STORAGE_DIR")).orElse("/home/vagrant/work/");
+    private static final String USER_DIR=Optional.ofNullable(System.getenv("VF_STORAGE_DIR")).orElse("/home/vagrant/work");
     private static final String TEST_DIR=REP_LOCATION.substring(0,REP_LOCATION.lastIndexOf("/"))+"test/";
     private static final String SCRIPT_DIR=REP_LOCATION+"/scripts/";
     private static Gson gson = new Gson();
@@ -234,8 +236,20 @@ public class DatasetServiceCon extends SharedCon {
     }
 
     private String getUserdir(String xusername, String proxycontext) {
-        return USER_DIR+xusername.hashCode()+"/"+proxycontext;
+        String uh = getHash(xusername);
+        return USER_DIR+"/"+uh+"/"+proxycontext;
     }
+
+    private String getHash(String xusername) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(xusername.getBytes());
+            return new String(md.digest());
+        } catch (NoSuchAlgorithmException e){
+            return "U"+xusername.hashCode();
+        }
+    }
+
     private String getTestdir(String proxycontext) {
         return TEST_DIR+proxycontext;
     }
