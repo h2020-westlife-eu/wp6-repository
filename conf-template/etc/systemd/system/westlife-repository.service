@@ -4,7 +4,7 @@ Description=West-Life VirtualFolder MetadataService
 [Service]
 Type=simple
 EnvironmentFile=/etc/westlife/repository.key
-Environment=REP_LOCATION=/cvmfs/west-life.egi.eu/software/repository/latest/frontend
+Environment=REP_LOCATION=/cvmfs/west-life.egi.eu/software/repository/latest
 Environment=VF_STORAGE_DIR=/home/vagrant/work
 Environment=VF_ALLOW_FILESYSTEM=true
 Environment=VF_ALLOW_MODULES=true
