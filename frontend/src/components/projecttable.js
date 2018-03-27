@@ -1,6 +1,6 @@
 import {ProjectApi} from './projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
-import {Selectedproject,FilterProject,FilterProjectByDataset,AddProject} from "./messages";
+import {Selectedproject,FilterProject,FilterProjectByDataset,Addproject} from "./messages";
 
 export class Projecttable {
   static inject = [ProjectApi,EventAggregator];
@@ -14,7 +14,7 @@ export class Projecttable {
     this.selectedProjectId=0;
     console.log("Projecttable() subscribe");
     this.ea.subscribe(FilterProject,msg =>this.filterSelectedProposal(msg.id));
-    this.ea.subscribe(AddProject,msg =>this.addProposal(msg.project));
+    this.ea.subscribe(Addproject,msg =>this.addProposal(msg.project));
     this.ea.subscribe(FilterProjectByDataset,msg =>this.filterSelectedProposal(msg.id));
   }
 

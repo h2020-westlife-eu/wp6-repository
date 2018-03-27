@@ -2,7 +2,7 @@
 import {Ariaapi} from '../components/ariaapixhr';
 import {ProjectApi} from "../components/projectapi";
 import {Addproject} from "../components/messages";
-import {EventAggregator} from 'aurelia-event-aggregator';
+import {EventAggregator} from "aurelia-event-aggregator";
 
 const getParams = query => {
   if (!query) {
