@@ -17,6 +17,8 @@ if [ -z ${WP6REPSRC+x} ]; then
 fi
 # copy sp_keys if they exists in /vagrant location
 cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
+# copy ARIA ids from /vagrant location if exists
+cp /vagrant/clientIds.php ${WP6REPSRC}/frontend/ariademo/
 # copy conf files from /vagrant location if exists
 cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
 
