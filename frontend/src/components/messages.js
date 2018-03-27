@@ -71,3 +71,9 @@ export class Adddataset {
     this.dataset= dataset;
   }
 }
+
+export class Addproject {
+  constructor(project){
+    this.project= project;
+  }
+}
