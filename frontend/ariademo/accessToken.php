@@ -93,9 +93,16 @@ if(isset($_GET['code']) && isset($_GET['state'])){
 }
 //otherwise create link
 else {
-  header("Status: 200 OK");
-  header('Content-type: application/json');
-  echo '{"url":"'.$OAservice.'authorize?client_id='.$client_id.'&state='.$_SESSION['OAstate'].'&response_type=code"}';
-  exit;
+  if (isset($client_id)) {
+    header("Status: 200 OK");
+    header('Content-type: application/json');
+    echo '{"url":"' . $OAservice . 'authorize?client_id=' . $client_id . '&state=' . $_SESSION['OAstate'] . '&response_type=code"}';
+    exit;
+  } else {//
+    header("HTTP/1.1 500 Internal Server Error");
+    header('Content-type: application/json');
+    echo '{"error":"ARIA integration not configured. Need client_id, secret_id dedicated to this website."}';
+    exit;
+  }
 }
 ?>
