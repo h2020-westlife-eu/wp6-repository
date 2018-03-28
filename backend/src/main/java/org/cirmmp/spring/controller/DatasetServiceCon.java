@@ -34,7 +34,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class DatasetServiceCon extends SharedCon {
     private static final Logger LOG = LoggerFactory.getLogger(RestCon.class);
     //REP_USER_DIR environment variable sets directory where new dataset may resist
-    private static final String REP_LOCATION=Optional.ofNullable(System.getenv("REP_LOCATION")).orElse("/home/vagrant/wp6_repository");
+    private static final String REP_LOCATION=Optional.ofNullable(System.getenv("REP_LOCATION")).orElse("/home/vagrant/wp6-repository");
     private static final String USER_DIR=Optional.ofNullable(System.getenv("VF_STORAGE_DIR")).orElse("/home/vagrant/work");
     private static final String TEST_DIR=REP_LOCATION+"/test/";
     private static final String SCRIPT_DIR=REP_LOCATION+"/scripts/";
@@ -245,7 +245,9 @@ public class DatasetServiceCon extends SharedCon {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(xusername.getBytes());
-            return new String(md.digest());
+            String hash= new String (Base64.getEncoder().encode(md.digest()));
+            hash = hash.replaceAll("[+//=]","-");
+            return hash;
         } catch (NoSuchAlgorithmException e){
             return "U"+xusername.hashCode();
         }
