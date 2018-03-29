@@ -69,23 +69,29 @@ public class DatasetServiceCon extends SharedCon {
             dataSets = dataSetService.findAllDataset();
 
         }
-        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
 
-        for (DataSet ds : dataSets) {
-            DatasetDTO dto = new DatasetDTO();
-            dto.name = ds.getDataName();
-            dto.info = ds.getDataInfo();
-            //infiles.setProjectId(ifile.getProjectId());
-            dto.creation_date = ds.getCreation_date().toString();
-            dto.summary = ds.getSummary();
-            dto.webdavurl = ds.getUri();
-            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
-            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
-            dto.id = ds.getId();
-            nfiles.add(dto);
+        return new ResponseEntity(DTOUtils.getDatasetDTOS(dataSets), HttpStatus.OK);
+    }
+
+    @Secured("ADMIN")
+    @RequestMapping(value = {"/user/{userId}/dataset"}, method = GET)
+    public ResponseEntity listUserDataset(@PathVariable int userId) {
+        List<DataSet> dataSets;
+        dataSets = dataSetService.findAllDataset();
+
+        //TODO it could be done by SQL query instead of iterating over results here.
+        // filter by project owned by user
+        // get projectids belonging to projects owned by user
+        List<Long> projectids =projectService.findByUserId(userId).stream().map(p -> p.getId()).collect(Collectors.toList());
+        //remove datasets that doesn't belong to project among projectids
+        for (Iterator<DataSet> iter = dataSets.iterator();iter.hasNext();){
+            DataSet a = iter.next();
+            //dataset without project will not be returned, dataset with project belonging to somebody else will be removed
+            if ((a.getProject()==null) || (!(projectids.contains(a.getProject().getId())))) {
+                iter.remove();
+            }
         }
-        LOG.info("listing datasets,nfiles:"+dataSets.size());
-        return new ResponseEntity(nfiles, HttpStatus.OK);
+        return new ResponseEntity(DTOUtils.getDatasetDTOS(dataSets), HttpStatus.OK);
     }
 
     //@Secured seems not to be taken into account
@@ -128,36 +134,10 @@ public class DatasetServiceCon extends SharedCon {
             }
         }
 
-        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
 
-        for (DataSet ds : dataSets) {
-            DatasetDTO dto = new DatasetDTO();
-            dto.name = ds.getDataName();
-            dto.info = ds.getDataInfo();
-            //infiles.setProjectId(ifile.getProjectId());
-            dto.creation_date = ds.getCreation_date().toString();
-            dto.summary = ds.getSummary();
-            dto.webdavurl = ds.getUri();
-            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
-            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
-            dto.id = ds.getId();
-            nfiles.add(dto);
-        }
-        LOG.info("listing datasets,nfiles:"+dataSets.size());
-/*
-        CsrfToken token = (CsrfToken) request.getSession().getAttribute(DEFAULT_CSRF_TOKEN_ATTR_NAME);
-        //now setting the csrf token as http header, client can use it in subsequent POST call
-        if (token==null) token = (CsrfToken) request.getSession().getAttribute("_csrf");
-        if (token==null) token = (CsrfToken) request.getAttribute("_csrf");
-// Spring Security will allow the Token to be included in this header name
-        //response.setHeader("X-CSRF-HEADER", token.getHeaderName());
-// Spring Security will allow the token to be included in this parameter name
-        //response.setHeader("X-CSRF-PARAM", token.getParameterName());
-// this is the value of the token to be included as either a header or an HTTP parameter
-        response.setHeader("X-CSRF-TOKEN", token.getToken());
-*/
-        return new ResponseEntity(nfiles, HttpStatus.OK);
+        return new ResponseEntity(DTOUtils.getDatasetDTOS(dataSets), HttpStatus.OK);
     }
+
 
     @Autowired
     ProjectService projectService;

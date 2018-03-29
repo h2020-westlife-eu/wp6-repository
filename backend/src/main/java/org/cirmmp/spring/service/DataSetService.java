@@ -21,5 +21,7 @@ public interface DataSetService {
 
     List<DataSet> findAllDataset();
 
+    List<DataSet> findAllDatasetByUser(Long userId);
+
     //void update(DataSet dataSet);
 }

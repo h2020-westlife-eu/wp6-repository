@@ -4,9 +4,11 @@ import {
   Selecteddataset, FilterDataset, FilterDatasetByProject, FilterProjectByDataset,
   Webdavresource, Adddataset
 } from "./messages";
+import {bindable} from 'aurelia-framework';
 
 export class Datasettable {
   static inject = [ProjectApi,EventAggregator];
+  @bindable userid;
 
   constructor(pa,ea) {
     this.pa=pa;
@@ -22,7 +24,11 @@ export class Datasettable {
 
   attached() {
     console.log("datasettable attached()");
-    this.pa.getDatasets().then(data => {
+  }
+
+  bind() {
+    console.log("datasettable bind()",this.userid);
+    this.pa.getDatasets(this.userid).then(data => {
       this.alldatasets = data;
       this.datasets=this.alldatasets;
       this.selectedDatasetId=this.pa.getSelectedDataset();

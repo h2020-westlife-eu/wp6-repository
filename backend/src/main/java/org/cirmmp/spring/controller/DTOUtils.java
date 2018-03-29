@@ -91,6 +91,26 @@ public class DTOUtils {
         return ds;
     }
 
+    public static ArrayList<DatasetDTO> getDatasetDTOS(List<DataSet> dataSets) {
+        ArrayList<DatasetDTO> nfiles = new ArrayList<>();
+
+        for (DataSet ds : dataSets) {
+            DatasetDTO dto = new DatasetDTO();
+            dto.name = ds.getDataName();
+            dto.info = ds.getDataInfo();
+            //infiles.setProjectId(ifile.getProjectId());
+            dto.creation_date = ds.getCreation_date().toString();
+            dto.summary = ds.getSummary();
+            dto.webdavurl = ds.getUri();
+            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
+            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
+            dto.id = ds.getId();
+            nfiles.add(dto);
+        }
+        return nfiles;
+    }
+
+
     public static String ExecuteCommand(String cmdline) throws IOException {
 
 

@@ -1,10 +1,13 @@
 <template>
   <require from="../components/datasettable"></require>
   <require from="../scientist/createdataset"></require>
-  <h3>Upload - Select Dataset</h3>
-  <p>Select dataset for user:<a route-href="route:selectuser" title="ammend selection of user">(${selectedUser.Id}) ${selectedUser.FirstName} ${selectedUser.LastName}</a></p>
+  <h3>Upload</h3>
 
-  <datasettable></datasettable>
+  <h4>Select Dataset</h4>
+  <p>Select dataset for user:<a route-href="route:selectuser" title="ammend selection of user">(${pa.selectedUser.Id}) ${selectedUser.FirstName} ${selectedUser.LastName}</a></p>
+
+  <datasettable userid.bind="pa.selectedUser.Id"></datasettable>
+  <h4>Or Create New Dataset</h4>
   <createdataset></createdataset>
 
 

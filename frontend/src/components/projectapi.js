@@ -16,6 +16,7 @@ export class ProjectApi {
     //else if (window.location.pathname.indexOf('repositorytest')>0) apiurl = "/restcontest";
     this.projecturl=apiurl+"/project";
     this.dataurl=apiurl+"/dataset";
+    //this.userdataurl=apiurl+"/user";
     this.copytaskurl=apiurl+"/copytask";
     this.userinfourl=apiurl+"/user";
     this.staffuserinfourl=apiurl+"/user";
@@ -73,12 +74,15 @@ export class ProjectApi {
     return this.selectedProjectId;
   }
 
-  getDatasets() {
+  getDatasets(userid) {
   //  await sleep(1000);
+    console.log("projectapi,getDatasets()",userid);
+    let userdataurl=(userid)?this.userinfourl+"/"+userid+"/dataset":this.dataurl;
+    //get them all the times?
     if (this.datasets.length>0)
       return new Promise(resolve => resolve(this.datasets))
     else
-    return this.httpclient.fetch(this.dataurl)
+    return this.httpclient.fetch(userdataurl)
       .then(response => response.json())
       .then(data => {
         this.datasets=data;
