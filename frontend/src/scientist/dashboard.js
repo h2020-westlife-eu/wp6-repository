@@ -98,8 +98,7 @@ export class Dashboard {
     pr.shareable=p.pid;
 
     this.importingaria=true;
-    this.pa.submitProject(pr).then(response => response.json())
-      .then(data =>{
+    this.pa.submitProject(pr).then(data =>{
       this.importingaria=false;
       this.ea.publish(new Addproject(data))
     }).catch (error=>{
