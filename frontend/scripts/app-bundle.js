@@ -1009,12 +1009,19 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
       this.selectedUser = null;
     }
 
-    ProjectApi.prototype.getProjects = function getProjects() {
+    ProjectApi.prototype.getUserProjects = function getUserProjects() {
+      return getProjects(this.selectedUser.Id);
+    };
+
+    ProjectApi.prototype.getProjects = function getProjects(userid) {
       var _this = this;
+
+      console.log("projectapi,getProjects()", userid);
+      var userprojecturl = userid ? this.userinfourl + "/" + userid + "/project" : this.projecturl;
 
       if (this.projects.length > 0) return new Promise(function (resolve) {
         return resolve(_this.projects);
-      });else return this.httpclient.fetch(this.projecturl).then(function (response) {
+      });else return this.httpclient.fetch(userprojecturl).then(function (response) {
         return response.json();
       }).then(function (data) {
         _this.projects = data;
@@ -1030,6 +1037,10 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
 
     ProjectApi.prototype.getSelectedProject = function getSelectedProject() {
       return this.selectedProjectId;
+    };
+
+    ProjectApi.prototype.getUserDatasets = function getUserDatasets() {
+      return getDatasets(this.selectedUser.Id);
     };
 
     ProjectApi.prototype.getDatasets = function getDatasets(userid) {
@@ -1136,7 +1147,7 @@ define('components/projectapi',["exports", "aurelia-fetch-client"], function (ex
     return ProjectApi;
   }(), _class.inject = [_aureliaFetchClient.HttpClient], _temp);
 });
-define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggregator', './messages'], function (exports, _projectapi, _aureliaEventAggregator, _messages) {
+define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggregator', './messages', 'aurelia-framework'], function (exports, _projectapi, _aureliaEventAggregator, _messages, _aureliaFramework) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1144,19 +1155,64 @@ define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggr
   });
   exports.Projecttable = undefined;
 
+  function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable,
+      writable: descriptor.writable,
+      value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
 
-  var _class, _temp;
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
 
-  var Projecttable = exports.Projecttable = (_temp = _class = function () {
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+  }
+
+  var _desc, _value, _class, _descriptor, _class2, _temp;
+
+  var Projecttable = exports.Projecttable = (_class = (_temp = _class2 = function () {
     function Projecttable(pa, ea) {
       var _this = this;
 
       _classCallCheck(this, Projecttable);
+
+      _initDefineProp(this, 'userid', _descriptor, this);
 
       console.log("Projecttable()");
       this.pa = pa;
@@ -1177,11 +1233,11 @@ define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggr
       console.log("Projecttable() subscribe 2");
     }
 
-    Projecttable.prototype.attached = function attached() {
+    Projecttable.prototype.bind = function bind() {
       var _this2 = this;
 
-      console.log("projecttableattached()");
-      this.pa.getProjects().then(function (data) {
+      console.log("projecttable bind()", this.userid);
+      this.pa.getProjects(this.userid).then(function (data) {
         _this2.projects = data;
 
         _this2.selectedProjectId = _this2.pa.getSelectedProject();
@@ -1192,7 +1248,6 @@ define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggr
 
     Projecttable.prototype.filterSelectedProposal = function filterSelectedProposal(id) {
       this.selectedProjectId = id;
-
       if (this.projects.length > 0) {
         this.selectedProject = this.projects.filter(function (i) {
           return i.id == id;
@@ -1222,7 +1277,10 @@ define('components/projecttable',['exports', './projectapi', 'aurelia-event-aggr
     };
 
     return Projecttable;
-  }(), _class.inject = [_projectapi.ProjectApi, _aureliaEventAggregator.EventAggregator], _temp);
+  }(), _class2.inject = [_projectapi.ProjectApi, _aureliaEventAggregator.EventAggregator], _temp), (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'userid', [_aureliaFramework.bindable], {
+    enumerable: true,
+    initializer: null
+  })), _class);
 });
 define('components/searchbydate',["exports"], function (exports) {
   "use strict";
@@ -1789,7 +1847,7 @@ define('resources/iupload',["exports", "aurelia-framework", "../components/proje
     initializer: null
   })), _class);
 });
-define('scientist/createdataset',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
+define('scientist/createdataset',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi', 'aurelia-framework'], function (exports, _messages, _aureliaEventAggregator, _projectapi, _aureliaFramework) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -1797,19 +1855,64 @@ define('scientist/createdataset',['exports', '../components/messages', 'aurelia-
   });
   exports.Createdataset = undefined;
 
+  function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+      enumerable: descriptor.enumerable,
+      configurable: descriptor.configurable,
+      writable: descriptor.writable,
+      value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+  }
+
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
 
-  var _class, _temp;
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
 
-  var Createdataset = exports.Createdataset = (_temp = _class = function () {
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+  }
+
+  var _desc, _value, _class, _descriptor, _class2, _temp;
+
+  var Createdataset = exports.Createdataset = (_class = (_temp = _class2 = function () {
     function Createdataset(ea, pa) {
       var _this = this;
 
       _classCallCheck(this, Createdataset);
+
+      _initDefineProp(this, 'userid', _descriptor, this);
 
       this.ea = ea;
       this.pa = pa;
@@ -1855,7 +1958,10 @@ define('scientist/createdataset',['exports', '../components/messages', 'aurelia-
     Createdataset.prototype.selectDataset = function selectDataset() {};
 
     return Createdataset;
-  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
+  }(), _class2.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp), (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'userid', [_aureliaFramework.bindable], {
+    enumerable: true,
+    initializer: null
+  })), _class);
 });
 define('scientist/dashboard',["exports", "../components/ariaapixhr", "../components/projectapi", "../components/messages", "aurelia-event-aggregator"], function (exports, _ariaapixhr, _projectapi, _messages, _aureliaEventAggregator) {
   "use strict";
@@ -2068,6 +2174,204 @@ define('scientist/dashboarddetail',['exports', '../components/messages', 'aureli
     };
 
     return Dashboarddetail;
+  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
+});
+define('scientist/datasetdetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Datasetdetail = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Datasetdetail = exports.Datasetdetail = (_temp = _class = function () {
+    function Datasetdetail(ea, pa) {
+      var _this = this;
+
+      _classCallCheck(this, Datasetdetail);
+
+      this.ea = ea;
+      this.pa = pa;
+
+      this.ea.subscribe(_messages.Selectedproject, function (msg) {
+        return _this.selectProject(msg.project);
+      });
+      this.ea.subscribe(_messages.Selecteddataset, function (msg) {
+        return _this.selectDataset(msg.dataset);
+      });
+    }
+
+    Datasetdetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      console.log("dashboarddetail.activate()");
+      if (params && params.projectid) {
+        console.log("dashboarddetail projectid:" + params.projectid);
+        this.filterProject(params.projectid);
+      }
+      if (params && params.datasetid) {
+        console.log("dashboarddetail datasetid:" + params.datasetid);
+        this.filterDataset(params.datasetid);
+      }
+    };
+
+    Datasetdetail.prototype.attached = function attached() {
+      console.log("Dashboard.attached()");
+      this.selectedDataset = this.pa.getSelectedDataset() > 0;
+    };
+
+    Datasetdetail.prototype.selectProject = function selectProject(project) {
+      this.selectedProject = project;
+      this.filterSelectedProposal(project.id);
+      return true;
+    };
+
+    Datasetdetail.prototype.filterSelectedProposal = function filterSelectedProposal(id) {
+      this.selectedProjectId = id;
+      this.filterProject();
+      this.filterDataset();
+    };
+
+    Datasetdetail.prototype.filterProject = function filterProject(projectid) {
+      console.log("dashboarddetail.filterProject()");
+      this.pa.setSelectedProject(projectid);
+      this.ea.publish(new _messages.FilterProject(projectid));
+      this.ea.publish(new _messages.FilterDatasetByProject(projectid));
+    };
+
+    Datasetdetail.prototype.filterDataset = function filterDataset(datasetid) {
+      console.log("dashboarddetail.filterDataset()");
+      this.pa.setSelectedDataset(datasetid);
+      this.ea.publish(new _messages.FilterDataset(datasetid));
+    };
+
+    Datasetdetail.prototype.deselectProposal = function deselectProposal() {};
+
+    Datasetdetail.prototype.selectDataset = function selectDataset(item) {
+      this.selectedDataset = item;
+      if (!item) {
+        deselectDataset();return true;
+      }
+      this.selectedDatasetId = item.id;
+      console.log("selectDataset");
+      console.log(item);
+
+      this.pa.dataseturl = item.webdavurl;
+      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
+      return true;
+    };
+
+    Datasetdetail.prototype.selectFile = function selectFile(file) {
+      console.log("SelectFile()");
+      console.log(file);
+    };
+
+    Datasetdetail.prototype.deleteDataset = function deleteDataset() {
+      var _this2 = this;
+
+      this.pa.deleteDataset(this.selectedDatasetId);
+      then(function (data) {
+        _this2.deselectDataset();
+        var i = _this2.datasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this2.datasets.splice(i, 1);
+        i = _this2.alldatasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this2.alldatasets.splice(i, 1);
+      });
+    };
+
+    return Datasetdetail;
+  }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
+});
+define('scientist/projectdetail',['exports', '../components/messages', 'aurelia-event-aggregator', '../components/projectapi'], function (exports, _messages, _aureliaEventAggregator, _projectapi) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.Projectdetail = undefined;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  var _class, _temp;
+
+  var Projectdetail = exports.Projectdetail = (_temp = _class = function () {
+    function Projectdetail(ea, pa) {
+      _classCallCheck(this, Projectdetail);
+
+      this.ea = ea;
+      this.pa = pa;
+    }
+
+    Projectdetail.prototype.activate = function activate(params, routeConfig, navigationInstruction) {
+      console.log("dashboarddetail.activate()");
+      if (params && params.projectid) {
+        this.filterProject(params.projectid);
+      }
+    };
+
+    Projectdetail.prototype.attached = function attached() {
+      console.log("Dashboard.attached()");
+      this.selectedDataset = this.pa.getSelectedDataset() > 0;
+    };
+
+    Projectdetail.prototype.filterProject = function filterProject(projectid) {
+      console.log("dashboarddetail.filterProject()");
+      this.pa.setSelectedProject(projectid);
+      this.ea.publish(new _messages.FilterProject(projectid));
+      this.ea.publish(new _messages.FilterDatasetByProject(projectid));
+    };
+
+    Projectdetail.prototype.selectDataset = function selectDataset(item) {
+      this.selectedDataset = item;
+      if (!item) {
+        deselectDataset();return true;
+      }
+      this.selectedDatasetId = item.id;
+      console.log("selectDataset");
+      console.log(item);
+
+      this.pa.dataseturl = item.webdavurl;
+      this.ea.publish(new _messages.Webdavresource(item.webdavurl));
+      return true;
+    };
+
+    Projectdetail.prototype.selectFile = function selectFile(file) {
+      console.log("SelectFile()");
+      console.log(file);
+    };
+
+    Projectdetail.prototype.deleteDataset = function deleteDataset() {
+      var _this = this;
+
+      this.pa.deleteDataset(this.selectedDatasetId);
+      then(function (data) {
+        _this.deselectDataset();
+        var i = _this.datasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this.datasets.splice(i, 1);
+        i = _this.alldatasets.map(function (e) {
+          return e.id;
+        }).indexOf(data.id);
+        _this.alldatasets.splice(i, 1);
+      });
+    };
+
+    return Projectdetail;
   }(), _class.inject = [_aureliaEventAggregator.EventAggregator, _projectapi.ProjectApi], _temp);
 });
 define('scientist/repositorytovf',['exports', 'aurelia-event-aggregator', '../components/messages'], function (exports, _aureliaEventAggregator, _messages) {
@@ -3082,6 +3386,27 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
     return "string";
   }
 
+  function tokenNestedComment(depth) {
+    return function (stream, state) {
+      var ch
+      while (ch = stream.next()) {
+        if (ch == "*" && stream.eat("/")) {
+          if (depth == 1) {
+            state.tokenize = null
+            break
+          } else {
+            state.tokenize = tokenNestedComment(depth - 1)
+            return state.tokenize(stream, state)
+          }
+        } else if (ch == "/" && stream.eat("*")) {
+          state.tokenize = tokenNestedComment(depth + 1)
+          return state.tokenize(stream, state)
+        }
+      }
+      return "comment"
+    }
+  }
+
   def("text/x-scala", {
     name: "clike",
     keywords: words(
@@ -3137,6 +3462,12 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         } else {
           return false
         }
+      },
+
+      "/": function(stream, state) {
+        if (!stream.eat("*")) return false
+        state.tokenize = tokenNestedComment(1)
+        return state.tokenize(stream, state)
       }
     },
     modeProps: {closeBrackets: {triples: '"'}}
@@ -3171,7 +3502,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
       "file import where by get set abstract enum open inner override private public internal " +
       "protected catch finally out final vararg reified dynamic companion constructor init " +
       "sealed field property receiver param sparam lateinit data inline noinline tailrec " +
-      "external annotation crossinline const operator infix suspend"
+      "external annotation crossinline const operator infix suspend actual expect"
     ),
     types: words(
       /* package java.lang */
@@ -3589,6 +3920,7 @@ var xmlConfig = {
   doNotIndent: {},
   allowUnquoted: false,
   allowMissing: false,
+  allowMissingTagName: false,
   caseFold: false
 }
 
@@ -3763,6 +4095,9 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
       state.tagName = stream.current();
       setStyle = "tag";
       return attrState;
+    } else if (config.allowMissingTagName && type == "endTag") {
+      setStyle = "tag bracket";
+      return attrState(type, stream, state);
     } else {
       setStyle = "error";
       return tagNameState;
@@ -3781,6 +4116,9 @@ CodeMirror.defineMode("xml", function(editorConf, config_) {
         setStyle = "tag error";
         return closeStateErr;
       }
+    } else if (config.allowMissingTagName && type == "endTag") {
+      setStyle = "tag bracket";
+      return closeState(type, stream, state);
     } else {
       setStyle = "error";
       return closeStateErr;
@@ -3958,7 +4296,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c"), D = kw("keyword d");
     var operator = kw("operator"), atom = {type: "atom", style: "atom"};
 
-    var jsKeywords = {
+    return {
       "if": kw("if"), "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
       "return": D, "break": D, "continue": D, "new": kw("new"), "delete": C, "void": C, "throw": C,
       "debugger": kw("debugger"), "var": kw("var"), "const": kw("var"), "let": kw("var"),
@@ -3970,33 +4308,6 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       "yield": C, "export": kw("export"), "import": kw("import"), "extends": C,
       "await": C
     };
-
-    // Extend the 'normal' keywords with the TypeScript language extensions
-    if (isTS) {
-      var type = {type: "variable", style: "type"};
-      var tsKeywords = {
-        // object-like things
-        "interface": kw("class"),
-        "implements": C,
-        "namespace": C,
-
-        // scope modifiers
-        "public": kw("modifier"),
-        "private": kw("modifier"),
-        "protected": kw("modifier"),
-        "abstract": kw("modifier"),
-        "readonly": kw("modifier"),
-
-        // types
-        "string": type, "number": type, "boolean": type, "any": type
-      };
-
-      for (var attr in tsKeywords) {
-        jsKeywords[attr] = tsKeywords[attr];
-      }
-    }
-
-    return jsKeywords;
   }();
 
   var isOperatorChar = /[+\-*&%=<>!?|~^@]/;
@@ -4242,6 +4553,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
   }
 
+  function isModifier(name) {
+    return name == "public" || name == "private" || name == "protected" || name == "abstract" || name == "readonly"
+  }
+
   // Combinators
 
   var defaultVars = {name: "this", next: {name: "arguments"}};
@@ -4298,6 +4613,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "function") return cont(functiondef);
     if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
+    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), className, poplex); }
     if (type == "variable") {
       if (isTS && value == "type") {
         cx.marked = "keyword"
@@ -4308,6 +4624,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (isTS && (value == "module" || value == "enum") && cx.stream.match(/^\s*\w/, false)) {
         cx.marked = "keyword"
         return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
+      } else if (isTS && value == "namespace") {
+        cx.marked = "keyword"
+        return cont(pushlex("form"), expression, block, poplex)
       } else {
         return cont(pushlex("stat"), maybelabel);
       }
@@ -4318,24 +4637,23 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "default") return cont(expect(":"));
     if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
                                      statement, poplex, popcontext);
-    if (type == "class") return cont(pushlex("form"), className, poplex);
     if (type == "export") return cont(pushlex("stat"), afterExport, poplex);
     if (type == "import") return cont(pushlex("stat"), afterImport, poplex);
     if (type == "async") return cont(statement)
     if (value == "@") return cont(expression, statement)
     return pass(pushlex("stat"), expression, expect(";"), poplex);
   }
-  function expression(type) {
-    return expressionInner(type, false);
+  function expression(type, value) {
+    return expressionInner(type, value, false);
   }
-  function expressionNoComma(type) {
-    return expressionInner(type, true);
+  function expressionNoComma(type, value) {
+    return expressionInner(type, value, true);
   }
   function parenExpr(type) {
     if (type != "(") return pass()
     return cont(pushlex(")"), expression, expect(")"), poplex)
   }
-  function expressionInner(type, noComma) {
+  function expressionInner(type, value, noComma) {
     if (cx.state.fatArrowAt == cx.stream.start) {
       var body = noComma ? arrowBodyNoComma : arrowBody;
       if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, expect("=>"), body, popcontext);
@@ -4345,7 +4663,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
     if (type == "function") return cont(functiondef, maybeop);
-    if (type == "class") return cont(pushlex("form"), classExpression, poplex);
+    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), classExpression, poplex); }
     if (type == "keyword c" || type == "async") return cont(noComma ? expressionNoComma : expression);
     if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
     if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
@@ -4443,10 +4761,11 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(afterprop);
     } else if (type == "jsonld-keyword") {
       return cont(afterprop);
-    } else if (type == "modifier") {
+    } else if (isTS && isModifier(value)) {
+      cx.marked = "keyword"
       return cont(objprop)
     } else if (type == "[") {
-      return cont(expression, expect("]"), afterprop);
+      return cont(expression, maybetype, expect("]"), afterprop);
     } else if (type == "spread") {
       return cont(expressionNoComma, afterprop);
     } else if (value == "*") {
@@ -4548,7 +4867,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
     if (value == "|" || type == ".") return cont(typeexpr)
     if (type == "[") return cont(expect("]"), afterType)
-    if (value == "extends") return cont(typeexpr)
+    if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
   }
   function maybeTypeArgs(_, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
@@ -4563,7 +4882,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     return pass(pattern, maybetype, maybeAssign, vardefCont);
   }
   function pattern(type, value) {
-    if (type == "modifier") return cont(pattern)
+    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(pattern) }
     if (type == "variable") { register(value); return cont(); }
     if (type == "spread") return cont(pattern);
     if (type == "[") return contCommasep(pattern, "]");
@@ -4617,7 +4936,8 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function funarg(type, value) {
     if (value == "@") cont(expression, funarg)
-    if (type == "spread" || type == "modifier") return cont(funarg);
+    if (type == "spread") return cont(funarg);
+    if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
     return pass(pattern, maybetype, maybeAssign);
   }
   function classExpression(type, value) {
@@ -4635,9 +4955,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "{") return cont(pushlex("}"), classBody, poplex);
   }
   function classBody(type, value) {
-    if (type == "modifier" || type == "async" ||
+    if (type == "async" ||
         (type == "variable" &&
-         (value == "static" || value == "get" || value == "set") &&
+         (value == "static" || value == "get" || value == "set" || (isTS && isModifier(value))) &&
          cx.stream.match(/^\s+[\w$\xa1-\uffff]/, false))) {
       cx.marked = "keyword";
       return cont(classBody);
@@ -4647,7 +4967,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return cont(isTS ? classfield : functiondef, classBody);
     }
     if (type == "[")
-      return cont(expression, expect("]"), isTS ? classfield : functiondef, classBody)
+      return cont(expression, maybetype, expect("]"), isTS ? classfield : functiondef, classBody)
     if (value == "*") {
       cx.marked = "keyword";
       return cont(classBody);
@@ -4885,9 +5205,9 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return ret("qualifier", "qualifier");
     } else if (/[:;{}\[\]\(\)]/.test(ch)) {
       return ret(null, ch);
-    } else if ((ch == "u" && stream.match(/rl(-prefix)?\(/)) ||
-               (ch == "d" && stream.match("omain(")) ||
-               (ch == "r" && stream.match("egexp("))) {
+    } else if (((ch == "u" || ch == "U") && stream.match(/rl(-prefix)?\(/i)) ||
+               ((ch == "d" || ch == "D") && stream.match("omain(", true, true)) ||
+               ((ch == "r" || ch == "R") && stream.match("egexp(", true, true))) {
       stream.backUp(1);
       state.tokenize = tokenParenthesized;
       return ret("property", "word");
@@ -4970,16 +5290,16 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return pushContext(state, stream, "block");
     } else if (type == "}" && state.context.prev) {
       return popContext(state);
-    } else if (supportsAtComponent && /@component/.test(type)) {
+    } else if (supportsAtComponent && /@component/i.test(type)) {
       return pushContext(state, stream, "atComponentBlock");
-    } else if (/^@(-moz-)?document$/.test(type)) {
+    } else if (/^@(-moz-)?document$/i.test(type)) {
       return pushContext(state, stream, "documentTypes");
-    } else if (/^@(media|supports|(-moz-)?document|import)$/.test(type)) {
+    } else if (/^@(media|supports|(-moz-)?document|import)$/i.test(type)) {
       return pushContext(state, stream, "atBlock");
-    } else if (/^@(font-face|counter-style)/.test(type)) {
+    } else if (/^@(font-face|counter-style)/i.test(type)) {
       state.stateArg = type;
       return "restricted_atBlock_before";
-    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/.test(type)) {
+    } else if (/^@(-(moz|ms|o|webkit)-)?keyframes$/i.test(type)) {
       return "keyframes";
     } else if (type && type.charAt(0) == "@") {
       return pushContext(state, stream, "at");
@@ -5601,7 +5921,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       },
       "@": function(stream) {
         if (stream.eat("{")) return [null, "interpolation"];
-        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/, false)) return false;
+        if (stream.match(/^(charset|document|font-face|import|(-(moz|ms|o|webkit)-)?keyframes|media|namespace|page|supports)\b/i, false)) return false;
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ["variable-2", "variable-definition"];
@@ -5674,15 +5994,17 @@ define('text!resources/ispincog.html', ['module'], function(module) { module.exp
 define('text!resources/istaff.html', ['module'], function(module) { module.exports = "<template>\n<span class=\"fa-stack\">\n        <i class=\"fa fa-square-o fa-stack-2x\"></i>\n        <i class=\"fa fa-id-badge fa-stack-1x\"></i>\n</span>\n</template>\n"; });
 define('text!resources/itable.html', ['module'], function(module) { module.exports = "<template>\n  <i class=\"fa fa-table\"></i>\n</template>\n"; });
 define('text!resources/iupload.html', ['module'], function(module) { module.exports = "<template bindable=\"href\">\n\n  <i class=\"fa fa-cloud-upload\" click.trigger=\"uploadtovf()\" title=\"Upload to Virtual Folder\"></i>\n</template>\n"; });
-define('text!scientist/createdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/projecttable\"></require>\n  <h3>Create Empty Dataset</h3>\n  <h4>Select Project</h4>\n  <projecttable></projecttable>\n  <h4>Name</h4>\n  <input value.bind=\"datasetname\"/>\n  <h4>Info</h4>\n  <input value.bind=\"datasetinfo\"/>\n  <h4>Summary</h4>\n  <input value.bind=\"datasetsummary\"/>\n  <br/>\n  <button class=\"w3-button\" click.delegate=\"submit()\" disabled.bind=\"!datasetprojectid\">Submit</button>\n  <button class=\"w3-button\" click.delegate=\"generate()\">Fill in sample data</button>\n\n  <table show.bind=\"submitted\"><tr>\n  <td><idata></idata><a class=\"w3-hover-green\" click.delegate=\"selectDataset()\" route-href=\"route: datasetdetail; params.bind: {datasetid:submitteditem.id}\">${submitteditem.name} ${submitteditem.info} ${submitteditem.summary}</a></td>\n  </tr></table>\n</template>\n"; });
+define('text!scientist/createdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/projecttable\"></require>\n  <h3>Create Empty Dataset</h3>\n  <h4>Select Project</h4>\n  <projecttable userid.bind=\"userid\"></projecttable>\n  <h4>Name</h4>\n  <input value.bind=\"datasetname\"/>\n  <h4>Info</h4>\n  <input value.bind=\"datasetinfo\"/>\n  <h4>Summary</h4>\n  <input value.bind=\"datasetsummary\"/>\n  <br/>\n  <button class=\"w3-button\" click.delegate=\"submit()\" disabled.bind=\"!datasetprojectid\">Submit</button>\n  <button class=\"w3-button\" click.delegate=\"generate()\">Fill in sample data</button>\n\n  <table show.bind=\"submitted\"><tr>\n  <td><idata></idata><a class=\"w3-hover-green\" click.delegate=\"selectDataset()\" route-href=\"route: datasetdetail; params.bind: {datasetid:submitteditem.id}\">${submitteditem.name} ${submitteditem.info} ${submitteditem.summary}</a></td>\n  </tr></table>\n</template>\n"; });
 define('text!scientist/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/searchbydate\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../components/importaria\"></require>\n  <h3>Visitor Dashboard</h3>\n  <htable></htable>\n  <p>You are logged as visiting scientist.\n\n    You can view your datasets available after your visit.\n    <ul><li>To review Visit Proposal, go to Instruct <a target=\"_blank\"\n                                                href=\"https://www.structuralbiology.eu/dashboard?t=instruct\"\n                                                class=\"w3-button w3-round-small w3-small\">Dashboard</a>\n</li>\n    <li>To submit new proposal, go to Instruct\n    <a target=\"_blank\" href=\"https://www.structuralbiology.eu/submit-proposal/step1/new\"\n       class=\"w3-button  w3-round-small w3-small\">Submission</a>.\n    </li>\n  <li>\n      To get existing projects from Instruct <importaria></importaria>.\n  <p show.bind=\"importingaria\">Importing from aria <ispincog></ispincog></p>\n  <p show.bind=\"importariaerror\" class=\"w3-pale-red\">Status: ${importariastatus}</p>\n  </li>\n</ul>\n  </p>\n  <div  class=\"w3-half\" show.bind=\"proposals.length>0\">\n  <h4>Aria proposals:</h4>\n    <table class=\"w3-table-all\">\n      <tr>\n        <th>id</th>\n        <th>name</th>\n        <th>status</th>\n      </tr>\n      <tr show.bind=\"!importingaria\" class=\"w3-hover-green\" repeat.for=\"proposal of proposals\" click.delegate=\"selectProposal(proposal)\">\n        <td>${proposal.pid}</td>\n        <td><iproject></iproject>${proposal.title}</td>\n        <td>${proposal.status}</td>\n      </tr>\n    </table>\n  </div>\n  <div  class=\"w3-half\" if.bind=\"selectedProposal\">\n    <h4>Aria proposal detail:</h4>\n    <table class=\"w3-table-all\">\n      <tr><td colspan=\"2\">pid: ${selectedProposal.pid} title: ${selectedProposal.title} status: ${selectedProposal.status}</td></tr>\n      <tr repeat.for=\"field of selectedFields\"><td><b>${field.title}</b></td><td>${field.data}</td></tr>\n    </table>\n\n    <button class=\"w3-button w3-pale-green\" click.trigger=\"importProposal(selectedProposal)\">Import this proposal as Repository Project</button>\n\n  </div>\n  <div class=\"w3-clear\"></div>\n  <div class=\"w3-half\">\n\n\n    <h4>Available project visits/proposals:<searchbydate></searchbydate> </h4>\n    <projecttable></projecttable>\n\n</div>\n  <div class=\"w3-half\">\n\n    <h4>Available datasets:</h4>\n      <datasettable></datasettable>\n\n  </div>\n\n  <div class=\"w3-clear\"></div>\n</template>\n"; });
 define('text!scientist/dashboarddetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project/Dataset Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
+define('text!scientist/datasetdetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project/Dataset Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
+define('text!scientist/projectdetail.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"./dashboard.css\"></require>\n  <require from=\"../components/webdavfilepanel\"></require>\n  <require from=\"../components/fileeditor\"></require>\n  <require from=\"../components/projecttable\"></require>\n  <require from=\"../components/datasettable\"></require>\n  <h3>Project Detail</h3>\n  <b>Select<span show.bind=\"selectedProject\">ed</span> project visit/proposal:</b>\n   <!--table class=\"w3-table-all\">\n    <tr show.bind=\"showProposals\">\n      <th>id</th>\n      <th>name</th>\n      <th>summary</th>\n    </tr>\n    <tr show.bind=\"showProposals\" class=\"au-animate\" repeat.for=\"project of projects\">\n      <td>${project.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" route-href=\"route: projectdetail; params.bind: {projectid:project.id}\"\n           click.trigger=\"selectProposal()\">${project.projectName}</a>\n      </td>\n      <td>${project.summary} (${project.datasets})</td>\n    </tr>\n    <tr show.bind=\"! showProposals\" title=\"click to show all projects\" class=\"w3-hover-green\">\n      <td>${selectedProject.id}</td>\n      <td>\n        <iproject></iproject>\n        <a class=\"w3-hover-green\" click.trigger=\"deselectProposal()\">\n          ${selectedProject.projectName}</a>\n      </td>\n      <td>${selectedProject.summary}</td>\n    </tr>\n  </table-->\n  <projecttable></projecttable>\n\n  <b>Select<span show.bind=\"selectedDataset\">ed</span> dataset to narrow files:</b>\n  <!--table class=\"w3-table-all\">\n    <thead show.bind=\"showDatasets\">\n    <tr>\n      <th>date</th>\n      <th>Summary</th>\n      <th>i</th>\n    </tr>\n    </thead>\n    <tbody>\n    <tr if.bind=\"emptyDatasets\"><td colspan=\"3\">No datasets available for this project</td></tr>\n    <tr show.bind=\"showDatasets\" class=\"w3-hover-green\" repeat.for=\"item of datasets\">\n      <td>${item.creation_date}</td>\n      <td>\n        <idata></idata>\n        <a class=\"w3-hover-green\"\n           route-href=\"route: datasetdetail; params.bind: {datasetid:item.id}\">${item.summary}</a></td>\n      <td>${item.info}</td>\n      <td>${item.projectId}</td>\n      <td>\n        <icopy href.bind=\"item.webdavurl\"></icopy>\n      </td>\n    </tr>\n    </div>\n    <tr if.bind=\"! showDatasets\" class=\"w3-hover-green\">\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.creation_date}</td>\n      <td click.trigger=\"deselectDataset()\">\n        <idata></idata>\n        ${selectedDataset.summary}\n      </td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.info}</td>\n      <td click.trigger=\"deselectDataset()\">${selectedDataset.projectId}</td>\n      <td>\n        <icopy href.bind=\"selectedDataset.webdavurl\"></icopy>\n      </td>\n      <td>\n        <ilink href.bind=\"selectedDataset.zip\"></ilink>\n      </td>\n      <td>\n        <iupload href.bind=\"selectedDataset.webdavurl\"></iupload>\n      </td>\n      <td click.trigger=\"deleteDataset()\">\n        <idelete></idelete>\n      </td>\n    </tr>\n    </tbody>\n  </table-->\n  <datasettable></datasettable>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <b>Files:</b>\n    <webdavfilepanel></webdavfilepanel>\n  </div>\n  <div show.bind=\"selectedDataset\" class=\"w3-half\">\n    <div class=\"w3-margin-left\">\n      <fileeditor></fileeditor>\n    </div>\n  </div>\n  <p>&nbsp;</p>\n</template>\n"; });
 define('text!scientist/repositorytovf.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../pickerclient/pickerclient\"></require>\n  <h3>Repository to West-Life Virtual Folder</h3>\n  <p> This page shows dialog to select files or directories to be uploaded from local repository to user's Virtual Folder.</p>\n  <div show.bind=\"selectingfiles\">\n    <p><b>1.</b>Select files or directories that will be uploaded:</p>\n    <h4>Repository files</h4>\n    <table class=\"w3-table-all\">\n      <thead>\n      <tr>\n        <th>filename</th>\n        <th>date</th>\n        <th colspan=\"2\">action</th>\n      </tr>\n      </thead>\n      <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n        <td class=\"w3-padding-tiny\">${item.name}</td>\n        <td class=\"w3-padding-tiny\">${item.date}</td>\n        <td class=\"w3-padding-tiny\">\n          <button class=\"w3-button w3-padding-tiny\" title=\"delete\" click.trigger=\"deleteitem(item)\">x</button>\n        </td>\n\n      </tr>\n    </table>\n    <button class=\"w3-button\" title=\"submit\" click.trigger=\"submitfiles()\">Submit</button>\n  </div>\n\n  <div show.bind=\"!selectingfiles\">\n    <p><b>1.</b>Selected files: ${selectedfiles} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"unsubmitfiles()\">change</button></p>\n    <p><b>2.</b>Select Virtual Folder:</p>\n    <pickerclient mode=\"dir\"></pickerclient>\n  </div>\n\n  <div show.bind=\"selectedUploadDir\">\n    <p><b>3.</b> Press the button to start <button class=\"w3-button w3-pale-green\" click.trigger=\"copy()\">upload all files.</button></p>\n    <p show.bind=\"copyinprogress\">... upload in progress ...</p>\n  </div>\n\n</template>\n"; });
 define('text!staff/dashboard.html', ['module'], function(module) { module.exports = "<template>\n  <h3> Dashboard</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  <a class=\"w3-pale-green w3-button\" route-href=\"route: upselectuser\">Next <inext></inext></a>\n\n\n</template>\n"; });
 define('text!staff/dataupload.html', ['module'], function(module) { module.exports = "<template>\n<h4>Visitor Dataset Upload</h4>\n</template>\n"; });
 define('text!staff/repositorystaff.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Repository Staff UI</h3>\n  <p> This page shows File upload dialog, used by Support Staff at local workstation to upload data acquisition into the visiting scientist account.</p>\n  1. select user\n  2. select his dataset or create new dataset (=folder)\n  3. select files from local computer\n  4. click upload\n  5. watch progress - number of files\n  6. Done - redirect to 1.\n  <label>Project input\n    <input class=\"w3-input\">\n  </label>\n  <div show.bind=\"selectinguser\">\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\" click.trigger=\"selectvisitor(visitor)\">\n      <td>(${visitor.Id})</td><td>${visitor.FirstName} ${visitor.LastName}</td>\n    </tr>\n  </table>\n  </div>\n  <div show.bind=\"!selectinguser\">\n    <p><b>1.</b>Selected user: (${selectedvisitor.Id})${selectedvisitor.FirstName} ${selectedvisitor.LastName} <button class=\"w3-button w3-padding-tiny\" click.trigger=\"deselectvisitor()\">change</button></p>\n    <p><b>2.</b>Select or drop files or directories to upload to the user account.</p>\n    <div class=\"w3-container\">\n      <div class=\"w3-half\">\n        <h4>Local files</h4>\n        <form>\n          <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n            <thead>\n            <tr>\n              <th>drag & drop files/directories here or browse</th>\n            </tr>\n            </thead>\n            <tbody>\n            <tr>\n              <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                         change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n                <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                       change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n              </td>\n              <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n            </tr>\n            <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\" click.trigger=\"selectItemToUpload(item)\">\n              <td class=\"w3-padding-0\">${item.name}</td>\n              <td class=\"w3-padding-0\">\n                <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n              </td>\n            </tr>\n            </tbody>\n          </table>\n        </form>\n      </div>\n      <div class=\"w3-half\">\n\n        <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n        <table class=\"w3-table-all w3-small\">\n          <thead>\n          <tr>\n            <th>filename</th>\n            <th>date</th>\n            <th colspan=\"2\">action</th>\n          </tr>\n          </thead>\n          <tr class=\"w3-hover-green\" repeat.for=\"item of items\" click.trigger=\"selectitem(item)\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">${item.date}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n            </td>\n\n          </tr>\n        </table>\n      </div>\n    </div>\n    <div>\n      <p><b>3.</b><button class=\"w3-button w3-green\" disabled.bind=\"items.length == 0\">Enable user access. Generate WebDAV endpoint.</button></p>\n    </div>\n  </div>\n\n</template>\n"; });
 define('text!staff/upconfirm.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Data Upload - Confirmation</h3>\n  <b>Summary</b>\n  <p><b>Dataset:</b><i>${dataset.id}</i> <i>${dataset.name}</i></p>\n  <p><b>Files:</b></p>\n  <ul class=\"w3-tiny\">\n  <li repeat.for=\"file of filestoupload\">\n    <code>${file.name}</code>\n  </li>\n\n</ul>\n  <button class=\"w3-button w3-pale-green\" click.trigger=\"uploadFiles()\" disabled.bind=\"submitted\">Upload files to dataset</button>\n  <pre class=\"w3-tiny\">${status}</pre>\n</template>\n"; });
 define('text!staff/upselectdata.html', ['module'], function(module) { module.exports = "<template>\n  <h3>Data Upload - Select Data</h3>\n  <p><b>2.</b>Select or drop files or directories to upload to the user account. Then click\n  <a class=\"w3-pale-green w3-button\" route-href=\"route: upconfirm\">Next <inext></inext></a>\n  </p>\n  <div class=\"w3-container\">\n\n      <h4>Local files</h4>\n      <form>\n        <table class=\"w3-table-all w3-padding-tiny\" drop.trigger=\"dropped($event)\" ondragover=\"event.preventDefault();\">\n          <thead>\n          <tr>\n            <th>drag & drop files/directories here or click \"Browse...\" button</th>\n          </tr>\n          </thead>\n          <tbody>\n          <tr>\n            <td><input class=\"w3-button\" type=\"file\" multiple=\"multiple\" name=\"files[]\" webkitdirectory=\"true\"\n                       change.delegate=\"appendDir($event)\" value.bind=\"uploaddir\"/>\n              <input class=\"w3-button\" type=\"file\" multiple=\"multiple\" title=\"Select Files to Download\"\n                     change.delegate=\"appendFiles($event)\" value.bind=\"uploadfiles\"/>\n            </td>\n            <td>Totally: ${filestoupload.length} files will be uploaded.</td>\n          </tr>\n          <tr class=\"w3-hover-green w3-small\" repeat.for=\"item of filestoupload\">\n            <td class=\"w3-padding-0\">${item.name}</td>\n            <td class=\"w3-padding-0\">\n              <button class=\"w3-button  w3-padding-tiny\" title=\"delete\" click.delegate=\"removeItemToUpload(item)\">&#10006;</button>\n            </td>\n          </tr>\n          </tbody>\n        </table>\n      </form>\n\n    <!--div class=\"w3-half\">\n\n      <h4><button disabled.bind=\"filestoupload.length == 0\" class=\"w3-left w3-green w3-button w3-padding-0\"\n                  click.delegate=\"submitUpload()\">Upload to &raquo; </button>&nbsp;User account</h4>\n      <table class=\"w3-table-all w3-small\">\n        <thead>\n        <tr>\n          <th>filename</th>\n          <th>date</th>\n          <th colspan=\"2\">action</th>\n        </tr>\n        </thead>\n        <tr class=\"w3-hover-green\" repeat.for=\"item of filesuploaded\" click.trigger=\"selectitem(item)\">\n          <td class=\"w3-padding-0\">${item.name}</td>\n          <td class=\"w3-padding-0\">${item.date}</td>\n          <td class=\"w3-padding-0\">\n            <button class=\"w3-button w3-padding-0\" title=\"delete\" click.trigger=\"deleteitem(item)\">&#10006;</button>\n          </td>\n\n        </tr>\n      </table>\n    </div-->\n  </div>\n</template>\n"; });
-define('text!staff/upselectdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../scientist/createdataset\"></require>\n  <h3>Upload</h3>\n\n  <h4>Select Dataset</h4>\n  <p>Select dataset for user:<a route-href=\"route:selectuser\" title=\"ammend selection of user\">(${pa.selectedUser.Id}) ${selectedUser.FirstName} ${selectedUser.LastName}</a></p>\n\n  <datasettable userid.bind=\"pa.selectedUser.Id\"></datasettable>\n  <h4>Or Create New Dataset</h4>\n  <createdataset></createdataset>\n\n\n</template>\n"; });
+define('text!staff/upselectdataset.html', ['module'], function(module) { module.exports = "<template>\n  <require from=\"../components/datasettable\"></require>\n  <require from=\"../scientist/createdataset\"></require>\n  <h3>Upload</h3>\n\n  <h4>Select Dataset</h4>\n  <p>Select dataset for user:<a route-href=\"route:selectuser\" title=\"ammend selection of user\">(${pa.selectedUser.Id}) ${selectedUser.FirstName} ${selectedUser.LastName}</a></p>\n\n  <datasettable userid.bind=\"pa.selectedUser.Id\"></datasettable>\n  <h4>Or Create New Dataset</h4>\n  <createdataset userid.bind=\"pa.selectedUser.Id\"></createdataset>\n\n\n</template>\n"; });
 define('text!staff/upselectuser.html', ['module'], function(module) { module.exports = "<template>\n  <h3> Data Upload - Select User</h3>\n  <p><b>1.</b>Select a user, who's data will be uploaded:</p>\n  <table class=\"w3-table-all\" draggable=\"true\">\n    <tr class=\"w3-hover-green\" repeat.for=\"visitor of visitors\">\n      <td><a route-href=\"route: upselectdataset\" click.trigger=\"selectUser(visitor)\">(${visitor.Id})</a></td><td><a route-href=\"route: upselectdataset\" click.trigger=\"selectUser(visitor)\">${visitor.FirstName} ${visitor.LastName}</a></td>\n    </tr>\n  </table>\n\n</template>\n"; });
 //# sourceMappingURL=app-bundle.js.map

@@ -50,12 +50,18 @@ export class ProjectApi {
     this.selectedUser=null;
   }
 
-  getProjects() {
+  getUserProjects() {
+    return getProjects(this.selectedUser.Id);
+  }
+
+  getProjects(userid) {
+    console.log("projectapi,getProjects()",userid);
+    let userprojecturl=(userid)?this.userinfourl+"/"+userid+"/project":this.projecturl;
     //if the projects is already fetched - returns it, otherwise fetch
     if (this.projects.length>0)
       return new Promise(resolve => resolve(this.projects))
     else
-      return this.httpclient.fetch(this.projecturl)
+      return this.httpclient.fetch(userprojecturl)
       .then(response => response.json())
       .then(data => {
         this.projects= data;
@@ -72,6 +78,10 @@ export class ProjectApi {
   }
   getSelectedProject(){
     return this.selectedProjectId;
+  }
+
+  getUserDatasets() {
+    return getDatasets(this.selectedUser.Id);
   }
 
   getDatasets(userid) {

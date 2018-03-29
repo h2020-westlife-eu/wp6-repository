@@ -1,11 +1,12 @@
 import {Selectedproject, Adddataset} from "../components/messages";
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {ProjectApi} from '../components/projectapi';
-
+import {bindable} from 'aurelia-framework';
 
 /* Dashboarddetails shows details of projects/datasets */
 export class Createdataset {
   static inject = [EventAggregator, ProjectApi];
+  @bindable userid;
 
   constructor(ea, pa) {
     this.ea = ea;

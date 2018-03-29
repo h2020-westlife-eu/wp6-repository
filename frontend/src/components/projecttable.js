@@ -1,9 +1,11 @@
 import {ProjectApi} from './projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {Selectedproject,FilterProject,FilterProjectByDataset,Addproject} from "./messages";
+import {bindable} from 'aurelia-framework';
 
 export class Projecttable {
   static inject = [ProjectApi,EventAggregator];
+  @bindable userid;
 
   constructor(pa,ea) {
     console.log("Projecttable()");
@@ -19,9 +21,9 @@ export class Projecttable {
     console.log("Projecttable() subscribe 2");
   }
 
-  attached() {
-    console.log("projecttableattached()")
-    this.pa.getProjects().then(data => {
+  bind() {
+    console.log("projecttable bind()",this.userid);
+    this.pa.getProjects(this.userid).then(data => {
       this.projects = data;
       //data retrieved and selectedProject already set e.g. by activate, call filter again
       this.selectedProjectId=this.pa.getSelectedProject();
@@ -30,13 +32,11 @@ export class Projecttable {
     });
   }
 
+
   /* this is used when new project proposal is selected - it filters project by id and datasets by id*/
   filterSelectedProposal(id) {
     //this.selectedProposal=item;
     this.selectedProjectId=id;
-    //console.log("projecttable.filterProject()");
-    //console.log(this.projects);
-    //console.log(id);
     if (this.projects.length>0) {
       this.selectedProject = this.projects.filter(i => i.id == id)[0];
     } else {

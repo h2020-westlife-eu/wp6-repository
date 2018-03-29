@@ -52,6 +52,7 @@ public class DatasetServiceCon extends SharedCon {
         return listDataset(projectId,"","","","");
     }
 
+    //TODO remove???
     @RequestMapping(value = {"/datasets", "/project/{projectId}/datasets"}, method = GET)
     public ResponseEntity listDatasets(@PathVariable Optional<Long> projectId) {
         List<DataSet> dataSets;
