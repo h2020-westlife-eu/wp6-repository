@@ -1,6 +1,8 @@
 Vagrant.configure(2) do |config|
-#  config.vm.box = "westlife-eu/cernvm4"
-  config.vm.box = "westlife-eu/scientific_7_x86_64_minimal_gui"
+# for production use CernVM 4
+  config.vm.box = "westlife-eu/cernvm4"
+# for development and testing use SL7  
+#  config.vm.box = "westlife-eu/scientific_7_x86_64_minimal_gui"
 
   if Vagrant::VERSION =~ /^1.9.3/
     puts "vagrant version 1.9.3, fixing host_ip configuration "
