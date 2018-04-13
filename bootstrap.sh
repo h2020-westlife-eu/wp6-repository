@@ -15,6 +15,7 @@ if [ -z ${WP6REPSRC+x} ]; then
   echo 'please set WP6REPSRC environment variable'
   exit 1
 fi
+
 # copy sp_keys if they exists in /vagrant location
 cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
 # copy ARIA ids from /vagrant location if exists
@@ -33,7 +34,7 @@ yum -y install epel-release
 yum repolist
 yum -y install davfs2 httpd
 # php only for ARIA demo
-yum -y install php php-common
+yum -y install php php-common --skip-broken
 
 # prepare all configuration
 cp -R $WP6REPSRC/conf-template/* /
@@ -64,8 +65,8 @@ while [[ $f != "/" ]]; do chmod g+rx $f; f=$(dirname $f); done;
 # enabling Apache server
 systemctl enable httpd
 # stop httpd if it is running by some other related software
-systemctl stop httpd
-systemctl start httpd
+#systemctl stop httpd
+#systemctl start httpd
 
 #create dirs
 mkdir /home/vagrant/work /home/vagrant/.westlife
@@ -79,17 +80,21 @@ usermod -g davfs2 vagrant
 # SSO preparation
 ########################################################################
 
-# installs SAML2 and integrates with Westlife AAI
-# default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
-SP_IDENTIFICATION=http://local.west-life.eu
-SP_ENDPOINT=http://localhost:8080/mellon
-
-# skip broken on cernvm4
+# skip broken dependencies on cernvm4
 yum -y install wget mod_auth_mellon --skip-broken
+# cernvm4 has old lasso 2.4.0
+#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/xmlsec1-1.2.20-5.el7.x86_64.rpm
+#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/xmlsec1-openssl-1.2.20-5.el7.x86_64.rpm
+#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/lasso-2.5.1-2.el7.x86_64.rpm
+#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/mod_auth_mellon-0.11.0-4.el7.x86_64.rpm
 # copy existing configuration
 
 # generate the configuration if not exists, note that sp-metadata.xml needs to be sent to idp-metadata provider
 if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
+# installs SAML2 and integrates with Westlife AAI
+# default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
+  SP_IDENTIFICATION=http://local.west-life.eu
+  SP_ENDPOINT=http://localhost:8080/mellon
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
   chmod +x mellon_create_metadata.sh
@@ -119,7 +124,8 @@ echo "If not yet registered, send the metadata file: sp-metadata.xml to West-lif
 #SSP=`find . -maxdepth 1 -type d -name 'simplesamlphp*'`
 #mv $SSP simplesamlphp
 
-service httpd restart
+service httpd stop
+service httpd start
 
 ########################################################################
 # Backend preparation
