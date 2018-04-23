@@ -66,7 +66,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 //.antMatchers("/login","/static/**","/restcon/**").permitAll().and()
-                .antMatchers("/login","/static/**","/restcon/dataset","/restcon/project","/restcon/user","/restcon/authsso").permitAll() //was with /restcon/authsso
+                .antMatchers("/login","/static/**","/restcon/dataset","/restcon/copytask","/restcon/project","/restcon/user","/restcon/authsso").permitAll() //was with /restcon/authsso
                 .antMatchers( "/list","/listPro","/restcon/**")
                 .access("hasRole('USER') or hasRole('ADMIN') or hasRole('DBA')")
                 .antMatchers("/newuser/**", "/delete-user-*")
