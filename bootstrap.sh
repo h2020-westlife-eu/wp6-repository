@@ -93,16 +93,18 @@ yum -y install wget mod_auth_mellon --skip-broken
 if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
 # installs SAML2 and integrates with Westlife AAI
 # default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
+# change the following to identify your site
   SP_IDENTIFICATION=http://local.west-life.eu
   SP_ENDPOINT=http://localhost:8080/mellon
+
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
   chmod +x mellon_create_metadata.sh
   ./mellon_create_metadata.sh $SP_IDENTIFICATION $SP_ENDPOINT
-  # move to /vagrant file - so next boot, provision will be same
-  mv http_local.west_life.eu.key ${WP6REPSRC}/sp_key.pem
-  mv http_local.west_life.eu.cert ${WP6REPSRC}/sp_cert.pem
-  mv http_local.west_life.eu.xml ${WP6REPSRC}/sp-metadata.xml
+  # move to /vagrant file - so next bootstrap, provision will be same
+  mv http_*.key ${WP6REPSRC}/sp_key.pem
+  mv http_*.cert ${WP6REPSRC}/sp_cert.pem
+  mv http_*.xml ${WP6REPSRC}/sp-metadata.xml
   #get west-life idp metadata
   wget https://auth.west-life.eu/proxy/saml2/idp/metadata.php
   mv metadata.php /${WP6REPSRC}/idp-metadata.xml
