@@ -50,6 +50,7 @@ create table PROJECT (
   project_name VARCHAR(255) ,
   summary VARCHAR(2000) ,
   creation_date TIMESTAMP,
+  hash_id BIGINT,
   PRIMARY KEY (id)
 
 );
