@@ -81,13 +81,19 @@ usermod -g davfs2 vagrant
 ########################################################################
 
 # skip broken dependencies on cernvm4
-yum -y install wget mod_auth_mellon --skip-broken
-# cernvm4 has old lasso 2.4.0
-#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/xmlsec1-1.2.20-5.el7.x86_64.rpm
-#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/xmlsec1-openssl-1.2.20-5.el7.x86_64.rpm
-#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/lasso-2.5.1-2.el7.x86_64.rpm
-#rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/mod_auth_mellon-0.11.0-4.el7.x86_64.rpm
-# copy existing configuration
+if [ -f /etc/cernvvm-release ]; then
+# cernvm4 has old lasso 2.4.0 and mod_auth_mellon
+  yum -y remove mod_auth_mellon lasso xmlsec1 xmlsec1-openssl
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-openssl-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-gcrypt-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-gnutls-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-nss-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/lasso-2.5.1-2.el7.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/mod_auth_mellon-0.11.0-4.el7.x86_64.rpm
+else
+  yum -y install wget mod_auth_mellon
+fi
 
 # generate the configuration if not exists, note that sp-metadata.xml needs to be sent to idp-metadata provider
 if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
