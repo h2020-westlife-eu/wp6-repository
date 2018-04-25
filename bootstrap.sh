@@ -174,6 +174,7 @@ mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
 echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/populatetestDB.sql
 #backend app gets frontend location from environment variable REP_LOCATION
+service westlife-repository stop
 sed -i -e "s/^\(WorkingDirectory\s*=\s*\).*$/\1${WP6SRCESC}\/backend/g" /etc/systemd/system/westlife-repository.service
 sed -i -e "s/^\(Environment=REP_LOCATION=\s*\).*$/\1${WP6SRCESC}/g" /etc/systemd/system/westlife-repository.service
 systemctl enable westlife-repository.service
