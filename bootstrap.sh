@@ -16,12 +16,14 @@ if [ -z ${WP6REPSRC+x} ]; then
   exit 1
 fi
 
-# copy sp_keys if they exists in /vagrant location
-cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
-# copy ARIA ids from /vagrant location if exists
-cp /vagrant/clientIds.php ${WP6REPSRC}/frontend/ariademo/
-# copy conf files from /vagrant location if exists
-cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+if [ -f /vagrant/sp_key.pem ]; then
+  # copy sp_keys if they exists in /vagrant location
+  cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
+  # copy ARIA ids from /vagrant location if exists
+  cp /vagrant/clientIds.php ${WP6REPSRC}
+  # copy conf files from /vagrant location if exists
+  cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+fi
 
 
 ########################################################################
@@ -134,6 +136,14 @@ echo "If not yet registered, send the metadata file: sp-metadata.xml to West-lif
 
 service httpd stop
 service httpd start
+
+####################################################################
+# ARIA (Instruct) integration
+###################################################################
+if [ -f ${WP6REPSRC}/clientIds.php ]; then
+  # copy existing aria keys to frontend
+  cp ${WP6REPSRC}/clientIds.php ${WP6REPSRC}/frontend/ariademo
+fi
 
 ########################################################################
 # Backend preparation
