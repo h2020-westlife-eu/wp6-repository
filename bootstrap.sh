@@ -54,7 +54,7 @@ if hash setsebool 2>/dev/null; then
   sed -i -e "s|\SELINUX=.*$|SELINUX=permissive|g" /etc/selinux/config
   setenforce 0
   setsebool -P httpd_can_network_connect 1
-  chcon -R --reference=/var/www $WP6SRC/www
+  chcon -R --reference=/var/www $WP6REPSRC/frontend
   firewall-cmd --zone=public --add-port=80/tcp --permanent
   firewall-cmd --reload
 fi
