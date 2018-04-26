@@ -81,7 +81,7 @@ usermod -g davfs2 vagrant
 ########################################################################
 
 # skip broken dependencies on cernvm4
-if [ -f /etc/cernvvm-release ]; then
+if [ -f /etc/cernvm-release ]; then
 # cernvm4 has old lasso 2.4.0 and mod_auth_mellon
   yum -y remove mod_auth_mellon lasso xmlsec1 xmlsec1-openssl
   rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-1.2.20-7.el7_4.x86_64.rpm
