@@ -49,10 +49,9 @@
       <td click.trigger="deselectDataset()"><idata></idata>${selectedDataset.name}</td>
       <td click.trigger="deselectDataset()">${selectedDataset.summary}</td>
       <td click.trigger="deselectDataset()">${selectedDataset.info}</td>
-      <td click.trigger="deselectDataset()">${selectedDataset.projectId}</td>
-      <td><icopy href.bind="selectedDataset.webdavurl"></icopy></td>
-      <td><ilink href.bind="selectedDataset.zip"></ilink></td>
-      <td><iupload href.bind="selectedDataset.webdavurl"></iupload></td>
+      <td style="white-space: nowrap;"><icopy href.bind="selectedDataset.webdavurl"></icopy>
+      <ilink href.bind="selectedDataset.zip"></ilink>
+      <iupload href.bind="selectedDataset.webdavurl"></iupload></td>
       <td click.trigger="deleteDataset()"><idelete></idelete></td>
     </tr>
     </tbody>
