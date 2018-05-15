@@ -13,8 +13,4 @@ export class Repositoryapp {
     this.router = router;
   }
 
-  login() {
-    //window.location="login.html?next"+window.location.pathname;
-  }
-
 }
