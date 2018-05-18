@@ -15,12 +15,15 @@ if [ -z ${WP6REPSRC+x} ]; then
   echo 'please set WP6REPSRC environment variable'
   exit 1
 fi
-# copy sp_keys if they exists in /vagrant location
-cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
-# copy ARIA ids from /vagrant location if exists
-cp /vagrant/clientIds.php ${WP6REPSRC}/frontend/ariademo/
-# copy conf files from /vagrant location if exists
-cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+
+if [ -f /vagrant/sp_key.pem ]; then
+  # copy sp_keys if they exists in /vagrant location
+  cp /vagrant/sp_cert.pem /vagrant/sp_key.pem /vagrant/idp-metadata.xml /vagrant/sp-metadata.xml ${WP6REPSRC}
+  # copy ARIA ids from /vagrant location if exists
+  cp /vagrant/clientIds.php ${WP6REPSRC}
+  # copy conf files from /vagrant location if exists
+  cp /vagrant/*.conf ${WP6REPSRC}/conf-template/etc/httpd/conf.d/
+fi
 
 
 ########################################################################
@@ -33,7 +36,7 @@ yum -y install epel-release
 yum repolist
 yum -y install davfs2 httpd
 # php only for ARIA demo
-yum -y install php php-common
+yum -y install php php-common --skip-broken
 
 # prepare all configuration
 cp -R $WP6REPSRC/conf-template/* /
@@ -53,7 +56,7 @@ if hash setsebool 2>/dev/null; then
   sed -i -e "s|\SELINUX=.*$|SELINUX=permissive|g" /etc/selinux/config
   setenforce 0
   setsebool -P httpd_can_network_connect 1
-  chcon -R --reference=/var/www $WP6SRC/www
+  chcon -R --reference=/var/www $WP6REPSRC/frontend
   firewall-cmd --zone=public --add-port=80/tcp --permanent
   firewall-cmd --reload
 fi
@@ -64,8 +67,8 @@ while [[ $f != "/" ]]; do chmod g+rx $f; f=$(dirname $f); done;
 # enabling Apache server
 systemctl enable httpd
 # stop httpd if it is running by some other related software
-systemctl stop httpd
-systemctl start httpd
+#systemctl stop httpd
+#systemctl start httpd
 
 #create dirs
 mkdir /home/vagrant/work /home/vagrant/.westlife
@@ -79,25 +82,37 @@ usermod -g davfs2 vagrant
 # SSO preparation
 ########################################################################
 
-# installs SAML2 and integrates with Westlife AAI
-# default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
-SP_IDENTIFICATION=http://local.west-life.eu
-SP_ENDPOINT=http://localhost:8080/mellon
-
-# skip broken on cernvm4
-yum -y install wget mod_auth_mellon --skip-broken
-# copy existing configuration
+# skip broken dependencies on cernvm4
+if [ -f /etc/cernvm-release ]; then
+# cernvm4 has old lasso 2.4.0 and mod_auth_mellon
+  yum -y remove mod_auth_mellon lasso xmlsec1 xmlsec1-openssl
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-openssl-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-gcrypt-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-gnutls-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/updates/x86_64/Packages/xmlsec1-nss-1.2.20-7.el7_4.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/lasso-2.5.1-2.el7.x86_64.rpm
+  rpm -i http://mirror.centos.org/centos/7/os/x86_64/Packages/mod_auth_mellon-0.11.0-4.el7.x86_64.rpm
+else
+  yum -y install wget mod_auth_mellon
+fi
 
 # generate the configuration if not exists, note that sp-metadata.xml needs to be sent to idp-metadata provider
 if [ ! -f ${WP6REPSRC}/sp_key.pem ]; then
+# installs SAML2 and integrates with Westlife AAI
+# default values of SP_IDENTIFICAION and SP_ENDPOINT, please edit them for production system
+# change the following to identify your site
+  SP_IDENTIFICATION=http://local.west-life.eu
+  SP_ENDPOINT=http://localhost:8080/mellon
+
   echo "Generating mellon configuration"
   wget https://raw.githubusercontent.com/UNINETT/mod_auth_mellon/master/mellon_create_metadata.sh
   chmod +x mellon_create_metadata.sh
   ./mellon_create_metadata.sh $SP_IDENTIFICATION $SP_ENDPOINT
-  # move to /vagrant file - so next boot, provision will be same
-  mv http_local.west_life.eu.key ${WP6REPSRC}/sp_key.pem
-  mv http_local.west_life.eu.cert ${WP6REPSRC}/sp_cert.pem
-  mv http_local.west_life.eu.xml ${WP6REPSRC}/sp-metadata.xml
+  # move to /vagrant file - so next bootstrap, provision will be same
+  mv http_*.key ${WP6REPSRC}/sp_key.pem
+  mv http_*.cert ${WP6REPSRC}/sp_cert.pem
+  mv http_*.xml ${WP6REPSRC}/sp-metadata.xml
   #get west-life idp metadata
   wget https://auth.west-life.eu/proxy/saml2/idp/metadata.php
   mv metadata.php /${WP6REPSRC}/idp-metadata.xml
@@ -119,7 +134,16 @@ echo "If not yet registered, send the metadata file: sp-metadata.xml to West-lif
 #SSP=`find . -maxdepth 1 -type d -name 'simplesamlphp*'`
 #mv $SSP simplesamlphp
 
-service httpd restart
+service httpd stop
+service httpd start
+
+####################################################################
+# ARIA (Instruct) integration
+###################################################################
+if [ -f ${WP6REPSRC}/clientIds.php ]; then
+  # copy existing aria keys to frontend
+  cp ${WP6REPSRC}/clientIds.php ${WP6REPSRC}/frontend/ariademo
+fi
 
 ########################################################################
 # Backend preparation
@@ -166,8 +190,8 @@ mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/createDB.sql
 echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/populatetestDB.sql
 #backend app gets frontend location from environment variable REP_LOCATION
+service westlife-repository stop
 sed -i -e "s/^\(WorkingDirectory\s*=\s*\).*$/\1${WP6SRCESC}\/backend/g" /etc/systemd/system/westlife-repository.service
 sed -i -e "s/^\(Environment=REP_LOCATION=\s*\).*$/\1${WP6SRCESC}/g" /etc/systemd/system/westlife-repository.service
-systemctl enable westlife-repository
-systemctl enable mariadb
+systemctl enable westlife-repository.service
 service westlife-repository start

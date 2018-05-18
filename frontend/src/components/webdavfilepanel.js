@@ -23,7 +23,7 @@ export class Webdavfilepanel {
           }
         })
     });
-    this.webdavpath = '/files/XufWqKau/';
+    this.webdavpath = '';///files/XufWqKau/';
     //hold depth of directory structure if cd into them
     this.dirs=[];
     this.files=[];
