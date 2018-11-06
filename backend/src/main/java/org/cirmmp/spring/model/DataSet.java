@@ -30,6 +30,13 @@ public class DataSet {
     @Column(name="URI")
     private String uri;
 
+    @Column(name="METADATA")
+    private String metadata; //unstructured metadata, variable types, but same for all files in dataset,
+    //metadata per file in dataset metadata or in separate structure?
+    //separate structure => more clear
+    //in dataset metadata => it's not where it should be discoverable - preparation to export to metadata db - b2note,neo4j,redis,virtuoso
+    //
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name="CREATION_DATE")
     private Date creation_date;
@@ -121,4 +128,8 @@ public class DataSet {
     public void removeFileLists(FileList fileList){
         this.fileLists.remove(fileList);
     }
+
+    public String getMetadata(){ return this.metadata;}
+
+    public void setMetadata(String m) {this.metadata=m;}
 }

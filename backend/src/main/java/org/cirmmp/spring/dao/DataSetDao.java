@@ -11,6 +11,7 @@ public interface DataSetDao {
     //  List<FileList> findByProjectId(int project_id);
 
     void save(DataSet dataSet);
+    void saveExisting(DataSet dataSet);
 
     void deleteById(Long dataset_id);
 

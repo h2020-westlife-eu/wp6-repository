@@ -114,6 +114,7 @@ public class DatasetServiceCon extends SharedCon {
                 DataSet a = iter.next();
                 //remove datasets that belongs to other project, or that doesn't belong to project
                 if ((a.getProject()==null) || (a.getProject().getId() != projectId.get())) {
+                    //TODO is it OK to remove object from iterator directly?
                     iter.remove();
                 }
             }
@@ -137,6 +138,59 @@ public class DatasetServiceCon extends SharedCon {
 
 
         return new ResponseEntity(DTOUtils.getDatasetDTOS(dataSets), HttpStatus.OK);
+    }
+    //@Secured seems not to be taken into account, Put it to RestCon.java
+    @Secured("USER")
+    @RequestMapping(value = {"/dataset/{datasetId}"}, method = GET)
+    public ResponseEntity getDataset(@PathVariable Long datasetId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+
+
+        LOG.info("listing dataset "+datasetId);
+        DataSet dataset = dataSetService.findById(datasetId);
+//TODO check dataset belongs to user, otherwise return HTTP 403
+        return new ResponseEntity(DTOUtils.getDatasetDTO(dataset), HttpStatus.OK);
+    }
+
+    //@Secured seems not to be taken into account, Put it to RestCon.java
+    @Secured("USER")
+    @RequestMapping(value = {"/dataset/{datasetId}/metadata"}, method = GET)
+    public ResponseEntity getDatasetMetadata(@PathVariable Long datasetId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups) {
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+
+
+        LOG.info("listing dataset "+datasetId);
+        DataSet dataset = dataSetService.findById(datasetId);
+//TODO check dataset belongs to user, otherwise return HTTP 403
+        return new ResponseEntity(dataset.getMetadata(), HttpStatus.OK);
+    }
+
+//this POST call initiate to set metadata,
+// if nothing is in BODY, then harvest metadata from files included in the dataset
+// otherwise the BODY of the request is set as metadata of the dataset (String) - it is expected to be some JSON format
+
+    @Secured("USER")
+    @RequestMapping(value = {"/dataset/{datasetId}/metadata"}, method = POST)
+    public ResponseEntity postDataset(@PathVariable Long datasetId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody Optional<String> datasetMetadata) {
+        //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
+        User user = checkAuthentication(xusername,xname,xemail,xgroups);
+        LOG.info("listing dataset "+datasetId);
+        DataSet dataset = dataSetService.findById(datasetId);
+        if (! datasetMetadata.isPresent()) {
+            String metadata = "{}";
+            //now generate metadata - harvest it from files
+            webDAVCopyUtils.harvestMetadata(getUserdir(xusername, getContextFromUri(dataset.getUri())));
+            dataset.setMetadata(metadata);
+            dataSetService.saveExisting(dataset);
+        }
+        else {
+          dataset.setMetadata(datasetMetadata.get());
+          dataSetService.saveExisting(dataset);
+        }
+//TODO check dataset belongs to user, otherwise return HTTP 403
+        return new ResponseEntity(dataset.getMetadata(), HttpStatus.OK);
     }
 
 

@@ -26,8 +26,11 @@ public class DataSetDaoImpl extends AbstractDao<Long, DataSet> implements DataSe
     @Override
     public void save(DataSet dataSet) {
         persist(dataSet);
-
     }
+
+    @Override
+    public void saveExisting(DataSet ds){ update(ds);}
+
 
     @Override
     public void deleteById(Long dataset_id) {

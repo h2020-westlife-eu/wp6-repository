@@ -87,6 +87,7 @@ public class DTOUtils {
         ds.setProject(projectService.findById(dto.projectId));
         ds.setSummary(dto.summary);
         //ds.setType(dto.);
+        ds.setMetadata(dto.metadata);
         ds.setUri(dto.webdavurl);
         return ds;
     }
@@ -95,19 +96,25 @@ public class DTOUtils {
         ArrayList<DatasetDTO> nfiles = new ArrayList<>();
 
         for (DataSet ds : dataSets) {
-            DatasetDTO dto = new DatasetDTO();
-            dto.name = ds.getDataName();
-            dto.info = ds.getDataInfo();
-            //infiles.setProjectId(ifile.getProjectId());
-            dto.creation_date = ds.getCreation_date().toString();
-            dto.summary = ds.getSummary();
-            dto.webdavurl = ds.getUri();
-            //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
-            dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
-            dto.id = ds.getId();
+            DatasetDTO dto = getDatasetDTO(ds);
             nfiles.add(dto);
         }
         return nfiles;
+    }
+
+    public static DatasetDTO getDatasetDTO(DataSet ds) {
+        DatasetDTO dto = new DatasetDTO();
+        dto.name = ds.getDataName();
+        dto.info = ds.getDataInfo();
+        //infiles.setProjectId(ifile.getProjectId());
+        dto.creation_date = ds.getCreation_date().toString();
+        dto.summary = ds.getSummary();
+        dto.webdavurl = ds.getUri();
+        //if dataset has no project? it violates analysis dataset -> project, but we can set projectid=0
+        dto.projectId = ds.getProject()!=null?ds.getProject().getId():0;
+        dto.metadata = ds.getMetadata();
+        dto.id = ds.getId();
+        return dto;
     }
 
 
@@ -136,4 +143,5 @@ public class DTOUtils {
         if (process.exitValue()!=0) throw new RuntimeException(error+"."+output);
         return output;
     }
+
 }

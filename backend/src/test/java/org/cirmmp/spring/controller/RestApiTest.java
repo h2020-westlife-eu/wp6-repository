@@ -193,4 +193,26 @@ if (!(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)) throw new C
 
     }
 
+    @Test
+    public void testcreateMetadataInDataset() throws IOException {
+        HttpUriRequest request = new HttpGet("http://localhost/repositorytest/restcon/user");
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        assertThat(
+                response.getStatusLine().getStatusCode(), equalTo(HttpStatus.SC_OK)
+        );
+        UserDTO user = retrieveResourceFromResponse(response, UserDTO.class);
+        HttpPost request2 = new HttpPost("http://localhost/repositorytest/restcon/dataset");
+        request2.setEntity(new StringEntity("                \"{info\":\"0b\",\"name\":\"Antidote\",\"projectId\":1,\"metadata\":{\"title\":\"Strychnince 42 mg\",\"Data Type\":\"NMR FID\",\"Spectrometer/Dat type\":\"Varian Unix\"}\");\n"));
+
+        response = HttpClientBuilder.create().build().execute(request2);
+        assertThat(
+                response.getStatusLine().getStatusCode(), equalTo(HttpStatus.SC_OK)
+        );
+
+        //delete
+        DatasetDTO resource = retrieveResourceFromResponse(response, DatasetDTO.class);
+        HttpDelete request3 = new HttpDelete("http://localhost/repositorytest/restcon/dataset/"+resource.id);
+
+    }
+
 }

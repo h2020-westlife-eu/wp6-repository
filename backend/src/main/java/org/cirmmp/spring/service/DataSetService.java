@@ -16,6 +16,7 @@ public interface DataSetService {
     List<FileList> FileFindById(Long id);
 
     void save(DataSet dataSet);
+    void saveExisting(DataSet dataSet);
 
     void deleteById(Long dataset_id);
 

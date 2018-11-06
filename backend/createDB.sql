@@ -65,7 +65,9 @@ create table DATASET (
   info VARCHAR(2000),
   summary VARCHAR(2000),
   uri VARCHAR(2000),
+  metadata VARCHAR(65535),
   creation_date TIMESTAMP,
+  CHECK (metadata IS NULL OR JSON_VALID(metadata)),
   PRIMARY KEY (id),
   CONSTRAINT dataset_project FOREIGN KEY (project_id) REFERENCES PROJECT (id) ON UPDATE CASCADE ON DELETE CASCADE
 );

@@ -27,6 +27,10 @@ public class DataSetServiceImpl implements DataSetService {
     public void save(DataSet dataSet) { dao.save(dataSet);
 
     }
+    @Override
+    public void saveExisting(DataSet dataSet) { dao.saveExisting(dataSet);
+
+    }
 
 //should be removed - dataset = directory, filelist = directory listing, should be deleagated for
 //API handling files = WEBDAV
