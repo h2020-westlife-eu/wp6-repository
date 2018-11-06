@@ -20,11 +20,11 @@ export class Ariaapi {
   }
 
   attached() {
-    console.log('ariaapi.attached()');
+    console.log('ariaapixhr.attached()');
   }
 
   created() {
-    console.log('ariaapi.created()');
+    console.log('ariaapixhr.created()');
   }
 
   getProposal(pid) {
