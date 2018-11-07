@@ -4,6 +4,8 @@ import com.github.sardine.Sardine;
 import com.github.sardine.SardineFactory;
 import lombok.Synchronized;
 import org.cirmmp.spring.controller.CopyTaskDTO;
+import org.cirmmp.spring.controller.DatasetDTO;
+import org.cirmmp.spring.model.DataSet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.scheduling.annotation.Async;
@@ -84,12 +86,19 @@ public class WebDAVCopyUtils {
 
     }
 
-    /** harvest metadata among all files presented in dataset directory, returns structure {'name':'datasetroot','key',value',...,items:[{"name","item",...}]} */
-    public static String harvestMetadata(String srcpath){
-        String meta="[]";
-        JSONArray metajson =  new JSONArray();//.put("")
+    /** harvest metadata among all files presented in dataset directory, returns structure {'name':'datasetroot',items:['filename':'datasetfilename','key',value',...,]} */
+    public static String harvestMetadata(DataSet dto, String srcpath){
+        //String meta="{}";
+        JSONArray items =  new JSONArray();//.put("")
+        JSONObject meta = new JSONObject();
         //traverse through srcpath and read headers of all files and put metadata structure to it
         Path src = Paths.get(srcpath);
+        meta.put("name",dto.getDataName());
+        meta.put("summary",dto.getSummary());
+        meta.put("info",dto.getDataInfo());
+        meta.put("url",dto.getUri());
+
+        //now construct items - list of metadata of files in dataset
         try {
             Files.walk(src)
                     .forEach(fileordir ->
@@ -110,9 +119,7 @@ public class WebDAVCopyUtils {
                                 //return;
                             } else { //it is file
                                 //read header of the file
-                                metajson.put(harvestFile(fileordir));
-
-
+                                items.put(harvestFile(fileordir));
                             }
                             //parse header - get to json
                             //ct.setStatus(ct.getStatus()+"\nFile     : "+fileordir);
@@ -123,6 +130,7 @@ public class WebDAVCopyUtils {
                             //TODO throw some exception to handle it by client code and to get feedback to UI!
                         } catch (Exception e) {
                             //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
+                            System.err.print("error when processing file:"+fileordir.getFileName()+"\n");
                             e.printStackTrace();
                         }
                     });
@@ -130,7 +138,8 @@ public class WebDAVCopyUtils {
         //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
         e.printStackTrace();
         }
-        return meta;
+        meta.put("items",items);
+        return meta.toString();
     }
 
 
@@ -161,7 +170,6 @@ public class WebDAVCopyUtils {
             }
             //count binary rows in data - after 4, it will finish
             if (! st.matches(ASCIIPATTERN)) binaryrows++;
-
         }
         br.close();
         return meta;

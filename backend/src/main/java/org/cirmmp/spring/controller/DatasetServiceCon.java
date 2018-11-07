@@ -181,7 +181,7 @@ public class DatasetServiceCon extends SharedCon {
         if (! datasetMetadata.isPresent()) {
             String metadata = "{}";
             //now generate metadata - harvest it from files
-            webDAVCopyUtils.harvestMetadata(getUserdir(xusername, getContextFromUri(dataset.getUri())));
+            webDAVCopyUtils.harvestMetadata(dataset,getUserdir(xusername, getContextFromUri(dataset.getUri())));
             dataset.setMetadata(metadata);
             dataSetService.saveExisting(dataset);
         }
