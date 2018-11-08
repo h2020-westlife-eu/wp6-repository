@@ -9,7 +9,7 @@ import "codemirror/mode/javascript/javascript";
 
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {HttpClient} from 'aurelia-fetch-client';
-import {Editfile} from './messages';
+import {Editfile,Viewcontent} from './messages';
 import {Nmrapi} from './nmrapi';
 import {bindable} from 'aurelia-framework';
 
@@ -26,6 +26,7 @@ export class Fileeditor {
     this.client = httpclient;
     this.nmrapi = nmrapi;
     this.ea.subscribe(Editfile, msg => this.selectFile(msg.file));
+    this.ea.subscribe(Viewcontent, msg => this.viewContent(msg.content));
     this.isimage=false;
     this.filename="";
     this.showtable=false;
@@ -100,6 +101,13 @@ export class Fileeditor {
 
 
   }
+
+  viewContent(content) {
+    //console.log("viewContent",content);
+  this.codemirror.setValue(JSON.stringify(content,null,4));
+  this.codemirror.refresh();
+  }
+
   //triggered when click on button
   table() {
     this.showtable= ! this.showtable;

@@ -14,6 +14,12 @@ export class Editfile {
   }
 }
 
+export class Viewcontent {
+  constructor(content){
+    this.content = content;
+  }
+}
+
 export class Uploaddir {
   constructor(webdavurl){
     this.webdavurl = webdavurl;

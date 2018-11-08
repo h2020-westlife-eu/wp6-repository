@@ -186,4 +186,18 @@ export class ProjectApi {
       .then(response =>response.json())
       .then(data=> {return data;});
     }
+
+  generateMetas(id){
+    let metadataurl = this.dataurl+"/"+id+"/metadata";
+      return this.httpclient.fetch(metadataurl, {method:"post"})
+        .then(response =>response.json())
+        .then(data=> {return data;});
+  }
+  getMetadatas(id){
+    let metadataurl = this.dataurl+"/"+id+"/metadata";
+    return this.httpclient.fetch(metadataurl)
+      .then(response =>response.json())
+      .then(data=> {return data;});
+  }
+
 }

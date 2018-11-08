@@ -136,4 +136,8 @@ export class Webdavfilepanel {
       // join the components into date
       return d.slice(0, 3).join('.') + ' ' + d.slice(3).join(':');
     }
+
+    viewMetadata(file){
+    //not implemented in backend
+    }
 }

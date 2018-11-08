@@ -51,7 +51,10 @@
       <td click.trigger="deselectDataset()">${selectedDataset.info}</td>
       <td style="white-space: nowrap;"><icopy href.bind="selectedDataset.webdavurl"></icopy>
       <ilink href.bind="selectedDataset.zip"></ilink>
-      <iupload href.bind="selectedDataset.webdavurl"></iupload></td>
+      <iupload href.bind="selectedDataset.webdavurl"></iupload>
+      </td>
+      <td if.bind="selectedDataset.metadata" click.trigger="getMetadatas()" title="view metadata of dataset"><imetas></imetas></td>
+      <td class="w3-red" if.bind="!selectedDataset.metadata" click.trigger="generateMetas()" title="metadata empty, generate metadata from files in dataset"><imetas></imetas></td>
       <td click.trigger="deleteDataset()"><idelete></idelete></td>
     </tr>
     </tbody>

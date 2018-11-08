@@ -2,7 +2,7 @@ import {ProjectApi} from '../components/projectapi';
 import {EventAggregator} from 'aurelia-event-aggregator';
 import {
   Selecteddataset, FilterDataset, FilterDatasetByProject, FilterProjectByDataset,
-  Webdavresource, Adddataset
+  Webdavresource, Adddataset,Viewcontent
 } from "./messages";
 import {bindable} from 'aurelia-framework';
 
@@ -15,11 +15,13 @@ export class Datasettable {
     this.alldatasets = [];
     //this.showDatasets =true;
     this.ea=ea;
+    //TODO refactor - move subscribe to attached and remove subscription in detached
     this.ea.subscribe(FilterDataset,msg =>this.filterSelectedDataset(msg.id));
     this.ea.subscribe(FilterDatasetByProject,msg =>this.filterProjectDatasets(msg.id));
     this.ea.subscribe(Adddataset,msg=> this.addDataset(msg.dataset));
     this.selectedDatasetId=0;
     this.selectedProjectId=0;
+    this.selectedDatasetMetadataEmpty=true;
   }
 
   attached() {
@@ -119,6 +121,21 @@ export class Datasettable {
     console.log("adddataset()");
     console.log(dataset);
     this.datasets.push(dataset);
+  }
+
+  generateMetas() {
+    //this.selectedDataset;
+    this.pa.generateMetas(this.selectedDatasetId)
+      .then(data =>{
+        this.ea.publish(new Viewcontent(data))
+      });
+  }
+  getMetadatas() {
+    //this.selectedDataset;
+    this.pa.getMetas(this.selectedDatasetId)
+      .then(data =>{
+        this.ea.publish(new Viewcontent(data))
+      });
   }
 
 }

@@ -11,5 +11,5 @@ export function configure(aurelia) {
     .feature(PLATFORM.moduleName('resources/index'));
   aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
   PLATFORM.moduleName('repository/main');
-  PLATFORM.moduleName('staffmain');
+  PLATFORM.moduleName('staff/main');
 }
