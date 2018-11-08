@@ -21,7 +21,6 @@ import java.util.ArrayList;
 @Component
 public class WebDAVCopyUtils {
 
-    private static final String ASCIIPATTERN = "\\A\\p{ASCII}*\\z";
 
     //TODO is synchronized needed? copyFileToWEBDAV can take long and there is probability
     //TODO that multiple requests will come, there is no access to shared resources
@@ -86,93 +85,5 @@ public class WebDAVCopyUtils {
 
     }
 
-    /** harvest metadata among all files presented in dataset directory, returns structure {'name':'datasetroot',items:['filename':'datasetfilename','key',value',...,]} */
-    public static String harvestMetadata(DataSet dto, String srcpath){
-        //String meta="{}";
-        JSONArray items =  new JSONArray();//.put("")
-        JSONObject meta = new JSONObject();
-        //traverse through srcpath and read headers of all files and put metadata structure to it
-        Path src = Paths.get(srcpath);
-        meta.put("name",dto.getDataName());
-        meta.put("summary",dto.getSummary());
-        meta.put("info",dto.getDataInfo());
-        meta.put("url",dto.getUri());
-
-        //now construct items - list of metadata of files in dataset
-        try {
-            Files.walk(src)
-                    .forEach(fileordir ->
-                    {
-                        try {
-
-                            //relative path is needed only in directory branch of condition?
-                            Path relativedir = src.relativize(fileordir);//Path d = dest.resolve(src.relativize(fileordir));
-                            //source is dir - create dir in target
-                            if (Files.isDirectory(fileordir)) {
-                                //DO NOTHING ??
-                                //ct.setStatus(ct.getStatus()+"\nDirectory: "+fileordir);
-                                //Path relativedir = src.relativize(fileordir);
-                                //cannot check directory existence in WEBDAV this way
-                                //if (!Files.exists(d))
-                                //sardine.createDirectory(targetwebdavdir +"/"+ relativedir.toString());
-                                //do not return, we need to continue to traverse the path
-                                //return;
-                            } else { //it is file
-                                //read header of the file
-                                items.put(harvestFile(fileordir));
-                            }
-                            //parse header - get to json
-                            //ct.setStatus(ct.getStatus()+"\nFile     : "+fileordir);
-                            // Files.copy( s, d );// use flag to override existing
-                            //InputStream fis = new FileInputStream(new File(fileordir.toString()));
-                            //sardine.put(targetwebdavdir +"/"+ relativedir.toString(), fis);
-
-                            //TODO throw some exception to handle it by client code and to get feedback to UI!
-                        } catch (Exception e) {
-                            //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
-                            System.err.print("error when processing file:"+fileordir.getFileName()+"\n");
-                            e.printStackTrace();
-                        }
-                    });
-        } catch (Exception e) {
-        //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
-        e.printStackTrace();
-        }
-        meta.put("items",items);
-        return meta.toString();
-    }
-
-
-    private static JSONObject harvestFile(Path fileordir) throws IOException,FileNotFoundException {
-        BufferedReader br = new BufferedReader(new FileReader(fileordir.toString()));
-        String st,key,value;
-        JSONObject meta =new JSONObject();
-        meta.put("filename",fileordir.getFileName());
-        meta.put("modified",Files.getLastModifiedTime(fileordir));
-        int binaryrows=0; //counts binary data in strings
-        while (((st = br.readLine()) != null) || (binaryrows<4)) { //will end when 4 binary (nonascii) rows were read
-            //parse line
-            //JSCAMP starts with ## or $$
-            if (st.startsWith("##")) {
-                String [] splitted = st.split("=",2);
-                if (splitted.length>1)
-                    meta.put(splitted[0],splitted[1].trim()); //trim e.g. spaces
-                else{
-                    splitted = st.split(" ",2);
-                    if (splitted.length>1)
-                        meta.put(splitted[0],splitted[1]);
-                    else
-                        meta.put("",st); //empty key
-                }
-            }
-            if (st.startsWith("$$")) {
-                meta.put(st,"");
-            }
-            //count binary rows in data - after 4, it will finish
-            if (! st.matches(ASCIIPATTERN)) binaryrows++;
-        }
-        br.close();
-        return meta;
-    }
 
 }

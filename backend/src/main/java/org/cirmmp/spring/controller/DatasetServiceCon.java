@@ -6,6 +6,7 @@ import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.service.DataSetService;
+import org.cirmmp.spring.service.MetadataUtils;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.WebDAVCopyUtils;
 import org.slf4j.Logger;
@@ -173,20 +174,21 @@ public class DatasetServiceCon extends SharedCon {
 
     @Secured("USER")
     @RequestMapping(value = {"/dataset/{datasetId}/metadata"}, method = POST)
-    public ResponseEntity postDataset(@PathVariable Long datasetId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody Optional<String> datasetMetadata) {
+    public ResponseEntity postDataset(@PathVariable Long datasetId,@RequestHeader(name="X-USERNAME",defaultValue="") String xusername, @RequestHeader(name="X-NAME",defaultValue="") String xname, @RequestHeader(name="X-EMAIL",defaultValue="") String xemail, @RequestHeader(name="X-GROUPS",defaultValue="") String xgroups,@RequestBody(required = false) String datasetMetadata) {
         //User user = checkAuthentication(request,xusername,xname,xemail,xgroups);
         User user = checkAuthentication(xusername,xname,xemail,xgroups);
         LOG.info("listing dataset "+datasetId);
         DataSet dataset = dataSetService.findById(datasetId);
-        if (! datasetMetadata.isPresent()) {
+        LOG.debug("debug metadata:"+datasetMetadata+"\n");
+        if (datasetMetadata== null || datasetMetadata.isEmpty()) {
             String metadata = "{}";
             //now generate metadata - harvest it from files
-            webDAVCopyUtils.harvestMetadata(dataset,getUserdir(xusername, getContextFromUri(dataset.getUri())));
+            metadata = MetadataUtils.harvestMetadata(dataset,getUserdir(xusername, getContextFromUri(dataset.getUri())));
             dataset.setMetadata(metadata);
             dataSetService.saveExisting(dataset);
         }
         else {
-          dataset.setMetadata(datasetMetadata.get());
+          dataset.setMetadata(datasetMetadata);
           dataSetService.saveExisting(dataset);
         }
 //TODO check dataset belongs to user, otherwise return HTTP 403

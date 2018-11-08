@@ -293,6 +293,17 @@
 			<artifactId>json</artifactId>
 			<version>20180130</version>
 		</dependency>
+		<!-- MONGODB driver -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>bson</artifactId>
+			<version>2.13.3</version>
+		</dependency>
 	</dependencies>
 
     <build>

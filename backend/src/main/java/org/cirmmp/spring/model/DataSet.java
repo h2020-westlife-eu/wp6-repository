@@ -1,5 +1,7 @@
 package org.cirmmp.spring.model;
 
+import org.cirmmp.spring.service.MetadataUtils;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +32,7 @@ public class DataSet {
     @Column(name="URI")
     private String uri;
 
-    @Column(name="METADATA")
+    @Transient //ignored in DB - it will be in mongodb
     private String metadata; //unstructured metadata, variable types, but same for all files in dataset,
     //metadata per file in dataset metadata or in separate structure?
     //separate structure => more clear
@@ -129,7 +131,7 @@ public class DataSet {
         this.fileLists.remove(fileList);
     }
 
-    public String getMetadata(){ return this.metadata;}
+    public String getMetadata(){ this.metadata= MetadataUtils.getMetadata(this.id);return this.metadata;}
 
-    public void setMetadata(String m) {this.metadata=m;}
+    public void setMetadata(String m) {this.metadata=m;MetadataUtils.insertMetadata(this.id,this.metadata);}
 }
