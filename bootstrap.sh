@@ -191,7 +191,9 @@ echo populating data
 mysql --user=root --password=${DBCRED} < $WP6REPSRC/backend/populatetestDB.sql
 #install mongodb
 yum install -y mongodb mongodb-server
+systemctl enable mongod.service
 service mongod start
+
 #backend app gets frontend location from environment variable REP_LOCATION
 service westlife-repository stop
 

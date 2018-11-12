@@ -53,9 +53,11 @@
       <ilink href.bind="selectedDataset.zip"></ilink>
       <iupload href.bind="selectedDataset.webdavurl"></iupload>
       </td>
-      <td if.bind="selectedDataset.metadata" click.trigger="getMetadatas()" title="view metadata of dataset"><imetas></imetas></td>
-      <td class="w3-red" if.bind="!selectedDataset.metadata" click.trigger="generateMetas()" title="metadata empty, generate metadata from files in dataset"><imetas></imetas></td>
-      <td click.trigger="deleteDataset()"><idelete></idelete></td>
+      <td>
+      <span if.bind="selectedDataset.metadata" click.trigger="getMetadatas()" title="view metadata of dataset"><imetas></imetas></span>
+      <span class="w3-red" click.trigger="generateMetas()" title="generate metadata from files in dataset/replace existing">generate <imetas></imetas></span>
+      <span click.trigger="deleteDataset()"><idelete></idelete></span>
+      </td>
     </tr>
     </tbody>
   </table>
