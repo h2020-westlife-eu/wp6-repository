@@ -201,4 +201,5 @@ service westlife-repository stop
 sed -i -e "s/^\(WorkingDirectory\s*=\s*\).*$/\1${WP6SRCESC}\/backend/g" /etc/systemd/system/westlife-repository.service
 sed -i -e "s/^\(Environment=REP_LOCATION=\s*\).*$/\1${WP6SRCESC}/g" /etc/systemd/system/westlife-repository.service
 systemctl enable westlife-repository.service
+
 service westlife-repository start

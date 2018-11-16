@@ -6,7 +6,7 @@ import org.cirmmp.spring.model.DataSet;
 import org.cirmmp.spring.model.Project;
 import org.cirmmp.spring.model.User;
 import org.cirmmp.spring.service.DataSetService;
-import org.cirmmp.spring.service.MetadataUtils;
+import org.cirmmp.spring.metadata.MetadataGenerator;
 import org.cirmmp.spring.service.ProjectService;
 import org.cirmmp.spring.service.WebDAVCopyUtils;
 import org.slf4j.Logger;
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.bind.annotation.*;
@@ -183,7 +182,7 @@ public class DatasetServiceCon extends SharedCon {
         if (datasetMetadata== null || datasetMetadata.isEmpty()) {
             String metadata = "{}";
             //now generate metadata - harvest it from files
-            metadata = MetadataUtils.harvestMetadata(dataset,getUserdir(xusername, getContextFromUri(dataset.getUri())));
+            metadata = MetadataGenerator.harvestMetadata(dataset,getUserdir(xusername, getContextFromUri(dataset.getUri())));
             dataset.setMetadata(metadata);
             dataSetService.saveExisting(dataset);
         }

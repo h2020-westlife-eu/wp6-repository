@@ -1,6 +1,6 @@
 package org.cirmmp.spring.model;
 
-import org.cirmmp.spring.service.MetadataUtils;
+import org.cirmmp.spring.metadata.MetadataDB;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -131,7 +131,7 @@ public class DataSet {
         this.fileLists.remove(fileList);
     }
 
-    public String getMetadata(){ this.metadata= MetadataUtils.getMetadata(this.id);return this.metadata;}
+    public String getMetadata(){ this.metadata= MetadataDB.getMetadata(this.id);return this.metadata;}
 
-    public void setMetadata(String m) {this.metadata=m;MetadataUtils.insertMetadata(this.id,this.metadata);}
+    public void setMetadata(String m) {this.metadata=m;MetadataDB.insertMetadata(this.id,this.metadata);}
 }
