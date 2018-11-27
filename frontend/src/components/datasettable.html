@@ -52,11 +52,13 @@
       <td style="white-space: nowrap;"><icopy href.bind="selectedDataset.webdavurl"></icopy>
       <ilink href.bind="selectedDataset.zip"></ilink>
       <iupload href.bind="selectedDataset.webdavurl"></iupload>
+        &nbsp;
+        <span click.trigger="deleteDataset()" title="delete dataset"><idelete></idelete></span>
       </td>
       <td>
-      <span if.bind="selectedDataset.metadata" click.trigger="getMetadatas()" title="view metadata of dataset"><imetas></imetas></span>
-      <span class="w3-red" click.trigger="generateMetas()" title="generate metadata from files in dataset/replace existing">generate <imetas></imetas></span>
-      <span click.trigger="deleteDataset()"><idelete></idelete></span>
+        <imetas></imetas>Metadata:<button class="w3-btn w3-padding-tiny" if.bind="selectedDataset.metadata" click.trigger="getMetadatas()" title="view metadata of dataset">view</button>
+      <button class="w3-btn w3-red w3-padding-tiny" click.trigger="generateMetas()" title="generate metadata from files in dataset/replace existing">generate </button>
+      
       </td>
     </tr>
     </tbody>

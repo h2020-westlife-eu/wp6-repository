@@ -132,7 +132,7 @@ export class Datasettable {
   }
   getMetadatas() {
     //this.selectedDataset;
-    this.pa.getMetas(this.selectedDatasetId)
+    this.pa.getMetadatas(this.selectedDatasetId)
       .then(data =>{
         this.ea.publish(new Viewcontent(data))
       });
