@@ -99,14 +99,15 @@ public class MetadataGenerator {
 
         if (cobj==null) {
             try { //try to create class using default constructor
-                Constructor ct = extclass.getConstructor(extclass);
-                AMetadataExtractor obj2 = (AMetadataExtractor) ((Constructor) ct).newInstance(null);
+                //Constructor ct = extclass.getConstructor(extclass);
+                AMetadataExtractor obj2 = (AMetadataExtractor) extclass.newInstance();
                 class2extractorobj.put(extclass.getName(),obj2);
                 return obj2;
             } catch (Exception e){
                 //create default extractor
                 LOG.error("error creating class for extension "+ext);
                 LOG.error(e.getMessage());
+                e.printStackTrace();
                 AMetadataExtractor obj2 = new DefaultMetadataExtractor();
                 class2extractorobj.put(extclass.getName(),obj2);
                 return obj2;
