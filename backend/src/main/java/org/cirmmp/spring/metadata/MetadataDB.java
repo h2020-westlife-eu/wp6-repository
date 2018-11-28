@@ -32,13 +32,20 @@ public class MetadataDB {
             q.put("id",id);
             obj.put("id",id);
             //will insert if it does not exist or update/replace it if it exist.
+            try {
             coll.update(q,obj,true,false);
+            } catch (Exception e) {
+              LOG.error("error when inserting metadata:");
+              LOG.error("metadata:"+md);
+              LOG.error("stacktrace:");
+              e.printStackTrace();
+            }
             LOG.debug("inserted for id:"+id);
             return obj.toString();
         } else{
-            LOG.error("error, not inserted for id:"+id);
+            LOG.error("error, not inserted for id:"+id);            
             return ""; //some error?
-        }
+        }        
     }
 
     //get metadata from mongodb - object with "id" == id

@@ -12,10 +12,37 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** Extracts from mixed binary and text file - expects that text information is in the beginning and prefixed by #_$
+ * maximum 16 normal lines are parsed or 4 binary files are tolerated then metadata extraction is stopped
+ * detects loop of variables in form
+ * loop_
+ * _name1
+ * _name2
+ * _name3
+ * value1 value2 value3
+ * value1 value2 value3
+ *
+ * detects uncategorized values - e.g. one value in line -puts into "uncategorized" section
+ *
+ * detects values prefixed by $ - puts into "other" section
+ *
+ * detects metadata prefixed by # - tries to guess key and value
+ *
+ * detects key prefixed by ##$ and array of values on subsequent rows in JCAMPD format
+ *
+ */
 public class DefaultMetadataExtractor implements AMetadataExtractor {
 
+    public static final int MAX_BINLINES = 4;
     private  final Logger LOG = LoggerFactory.getLogger(DefaultMetadataExtractor.class);
     public  int MAX_NORMLINES = 16;
+    protected int normlines=0;
+    private  boolean expectvalues=false;
+    private  String expectkey="";
+    private  JSONArray loop;
+    private  ArrayList<String> loopkeys;
+    private  boolean inloop=false;
+    private int loopindex=0;
 
     private  final String DATETIMEREGEX= "/\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d(?:\\.\\d+)?Z?/";
     private  final String ASCIIPATTERN = "\\A\\p{ASCII}*\\z";
@@ -23,10 +50,11 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
     /** returns metadata in JSONObject generated from content of the file */
     public JSONObject harvestFile(Path fileordir) throws IOException,FileNotFoundException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fileordir.toFile()),"US-ASCII"));
-        String st,key,value;
+        String st="",key="",value="";
         JSONObject meta =new JSONObject();
         JSONArray unc = new JSONArray();
         JSONArray dolar = new JSONArray();
+        normlines=0; inloop=false;expectvalues=false;loopindex=0;
         //JSONObject loop =new JSONObject();
         metaput(meta,"filename",fileordir.getFileName().toString());
         try {
@@ -36,7 +64,7 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
         int binaryrows=0; //counts binary data in strings
         LOG.debug("processing file:"+fileordir.getFileName());
         try {
-            while (((st = br.readLine()) != null) && (binaryrows < 4) && (normlines < MAX_NORMLINES)) { //will end when 4 binary (nonascii) rows were read or MAX_NORMLINES normline (text)
+            while (((st = br.readLine()) != null) && (binaryrows < MAX_BINLINES) && (normlines < MAX_NORMLINES)) { //will end when 4 binary (nonascii) rows were read or MAX_NORMLINES normline (text)
                 //parse line
                 //JSCAMP starts with ## or $$
                 if (!st.matches(ASCIIPATTERN)) {
@@ -71,19 +99,18 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
         return meta;
     }
 
-    protected int normlines=0;
     //parses line with string without any prefix (#,$,_) normal string - not special character at the begining
     private  void parseNorm(String st, JSONObject meta,JSONArray unc) {
-        if (normlines++> MAX_NORMLINES) return; //parse only first MAX_NORMLINES normlines
         //LOG.debug("parseNorm"+st+" inloop:"+inloop+" expectvalues:"+expectvalues);
         if (inloop){
             //put loop items as array ['axis':1,'id:'cbf',...]
             JSONObject loopitem = new JSONObject();
-            Pattern p= Pattern.compile("\\w+|\"[^\"]+\""); //should split by space, keeps quoted items together
+            Pattern p= Pattern.compile("[A-Za-z0-9\\.,_-]+|\"[^\"]+\"|\'[^\']+\'"); //should split by space, keeps quoted items together
             Matcher m = p.matcher(st);
             for (int i = 0; i < loopkeys.size(); i++) {
-                if (m.find())
-                    loopitem.put(loopkeys.get(i), m.group(0));
+                if (m.find()) {
+                    loopitem.put(loopkeys.get(i).replace('.', ':'), m.group(0));
+                }
             }
             LOG.debug("added loop items:"+loopitem.toString());
             loop.put(loopitem);
@@ -96,6 +123,7 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
             metaput(meta,expectkey,values);
             return;
         }
+        if (normlines++> MAX_NORMLINES) return; //parse only first MAX_NORMLINES normlines
         String[] splitted = st.trim().split(":", 2);
         if (splitted.length > 1)
             metaput(meta,splitted[0], splitted[1].trim()); //trim e.g. spaces
@@ -105,7 +133,7 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
                 metaput(meta,splitted[0], splitted[1].trim());
             else
                 //puts whole string into uncategorized array of items
-                unc.put(st.trim());
+            {String uncvalue=st.trim(); if (uncvalue.length()>0) unc.put(uncvalue);}
             //do nothing else
             //metaput(meta,"", st); //empty key
         }
@@ -114,8 +142,8 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
     //puts metadata key and value - keys should not contain some special characters e.g.(.)
     private  void metaput(JSONObject meta, String key, Object value){
         //keys in mongodb is not recommended to contain dot
-        if (key.contains(".")) key.replace('.',':');
-        meta.put(key,value);
+        
+        meta.put(key.replace('.',':'),value);
     }
 
     private  void parseDolar(String st, JSONObject meta,JSONArray unc) {
@@ -124,13 +152,10 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
         unc.put(st.substring(st.lastIndexOf('$')).trim());
     }
 
-    private  JSONArray loop;
-    private  ArrayList<String> loopkeys;
-    private  boolean inloop=false;
 
     private  void storeloop(JSONObject meta){
-        LOG.debug("parse loop:",loop.toString());
-        meta.put("loop",loop);
+        LOG.debug("storing loop:",loop.toString());
+        meta.put("loop_"+(++loopindex),loop);
         inloop=false;
     }
 
@@ -147,12 +172,10 @@ public class DefaultMetadataExtractor implements AMetadataExtractor {
     }
     private  void parseLoopItem(String item){
         LOG.debug("loop item:"+item);
-        if (inloop)        loopkeys.add(item.substring(1)); //remove leading _
+        loopkeys.add(item.substring(1)); //remove leading _
     }
 
-    private  boolean expectvalues=false;
-    private  String expectkey="";
-    
+
     protected void initNormlines() {normlines=0;}
 
     //parses hash string - very probably meatadata

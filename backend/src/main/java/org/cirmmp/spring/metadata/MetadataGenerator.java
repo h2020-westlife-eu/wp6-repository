@@ -40,7 +40,7 @@ public class MetadataGenerator {
     }
     /** harvest metadata among all files presented in dataset directory,
      * returns JSON structure {'name':'datasetroot',items:['filename':'datasetfilename','key',value',...,]} */
-    public static JSONObject harvestJSONMetadata(DataSet dto, String srcpath){
+    public static JSONObject harvestJSONMetadata(DataSet dto, String srcpath) {
         class2extractorobj = new HashMap<String,AMetadataExtractor>();
         JSONArray items =  new JSONArray();
         JSONObject meta = new JSONObject();
@@ -69,15 +69,17 @@ public class MetadataGenerator {
                             }
 
                             //TODO throw some exception to handle it by client code and to get feedback to UI!
+                        } catch (IOException ie){
+                            LOG.warn("ignoring error when processing file:" + fileordir.getFileName() + "\n");
+                            ie.printStackTrace();
                         } catch (Exception e) {
                             //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
-                            LOG.error("error when processing file:"+fileordir.getFileName()+"\n");
+                            LOG.error("non-ignoring error when processing file:" + fileordir.getFileName() + "\n");
                             e.printStackTrace();
+                            throw e;
                         }
                     });
-        } catch (Exception e) {
-            //System.err.print("error when processing file:"+fileordir.getFileName()+"\n");
-            //ct.setStatus(ct.getStatus()+"\nError    : "+e.getMessage());
+        } catch (IOException e){
             e.printStackTrace();
         } finally {
             class2extractorobj.clear();
